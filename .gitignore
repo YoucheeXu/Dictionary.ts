@@ -1,3 +1,8 @@
+# custom
+bin\audio
+bin\dict
+bin\log
+
 # Logs
 logs
 *.log
