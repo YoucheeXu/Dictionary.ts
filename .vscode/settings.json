@@ -1,0 +1,54 @@
+{
+    "editor.wordWrap": "on",        //是否自动换行
+    "editor.detectIndentation": false,		 // vscode默认启用了根据文件类型自动设置tabsize的选项
+    "editor.tabSize": 4,            // tab几个缩进
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/node_modules": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "/bin": true
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+
+    "eslint.format.enable": true,
+    "eslint.run": "onSave", // 保存之后进行lint
+    "eslint.codeAction.showDocumentation": {
+        "enable": true
+    },
+    "eslint.validate": [
+        "javascript",
+        "typescript"
+    ],
+    "eslint.probe": [
+        "javascript",
+        "typescript"
+    ],
+    "eslint.options": { //指定vscode的eslint所处理的文件的后缀
+        "extensions": [
+            ".js",
+            ".jsx",
+            ".ts",
+            ".tsx",
+            ".html"
+        ]
+    },
+
+    "editor.formatOnSave": true,
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    },
+
+    "prettier.tabWidth": 4,
+
+    "code-runner.runInTerminal": true,
+    // "terminal.integrated.shellArgs.windows": ["-NoExit", "/c", "chcp 65001"]
+    // "terminal.integrated.shellArgs.windows": ["/K chcp 65001 >nul"]
+}

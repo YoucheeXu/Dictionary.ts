@@ -1,7 +1,7 @@
 # custom
-bin\audio
-bin\dict
-bin\log
+bin/audio
+bin/dict
+bin/log
 
 # Logs
 logs

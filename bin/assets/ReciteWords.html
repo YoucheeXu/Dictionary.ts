@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>ReciteWords_v0.1alpha</title>
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #SelDiag {
+            position: absolute;
+            width: 300px;
+            height: 240px;
+            z-index: 9999;
+            display: none;
+            background-color: white;
+            position: absolute;
+            left: 50%;
+            top: 25%;
+            transform: translate(-50%, -50%);
+            border: 1px solid gray;
+        }
+
+        /*.form-group {
+            width: 100%;
+            float: left;
+            margin: 5px 0 0 10px;      
+        }*/
+
+        .form-group {
+            /* 上边 | 右边 | 下边 | 左边 */
+            margin: 20px 0px 30px 0px;
+        }
+
+        .form-group label {
+            float: left;
+            height: 35px;
+            line-height: 35px;
+            width: 90px;
+            padding-left: 10px;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .form-group select {
+            height: 35px;
+            line-height: 35px;
+            width: 150px;
+            text-indent: 5px;
+        }
+
+        .wrap4 {
+            float: left;
+        }
+
+        .wrap4 .left {
+            position: absolute;
+            left: 25%;
+            transform: translateX(-50%);
+        }
+
+        .wrap4 .right {
+            position: absolute;
+            left: 75%;
+            transform: translateX(-50%);
+        }
+
+        #ReciteDiag-header {
+            text-align: center;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        #ReciteDiag-header a {
+            font-size: 24px;
+            text-decoration: none;
+            color: black;
+        }
+
+        #ReciteDiag {
+            position: absolute;
+            width: 701px;
+            height: 551px;
+            z-index: 9999;
+            display: none;
+            background-color: white;
+            /* 这里要注意绝对定位的盒子怎么在屏幕显示居中 */
+            /* <!-- left: 50%; -->
+				<!-- margin-left: -350px; -->
+				<!-- margin-top: 142px; --> */
+            position: absolute;
+            left: 50%;
+            top: 55%;
+            transform: translate(-50%, -50%);
+            border: 1px solid gray;
+        }
+
+        .diag-title {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: move;
+            background-color: green;
+            opacity: 0.5;
+            -webkit-opacity: 0.5;
+            -moz-opacity: 0.5;
+        }
+
+        #ReciteDiag-title span a {
+            text-decoration: none;
+            border: 1px solid gray;
+            font-size: 12px;
+            color: black;
+            border-radius: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            opacity: 1.0;
+            -webkit-opacity: 1.0;
+            -moz-opacity: 1.0;
+        }
+
+        #closeBtn {
+            line-height: 40px;
+            text-align: center;
+            text-decoration: none;
+            border: 1px solid gray;
+            font-size: 12px;
+            color: black;
+            border-radius: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            position: absolute;
+            top: -20px;
+            right: -20px;
+        }
+
+        .centerList {
+            font-size: 20px;
+            position: relative;
+            display: block;
+            left: 50%;
+            top: 5px;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        #txtArea {
+            resize: none;
+            /* display: block;
+				position: absolute; */
+            top: 25%;
+            /* transform: translate(-50%, -50%); */
+            border-style: solid;
+        }
+
+        .btn-action {
+            height: 30px;
+            width: 120px;
+        }
+
+        .wrap5 {
+            display: grid;
+            width: 100%;
+            /* grid-template-rows: 200px; */
+            grid-template-rows: 100px;
+            grid-template-columns: 300px auto 300px;
+        }
+
+        .wrap5 .left {
+            text-align: left;
+            margin: 5px 0px 0px 10px;
+        }
+
+        .wrap5 .right {
+            text-align: right;
+            margin: 5px 10px 0px 0px;
+        }
+
+        .wrap5 .center {
+            text-align: center;
+            margin: 5px 0px 0px 0px;
+        }
+
+        /* 遮盖层 */
+        .bg {
+            background-color: #000;
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            position: fixed;
+            opacity: 0.3;
+            -webkit-opacity: 0.3;
+            -moz-opacity: 0.3;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ReciteDiag-header">
+        <label style="height: 20px; margin: 5px 0px 0px 0px;" id="usr"></label>
+        <a id="studyLearnBtn" href="javascript:void(0)">开始学习</a>
+        <label style="height: 20px; margin: 5px 0px 0px 0px;" id="level"></label>
+    </div>
+    <label style="height: 20px; margin: 5px 0px 0px 0px;" id="allCount" class="centerList"></label>
+    <label style="height: 20px; margin: 5px 0px 0px 0px;" id="InProgressCount" class="centerList"></label>
+    <label style="height: 20px; margin: 5px 0px 0px 0px;" id="newCount" class="centerList"></label>
+    <label style="height: 20px; margin: 5px 0px 0px 0px;" id="finishCount" class="centerList"></label>
+
+    <div id="SelDiag" class="diag">
+        <div id="SelDiag-title" class="diag-title">
+            <label>选择</label>
+        </div>
+        <div class="form-group">
+            <label>User: </label>
+            <select name="User" id="usr-select">
+                <!-- <option value="XYQ">XYQ</option>
+                <option value="More">Add more...</option> -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Level: </label>
+            <select name="level" id="lvl-select">
+                <!-- <option value="CET6">CET6</option>
+                <option value="Tofel">Tofel</option>
+                <option value="More">Add more...</option> -->
+            </select>
+        </div>
+        <div class="wrap4">
+            <button id="confirmBtn" class="left btn-action">确定</button>
+            <button id="quitBtn" class="right btn-action">退出</button>
+        </div>
+    </div>
+
+    <div id="ReciteDiag" class="diag">
+        <div id="ReciteDiag-title" class="diag-title">
+            <label id="title">学习模式</label>
+        </div>
+        <span><a id="closeBtn" href="javascript:void(0)">关闭</a></span>
+        <input style="height: 30px; border-style: solid;" type="text" value="..." placeholder="请输入单词" id="word"
+            class="centerList" />
+        <label style="height: 30px; margin: 5px 0px 0px 0px;" id="symbol" class="centerList">symbol</label>
+        <audio id="webAudio">
+            <source id="audioSource" src="../audio/WrongHint.mp3">
+            </source>
+            Your browser does not support the audio format.
+        </audio>
+        <textarea style="text-align: left;" rows="12" cols="55" id="txtArea" class="centerList"
+            readonly>txtArea</textarea>
+        <label style="height: 30px; margin: 5px 0px 0px 0px;" id="count" class="centerList">score</label>
+        <label style="height: 30px; margin: 5px 0px 0px 0px;" id="score" class="centerList">score</label>
+        <div style="text-align: center;">
+            <button style="float: left; margin: 0px 0px 0px 10px;" class="btn btn-action"
+                id="againBtn">再读一遍（F5）</button>
+            <button class="btn btn-action" id="forgetBtn">忘记了（F6）</button>
+            <button style="float: right; margin: 0px 10px 0px 0px;" class="btn btn-action" id="chopBtn">斩（F7）</button>
+        </div>
+        <div class="wrap5">
+            <label id="numOfLearn" class="left">numOfLearn</label>
+            <label id="numOfWords" class="center">numOfWords</label>
+            <label id="numOfTest" class="right">numOfTest</label>
+        </div>
+    </div>
+
+    <!-- 遮盖层 -->
+    <div id="bg" class="bg">sada</div>
+
+    <script type="text/javascript" src="./js/gui-common.js"></script>
+    <script type="text/javascript">
+        const { ipcRenderer } = require('electron');
+
+        var HotKeyHandler = {
+            currentMainKey: null,
+
+            Register: function (MainKey, value, func) {
+                console.log("MainKey: " + MainKey);
+                console.log("register Key: " + value);
+                // let MainKey = "";
+                /*switch (tag) {
+                    case 0:
+                        MainKey = 0; // null 
+                        break;
+                    case 1:
+                        MainKey = 17; // Ctrl 
+                        break;
+                    case 2:
+                        MainKey = 16; // Shift 
+                        break;
+                    case 3:
+                        MainKey = 18; // Alt 
+                        break;
+                }*/
+
+                document.onkeyup = function (e) {
+                    HotKeyHandler.currentMainKey = null;
+                    // console.log("clear main key.");
+                }
+
+                document.onkeydown = function (event) {
+                    if (event.defaultPrevented) {
+                        return; // Should do nothing if the default action has been cancelled
+                    }
+                    // 获取键值
+                    let bHandled = false;
+                    let keyValue = "";
+                    if (event.key !== undefined) {
+                        // Handle the event with KeyboardEvent.key and set handled true.
+                        // console.log("event.key");
+                        keyValue = event.key;
+                    } else if (event.keyIdentifier !== undefined) {
+                        // Handle the event with KeyboardEvent.keyIdentifier and set handled true.
+                        // console.log("event.keyIdentifier");
+                        keyValue = event.keyIdentifier;
+                    } else if (event.keyCode !== undefined) {
+                        // Handle the event with KeyboardEvent.keyCode and set handled true.
+                        // console.log("event.keyCode");
+                        keyValue = String.fromCharCode(event.keyCode);
+                    }
+
+                    // console.log("keyValue: " + keyValue);
+
+                    if (HotKeyHandler.currentMainKey != null || MainKey == "") {
+                        if (keyValue == value) {
+                            HotKeyHandler.currentMainKey = null;
+                            if (func != null) func();
+                            bHandled = true;
+                        }
+                    }
+
+                    if (keyValue == MainKey) {
+                        HotKeyHandler.currentMainKey = keyValue;
+                        bHandled = true;
+                    }
+
+                    if (bHandled) {
+                        // Suppress "double action" if event handled
+                        event.preventDefault();
+                    }
+                }
+            }
+        }
+
+        // popup select dialog
+        let studyLearnBtn = document.getElementById("studyLearnBtn");
+        studyLearnBtn.onclick = function () {
+            ipcRenderer.on('gui', (event, fun, ...paras) => {
+                let parasStr = paras.join('`, `');
+                if (paras.length >= 1) {
+                    parasStr = '`' + parasStr + '`';
+                }
+
+                let command = `${fun}(${parasStr})`;
+                // console.log('command: ' + command);
+                eval(command);
+
+                event.returnValue = 'true';
+            });
+
+            let usrDict = ipcRenderer.sendSync('syncMsg', 'readUsrs');
+            console.log(usrDict);
+
+            for (let name of usrDict.keys()) {
+                appendOpt("usr-select", name);
+            }
+            appendOpt("usr-select", "more", "Add more...");
+
+            let usrName = getSelVal("usr-select");
+            // let usrName = usrDict.keys().next().value;
+            let levels = usrDict.get(usrName);
+            console.log(usrName, levels);
+
+            let usrSel = document.getElementById('usr-select');
+            usrSel.addEventListener('change', (() => {
+                // let txt = usrSel.options[usrSel.selectedIndex].value;
+                // console.log("txt: " + txt);
+                let name = usrSel.value;
+                console.log("val: " + name);
+                if (name == "more") {
+                    // To-Do: 
+                }
+                else {
+                    // let lvlSel = document.getElementById('lvl-select');
+                    // lvlSel.options.length = 0;
+                    clearOptions('lvl-select');
+                    for (let lvl of usrDict.get(name)) {
+                        appendOpt("lvl-select", lvl);
+                    }
+                    appendOpt("lvl-select", "more", "Add more...");
+                }
+            }));
+
+            for (let lvl of levels) {
+                appendOpt("lvl-select", lvl);
+            }
+            appendOpt("lvl-select", "more", "Add more...");
+
+            let lvlSel = document.getElementById('lvl-select');
+            lvlSel.addEventListener('change', (() => {
+                let lvl = usrSel.value;
+                console.log("val: " + lvl);
+                if (lvl == "more") {
+                    // To-Do: 
+                }
+            }));
+
+            displayOrHide('SelDiag');
+            displayOrHide('bg');
+            return false;
+        }
+
+        let quitBtn = document.getElementById('quitBtn');
+        quitBtn.onclick = function () {
+            let test_value = confirm("你确定要退出吗？");
+            if (test_value == true) {
+                // ipc.send('close-main-window');
+                ipcRenderer.send('ReciteWordsApp', 'quit');
+            }
+        }
+
+        // popup recite dialog
+        let confirmBtn = document.getElementById("confirmBtn");
+        confirmBtn.onclick = function () {
+            displayOrHide('SelDiag', false);
+            displayOrHide('ReciteDiag');
+
+            let usrName = getSelVal("usr-select");
+            let level = getSelVal("lvl-select");
+            console.log(`selUser: ${usrName}, Level: ${level}`)
+
+            // Enter
+            HotKeyHandler.Register("", "Enter", function () {
+                // console.log("enter was clicked!");
+                let word = getValue("word");
+                ipcRenderer.send('ReciteWordsApp', 'Check_Input', word);
+            });
+
+            ipcRenderer.send('ReciteWordsApp', 'Go', usrName, level);
+
+            return false;
+        }
+
+        let closeBtn = document.getElementById('closeBtn');
+        closeBtn.onclick = function () {
+            let test_value = confirm("你确定要退出吗？");
+            if (test_value == true) {
+                displayOrHide('ReciteDiag', false);
+                displayOrHide('bg', false);
+                // ipc.send('close-main-window');
+                ipcRenderer.send('ReciteWordsApp', 'quit');
+            }
+        }
+        let againBtn = document.getElementById('againBtn');
+        againBtn.onclick = function () {
+            ipcRenderer.send('ReciteWordsApp', 'Play_Again');
+        }
+        let forgetBtn = document.getElementById('forgetBtn');
+        forgetBtn.onclick = function () {
+            ipcRenderer.send('ReciteWordsApp', 'Forgoten');
+        }
+        let chopBtn = document.getElementById('chopBtn');
+        chopBtn.onclick = function () {
+            ipcRenderer.send('ReciteWordsApp', 'Chop');
+        }
+
+        /*
+        // 鼠标拖拽功能
+        var reciteDiag_title = document.getElementById('ReciteDiag-title');
+        reciteDiag_title.onmousedown = function (e) {
+            e = e || window.event;
+            var x = e.pageX || e.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft);
+            var y = e.pageY || e.clientY + (document.body.scrollTop || document.documentElement.scrollTop);
+
+            var boxX = ReciteDiag.offsetLeft;
+            var boxY = ReciteDiag.offsetTop;
+
+            var mouse_in_boxX = x - boxX;
+            var mouse_in_boxY = y - boxY;
+
+            document.onmousemove = function (e) {
+                var x = e.pageX || e.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft);
+                var y = e.pageY || e.clientY + (document.body.scrollTop || document.documentElement.scrollTop);
+
+                reciteDiag.style.left = x - mouse_in_boxX + 256 + 'px';
+                reciteDiag.style.top = y - mouse_in_boxY - 142 + 'px';
+            }
+        }
+        reciteDiag_title.onmouseup = function () {
+            document.onmousemove = null;
+        }
+        */
+
+        function loadAndPlayAudio(audioFile) {
+            // console.log(audioFile);
+            let webAudio = document.getElementById("webAudio");
+            let source = document.getElementById('audioSource');
+            source.src = "file:///" + audioFile;
+
+            webAudio.load(); //call this to just preload the audio without playing
+            webAudio.addEventListener("canplaythrough", function () {
+                webAudio.play(); //call this to play the song right away
+            }, false);
+
+        }
+
+        function playAudio() {
+            let webAudio = document.getElementById("webAudio");
+            webAudio.play(); //call this to play the song right away
+
+        }
+
+        function modifyValue(id, valueStr) {
+            let ele = document.getElementById(id);
+            if (ele.value === undefined) {
+                console.log(`innerHTML of ${id}: ${ele.innerHTML}`);
+                ele.innerHTML = valueStr;
+            }
+            else {
+                console.log(`value of ${id}: ${ele.value} to ${valueStr}.`);
+                ele.value = valueStr;
+            }
+        }
+
+        function getValue(id) {
+            let ele = document.getElementById(id);
+            if (ele.value) {
+                // console.log(`value of ${id}: ${ele.value}`);
+                return ele.value;
+            }
+            else {
+                // console.log(`innerHTML of ${id}: ${ele.innerHTML}`);
+                return ele.innerHTML;
+            }
+        }
+    </script>
+</body>
+
+</html>
