@@ -314,6 +314,7 @@ export class ReciteWordsApp {
             this.GoStudyMode();
         }
         else {
+            this.CurTestPos += 1;
             this.quit();
         }
     }
