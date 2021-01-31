@@ -337,6 +337,7 @@ var ReciteWordsApp = /** @class */ (function () {
             this.GoStudyMode();
         }
         else {
+            this.CurTestPos += 1;
             this.quit();
         }
     };
@@ -654,7 +655,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Go = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progress, progressFile, allCount, InProgressCount, newCount, finishCount, allLimit, newWdsLimit, wdsLst, numOfWords, yesterday, yesterdayStr, _b, wdsLst_1, wd, timeDayLst, timeArray, _c, timeArray_1, timeGroup, curTotalLimit, lastlastDateStr, lastlastDate, _d, wdsLst_2, wd, i, curLimit, _e, wdsLst_3, wd, totalLimit, _f, wdsLst_4, wd, _g, _h, word;
+            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, learnCount, InProgressCount, allLimit, newWdsLimit, wdsLst, numOfWords, yesterday, yesterdayStr, _b, wdsLst_1, wd, timeDayLst, timeArray, _c, timeArray_1, timeGroup, curTotalLimit, lastlastDateStr, lastlastDate, _d, wdsLst_2, wd, i, curLimit, _e, wdsLst_3, wd, totalLimit, _f, wdsLst_4, wd, _g, _h, word;
             var _this_1 = this;
             return __generator(this, function (_j) {
                 switch (_j.label) {
@@ -709,21 +710,22 @@ var ReciteWordsApp = /** @class */ (function () {
                         allCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "allCount", "All words: " + allCount);
                         this.logger.info("All words: " + allCount);
-                        return [4 /*yield*/, this.usrProgress.GetInProgressCount(level)];
-                    case 6:
-                        InProgressCount = _j.sent();
-                        this.win.webContents.send("gui", "modifyValue", "InProgressCount", "Number in learning Word: " + InProgressCount);
-                        this.logger.info("Number in learning Word: " + InProgressCount);
                         return [4 /*yield*/, this.usrProgress.GetNewCount(level)];
-                    case 7:
+                    case 6:
                         newCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "newCount", "New words to learn: " + newCount);
                         this.logger.info("New words to learn: " + newCount);
                         return [4 /*yield*/, this.usrProgress.GetFnshedCount(level)];
-                    case 8:
+                    case 7:
                         finishCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "finishCount", "Words has recited: " + finishCount);
                         this.logger.info("Words has recited: " + finishCount);
+                        return [4 /*yield*/, this.usrProgress.GetInProgressCount(level)];
+                    case 8:
+                        learnCount = _j.sent();
+                        InProgressCount = learnCount - finishCount;
+                        this.win.webContents.send("gui", "modifyValue", "InProgressCount", "Word in learning: " + InProgressCount);
+                        this.logger.info("Word in learning: " + InProgressCount);
                         allLimit = this.cfg.General.Limit;
                         newWdsLimit = this.cfg.StudyMode.Limit;
                         this.TestCount = this.cfg.TestMode.Times;

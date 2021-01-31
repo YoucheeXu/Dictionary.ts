@@ -683,11 +683,6 @@ export class ReciteWordsApp {
         this.win.webContents.send("gui", "modifyValue", "allCount", `All words: ${allCount}`);
         this.logger.info(`All words: ${allCount}`);
 
-        // where = "level = '" + level + "' and familiar > 0";
-        let InProgressCount = await this.usrProgress.GetInProgressCount(level);
-        this.win.webContents.send("gui", "modifyValue", "InProgressCount", `Number in learning Word: ${InProgressCount}`);
-        this.logger.info(`Number in learning Word: ${InProgressCount}`);
-
         // where = "level = '" + level + "' and LastDate is null ";
         let newCount = await this.usrProgress.GetNewCount(level);
         this.win.webContents.send("gui", "modifyValue", "newCount", `New words to learn: ${newCount}`);
@@ -697,6 +692,12 @@ export class ReciteWordsApp {
         let finishCount = await this.usrProgress.GetFnshedCount(level);
         this.win.webContents.send("gui", "modifyValue", "finishCount", `Words has recited: ${finishCount}`);
         this.logger.info(`Words has recited: ${finishCount}`);
+
+        // where = "level = '" + level + "' and familiar > 0";
+        let learnCount = await this.usrProgress.GetInProgressCount(level);
+        let InProgressCount = learnCount - finishCount;
+        this.win.webContents.send("gui", "modifyValue", "InProgressCount", `Words in learning: ${InProgressCount}`);
+        this.logger.info(`Words in learning: ${InProgressCount}`);
 
         // read configuration
 
