@@ -68,13 +68,13 @@
             transform: translateX(-50%);
         }
 
-        #ReciteDiag-header {
+        #Recite-header {
             text-align: center;
             height: 30px;
             line-height: 30px;
         }
 
-        #ReciteDiag-header a {
+        #Recite-header a {
             font-size: 24px;
             text-decoration: none;
             color: black;
@@ -105,6 +105,19 @@
             text-align: center;
             margin-bottom: 20px;
             cursor: move;
+            background-color: green;
+            opacity: 0.75;
+            -webkit-opacity: 0.75;
+            -moz-opacity: 0.75;
+        }
+
+        .diag-bottom {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: left;
+            margin-top: 0px;
+            cursor: text;
             background-color: green;
             opacity: 0.5;
             -webkit-opacity: 0.5;
@@ -172,7 +185,7 @@
             display: grid;
             width: 100%;
             /* grid-template-rows: 200px; */
-            grid-template-rows: 100px;
+            grid-template-rows: 45px;
             grid-template-columns: 300px auto 300px;
         }
 
@@ -207,7 +220,7 @@
 </head>
 
 <body>
-    <div id="ReciteDiag-header">
+    <div id="Recite-header">
         <label style="height: 20px; margin: 5px 0px 0px 0px;" id="usr"></label>
         <a id="studyLearnBtn" href="javascript:void(0)">开始学习</a>
         <label style="height: 20px; margin: 5px 0px 0px 0px;" id="level"></label>
@@ -269,6 +282,9 @@
             <label id="numOfLearn" class="left">numOfLearn</label>
             <label id="numOfWords" class="center">numOfWords</label>
             <label id="numOfTest" class="right">numOfTest</label>
+        </div>
+        <div id="ReciteDiag-bottom" class="diag-bottom">
+            <label id="info" style="padding-left:5px;"></label>
         </div>
     </div>
 

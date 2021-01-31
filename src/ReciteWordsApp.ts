@@ -272,6 +272,9 @@ export class ReciteWordsApp {
             this.win.webContents.send("gui", "modifyValue", "numOfWords", `${this.CurLearnPos + 1} of ${len}`);
 
             // this.CurLearnPos += 1;
+
+            let familiar = this.WordsDict.get(word);
+            this.win.webContents.send("gui", "modifyValue", "info", `Familiar: ${familiar}`);
         }
     }
 
@@ -333,6 +336,8 @@ export class ReciteWordsApp {
 
         this.win.webContents.send("gui", "modifyValue", "numOfWords", `${this.CurTestPos + 1} of ${this.CurTestLst.length}`);
 
+        let familiar = this.WordsDict.get(word);
+        this.win.webContents.send("gui", "modifyValue", "info", `Familiar: ${familiar}`);
         // this.CurTestPos += 1;
     }
 

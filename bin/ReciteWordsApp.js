@@ -272,7 +272,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Study_Next = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var len, word, lastDate;
+            var len, word, lastDate, familiar;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -293,6 +293,8 @@ var ReciteWordsApp = /** @class */ (function () {
                         this.Show_Content(word, true);
                         this.Play_MP3(word);
                         this.win.webContents.send("gui", "modifyValue", "numOfWords", this.CurLearnPos + 1 + " of " + len);
+                        familiar = this.WordsDict.get(word);
+                        this.win.webContents.send("gui", "modifyValue", "info", "Familiar: " + familiar);
                         _a.label = 2;
                     case 2: return [2 /*return*/];
                 }
@@ -351,6 +353,8 @@ var ReciteWordsApp = /** @class */ (function () {
             this.Show_Content(this.lastWord);
         }
         this.win.webContents.send("gui", "modifyValue", "numOfWords", this.CurTestPos + 1 + " of " + this.CurTestLst.length);
+        var familiar = this.WordsDict.get(word);
+        this.win.webContents.send("gui", "modifyValue", "info", "Familiar: " + familiar);
         // this.CurTestPos += 1;
     };
     ReciteWordsApp.prototype.Check_Input = function (input_word) {
@@ -724,8 +728,8 @@ var ReciteWordsApp = /** @class */ (function () {
                     case 8:
                         learnCount = _j.sent();
                         InProgressCount = learnCount - finishCount;
-                        this.win.webContents.send("gui", "modifyValue", "InProgressCount", "Word in learning: " + InProgressCount);
-                        this.logger.info("Word in learning: " + InProgressCount);
+                        this.win.webContents.send("gui", "modifyValue", "InProgressCount", "Words in learning: " + InProgressCount);
+                        this.logger.info("Words in learning: " + InProgressCount);
                         allLimit = this.cfg.General.Limit;
                         newWdsLimit = this.cfg.StudyMode.Limit;
                         this.TestCount = this.cfg.TestMode.Times;
