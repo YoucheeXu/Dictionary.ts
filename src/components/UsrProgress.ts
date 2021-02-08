@@ -124,7 +124,7 @@ export class UsrProgress {
             familiar = args[2];
             limit = args[3];
             // let sql = "select * from Words where level = '" + level + "' and lastdate <= date('" + lastlastdate + "') and familiar < " + String(familiar);
-            let sql = `select * from ${this.level} where lastdate < date('${lastlastdate}') and familiar < ${String(familiar)}`;
+            let sql = `select * from ${this.level} where lastdate <= date('${lastlastdate}') and familiar < ${String(familiar)}`;
             sql += " limit " + String(limit);
 
             // this.dataBase.GetWordsLst(wdsLst, where);

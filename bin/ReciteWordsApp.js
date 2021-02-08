@@ -272,7 +272,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Study_Next = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var len, word, lastDate, familiar;
+            var len, word, lastDate, data, familiar, lastDate_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -288,13 +288,16 @@ var ReciteWordsApp = /** @class */ (function () {
                         else {
                             this.win.webContents.send("gui", "modifyValue", "score", "");
                         }
-                        // this.logger.info(`LearnWord: ${word}, familiar: ${this.WordsDict.get(word)}`);
-                        console.log("LearnWord: " + word + ", familiar: " + this.WordsDict.get(word));
+                        data = this.WordsDict.get(word);
+                        if (data != undefined) {
+                            familiar = data[0];
+                            lastDate_1 = data[1];
+                            console.log("LearnWord: " + word + ", familiar: " + familiar + ", lastDate: " + lastDate_1);
+                            this.win.webContents.send("gui", "modifyValue", "info", "Familiar: " + familiar + ", LastDate: " + lastDate_1);
+                        }
                         this.Show_Content(word, true);
                         this.Play_MP3(word);
                         this.win.webContents.send("gui", "modifyValue", "numOfWords", this.CurLearnPos + 1 + " of " + len);
-                        familiar = this.WordsDict.get(word);
-                        this.win.webContents.send("gui", "modifyValue", "info", "Familiar: " + familiar);
                         _a.label = 2;
                     case 2: return [2 /*return*/];
                 }
@@ -345,16 +348,19 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Test_Next = function () {
         var word = this.CurTestLst[this.CurTestPos];
-        // this.logger.info(`TestWord: ${word}, familiar: ${this.WordsDict.get(word)}`);
-        console.log("TestWord: " + word + ", familiar: " + this.WordsDict.get(word));
+        var data = this.WordsDict.get(word);
+        if (data != undefined) {
+            var familiar = data[0];
+            var lastDate = data[1];
+            console.log("LearnWord: " + word + ", familiar: " + familiar + ", lastDate: " + lastDate);
+            this.win.webContents.send("gui", "modifyValue", "info", "Familiar: " + familiar + ", LastDate: " + lastDate);
+        }
         this.win.webContents.send("gui", "modifyValue", "word", "");
         this.Play_MP3(word);
         if (this.lastWord != "") {
             this.Show_Content(this.lastWord);
         }
         this.win.webContents.send("gui", "modifyValue", "numOfWords", this.CurTestPos + 1 + " of " + this.CurTestLst.length);
-        var familiar = this.WordsDict.get(word);
-        this.win.webContents.send("gui", "modifyValue", "info", "Familiar: " + familiar);
         // this.CurTestPos += 1;
     };
     ReciteWordsApp.prototype.Check_Input = function (input_word) {
@@ -381,22 +387,26 @@ var ReciteWordsApp = /** @class */ (function () {
                 this.win.webContents.send("gui", "modifyValue", "score", "Wrong " + this.ErrCount + "!");
                 console.log("ErrCount: " + this.ErrCount);
                 console.log("Right word: " + word + ", Wrong word: " + input_word + ".");
-                var familiar = this.WordsDict.get(word) || 0;
+                var data = this.WordsDict.get(word);
+                if (data === undefined) {
+                    throw new Error("${word} is not in WordsDict!");
+                }
+                var familiar = data[0];
+                var lastDate = data[1];
                 if (this.ErrCount == 1) {
                     // this.CurTestPos -= 1;
                     // this.WordsDict.set(word, familiar - 1);
                 }
                 else if (this.ErrCount < 3) {
                     // this.CurTestPos -= 1;
-                    this.WordsDict.set(word, familiar - 1);
+                    this.WordsDict.set(word, [familiar - 1, lastDate]);
                 }
                 else {
                     this.Play_MP3(word);
                     this.win.webContents.send("gui", "modifyValue", "word", "");
                     this.Show_Content(word, true);
-                    // this.win.webContents.send("gui", "modifyValue", "word", "");
                     this.win.webContents.send("gui", "modifyValue", "score", "Go on!");
-                    this.WordsDict.set(word, familiar - 4);
+                    this.WordsDict.set(word, [familiar - 4, lastDate]);
                     this.LearnLst.push(word);
                     console.log(word + " has been added in learn list.");
                     this.ErrCount = 0;
@@ -449,7 +459,12 @@ var ReciteWordsApp = /** @class */ (function () {
                     i--;
                 }
             }
-            this.WordsDict.set(word, 10);
+            var data = this.WordsDict.get(word);
+            if (data != undefined) {
+                // let familiar = data[0];
+                var lastDate = data[1];
+                this.WordsDict.set(word, [10, lastDate]);
+            }
             console.log(word + " has been chopped!");
             this.win.webContents.send("gui", "modifyValue", "numOfTest", this.TestLst.length + " words to Test!");
             this.lastWord = this.CurLearnLst[this.CurLearnPos - 1];
@@ -493,7 +508,12 @@ var ReciteWordsApp = /** @class */ (function () {
                     i--;
                 }
             }
-            this.WordsDict.set(word, 10);
+            var data = this.WordsDict.get(word);
+            if (data != undefined) {
+                // let familiar = data[0];
+                var lastDate = data[1];
+                this.WordsDict.set(word, [10, lastDate]);
+            }
             console.log(word + " has been chopped!");
             this.win.webContents.send("gui", "modifyValue", "numOfTest", this.TestLst.length + " words to Test!");
             this.lastWord = this.CurTestLst[this.CurTestPos - 1];
@@ -524,9 +544,11 @@ var ReciteWordsApp = /** @class */ (function () {
                     i--;
                 }
             }
-            var familiar = this.WordsDict.get(word);
-            if (familiar) {
-                this.WordsDict.set(word, familiar - 5);
+            var data = this.WordsDict.get(word);
+            if (data != undefined) {
+                var familiar = data[0];
+                var lastDate = data[1];
+                this.WordsDict.set(word, [familiar - 5, lastDate]);
             }
             this.LearnLst.push(word);
             console.log(word + " has been added in learn list.");
@@ -749,8 +771,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (_j.sent()) {
                             for (_b = 0, wdsLst_1 = wdsLst; _b < wdsLst_1.length; _b++) {
                                 wd = wdsLst_1[_b];
-                                // this.WordsDict.set(wd, await this.usrProgress.GetFamiliar(wd));
-                                this.WordsDict.set(wd.Word, wd.Familiar);
+                                this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
                             }
                         }
@@ -783,9 +804,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (_j.sent()) {
                             for (_d = 0, wdsLst_2 = wdsLst; _d < wdsLst_2.length; _d++) {
                                 wd = wdsLst_2[_d];
-                                // this.WordsDict.set(wd, await this.usrProgress.GetFamiliar(wd));
-                                this.WordsDict.set(wd.Word, wd.Familiar);
-                                // this.logger.info(`word: ${wd}, familiar: ${this.WordsDict.get(wd)}`);
+                                this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
                             }
                         }
@@ -812,9 +831,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (_j.sent()) {
                             for (_e = 0, wdsLst_3 = wdsLst; _e < wdsLst_3.length; _e++) {
                                 wd = wdsLst_3[_e];
-                                // this.WordsDict.set(wd, await this.usrProgress.GetFamiliar(wd));
-                                this.WordsDict.set(wd.Word, Number(wd.Familiar));
-                                // this.logger.info(`word: ${wd}, familiar: ${this.WordsDict.get(wd)}`);
+                                this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
                             }
                             this.logger.info("got " + wdsLst.length + " on " + timeDayLst[i] + " day Ebbinghaus Forgetting Curve words.");
@@ -844,8 +861,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (_j.sent()) {
                             for (_f = 0, wdsLst_4 = wdsLst; _f < wdsLst_4.length; _f++) {
                                 wd = wdsLst_4[_f];
-                                // this.WordsDict.set(wd, 0);
-                                this.WordsDict.set(wd.Word, 0);
+                                this.WordsDict.set(wd.Word, [0, wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
                                 if (this.WordsDict.size >= totalLimit) {
                                     break;
@@ -858,13 +874,8 @@ var ReciteWordsApp = /** @class */ (function () {
                         numOfWords = this.WordsDict.size;
                         // this.logger.info("WordsDict = " + String(this.WordsDict));
                         this.logger.info("len of WordsDict: " + this.WordsDict.size + ".");
-                        // forgotten and new words
-                        /*for (let [word, familiar] of this.WordsDict) {
-                            if(familiar <= 0){
-                                this.LearnLst.push(word);
-                            }
-                        }*/
-                        this.WordsDict.forEach(function (familiar, word) {
+                        this.WordsDict.forEach(function (_a, word) {
+                            var familiar = _a[0], lastDate = _a[1];
                             if (familiar <= 0) {
                                 _this_1.LearnLst.push(word);
                             }
@@ -900,9 +911,9 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Save_Progress = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, word, _b, _c, word, familiar, _d, _e, word, _f, _g, word, familiar, allLen, mapStr, todayStr, i, iterator, r, _h, word, familiar, percent, e_1;
-            return __generator(this, function (_j) {
-                switch (_j.label) {
+            var _i, _a, word, _b, _c, word, data, familiar, lastDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, allLen, mapStr, todayStr, i, iterator, r, _h, word, _j, familiar, lastDate, percent, e_1;
+            return __generator(this, function (_k) {
+                switch (_k.label) {
                     case 0:
                         this.logger.info("len of this.WordsDict: " + this.WordsDict.size);
                         for (_i = 0, _a = this.TestLst; _i < _a.length; _i++) {
@@ -915,8 +926,12 @@ var ReciteWordsApp = /** @class */ (function () {
                             for (_b = 0, _c = this.CurLearnLst; _b < _c.length; _b++) {
                                 word = _c[_b];
                                 if (this.WordsDict.has(word)) {
-                                    familiar = this.WordsDict.get(word) || 0 - 1;
-                                    this.WordsDict.set(word, familiar);
+                                    data = this.WordsDict.get(word);
+                                    if (data != undefined) {
+                                        familiar = data[0] - 1;
+                                        lastDate = data[1];
+                                        this.WordsDict.set(word, [familiar, lastDate]);
+                                    }
                                 }
                             }
                         }
@@ -934,14 +949,19 @@ var ReciteWordsApp = /** @class */ (function () {
                         for (_f = 0, _g = this.LearnLst; _f < _g.length; _f++) {
                             word = _g[_f];
                             if (this.WordsDict.has(word)) {
-                                familiar = this.WordsDict.get(word) || 0 - 1;
-                                this.WordsDict.set(word, familiar);
+                                data = this.WordsDict.get(word);
+                                if (data != undefined) {
+                                    familiar = data[0] - 1;
+                                    lastDate = data[1];
+                                    this.WordsDict.set(word, [familiar, lastDate]);
+                                }
                             }
                         }
                         allLen = this.WordsDict.size;
                         this.logger.info("len of this.WordsDict: " + allLen);
                         mapStr = "{";
-                        this.WordsDict.forEach(function (familiar, word) {
+                        this.WordsDict.forEach(function (_a, word) {
+                            var familiar = _a[0], lastDate = _a[1];
                             mapStr += word + ": " + String(familiar) + ", ";
                         });
                         mapStr += "}";
@@ -949,10 +969,10 @@ var ReciteWordsApp = /** @class */ (function () {
                         todayStr = utils_1.formatDate(this.today);
                         i = 0;
                         iterator = this.WordsDict.entries();
-                        _j.label = 1;
+                        _k.label = 1;
                     case 1:
                         if (!(r = iterator.next(), !r.done)) return [3 /*break*/, 6];
-                        _h = r.value, word = _h[0], familiar = _h[1];
+                        _h = r.value, word = _h[0], _j = _h[1], familiar = _j[0], lastDate = _j[1];
                         familiar += 1.0;
                         if (familiar > 10) {
                             familiar = 10.0;
@@ -961,26 +981,26 @@ var ReciteWordsApp = /** @class */ (function () {
                             familiar = -10.0;
                         }
                         familiar = Number(familiar.toFixed(1));
-                        _j.label = 2;
+                        _k.label = 2;
                     case 2:
-                        _j.trys.push([2, 4, , 5]);
-                        // console.info(`update ${word} familiar: ${familiar}.`)
+                        _k.trys.push([2, 4, , 5]);
                         return [4 /*yield*/, this.usrProgress.UpdateProgress(word, familiar, todayStr)];
                     case 3:
-                        // console.info(`update ${word} familiar: ${familiar}.`)
-                        _j.sent();
+                        _k.sent();
                         i++;
                         percent = i / allLen * 100;
                         console.log(percent.toFixed(2) + "% to save progress.");
+                        this.win.webContents.send("gui", "modifyValue", "info", percent.toFixed(2) + "% to save progress.");
                         return [3 /*break*/, 5];
                     case 4:
-                        e_1 = _j.sent();
+                        e_1 = _k.sent();
                         this.logger.error(e_1.message);
                         this.logger.error(e_1);
                         return [3 /*break*/, 5];
                     case 5: return [3 /*break*/, 1];
                     case 6:
                         console.log("OK to save progress.");
+                        this.win.webContents.send("gui", "modifyValue", "info", "OK to save progress.");
                         return [2 /*return*/];
                 }
             });
