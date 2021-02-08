@@ -207,7 +207,7 @@ var UsrProgress = /** @class */ (function () {
                         lastlastdate = args[1];
                         familiar = args[2];
                         limit = args[3];
-                        sql = "select * from " + this.level + " where lastdate < date('" + lastlastdate + "') and familiar < " + String(familiar);
+                        sql = "select * from " + this.level + " where lastdate <= date('" + lastlastdate + "') and familiar < " + String(familiar);
                         sql += " limit " + String(limit);
                         // this.dataBase.GetWordsLst(wdsLst, where);
                         return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
