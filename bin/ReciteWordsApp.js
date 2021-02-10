@@ -681,7 +681,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Go = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, learnCount, InProgressCount, allLimit, newWdsLimit, wdsLst, numOfWords, yesterday, yesterdayStr, _b, wdsLst_1, wd, timeDayLst, timeArray, _c, timeArray_1, timeGroup, curTotalLimit, lastlastDateStr, lastlastDate, _d, wdsLst_2, wd, i, curLimit, _e, wdsLst_3, wd, totalLimit, _f, wdsLst_4, wd, _g, _h, word;
+            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, learnCount, InProgressCount, allLimit, newWdsLimit, wdsLst, numOfWords, yesterday, yesterdayStr, _b, wdsLst_1, wd, timeDayLst, timeArray, _c, timeArray_1, timeGroup, curTotalLimit, lastlastDateStr, lastlastDate, _d, wdsLst_2, wd, i, curLimit, num, _e, wdsLst_3, wd, dif, totalLimit, _f, wdsLst_4, wd, _g, _h, word;
             var _this_1 = this;
             return __generator(this, function (_j) {
                 switch (_j.label) {
@@ -820,6 +820,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (!(i >= 0)) return [3 /*break*/, 15];
                         curLimit = allLimit - this.WordsDict.size;
                         if (!(curLimit > 0)) return [3 /*break*/, 14];
+                        lastlastDate = new Date();
                         lastlastDate.setDate(this.today.getDate() - Number(timeDayLst[i]));
                         lastlastDateStr = utils_1.formatDate(lastlastDate);
                         wdsLst.length = 0;
@@ -829,12 +830,14 @@ var ReciteWordsApp = /** @class */ (function () {
                         // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
                         // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
                         if (_j.sent()) {
+                            num = this.WordsDict.size;
                             for (_e = 0, wdsLst_3 = wdsLst; _e < wdsLst_3.length; _e++) {
                                 wd = wdsLst_3[_e];
                                 this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
                             }
-                            this.logger.info("got " + wdsLst.length + " on " + timeDayLst[i] + " day Ebbinghaus Forgetting Curve words.");
+                            dif = this.WordsDict.size - num;
+                            this.logger.info("got " + dif + " on " + timeDayLst[i] + " day Ebbinghaus Forgetting Curve words.");
                         }
                         curLimit = allLimit - this.WordsDict.size;
                         if (curLimit <= 0) {

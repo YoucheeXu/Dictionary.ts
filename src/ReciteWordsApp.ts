@@ -800,6 +800,7 @@ export class ReciteWordsApp {
         for (let i = timeDayLst.length - 1; i >= 0; i--) {
             let curLimit = allLimit - this.WordsDict.size;
             if (curLimit > 0) {
+                lastlastDate = new Date();
                 lastlastDate.setDate(this.today.getDate() - Number(timeDayLst[i]));
                 lastlastDateStr = formatDate(lastlastDate);
                 wdsLst.length = 0;
@@ -807,11 +808,13 @@ export class ReciteWordsApp {
                 // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
                 // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
                 if (await this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
+                    let num = this.WordsDict.size;
                     for (let wd of wdsLst) {
                         this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
                         console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
                     }
-                    this.logger.info(`got ${wdsLst.length} on ${timeDayLst[i]} day Ebbinghaus Forgetting Curve words.`);
+                    let dif = this.WordsDict.size - num;
+                    this.logger.info(`got ${dif} on ${timeDayLst[i]} day Ebbinghaus Forgetting Curve words.`);
                 }
 
                 curLimit = allLimit - this.WordsDict.size;
