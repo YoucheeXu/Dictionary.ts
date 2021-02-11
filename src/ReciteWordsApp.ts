@@ -803,21 +803,33 @@ export class ReciteWordsApp {
                 lastlastDate = new Date();
                 lastlastDate.setDate(this.today.getDate() - Number(timeDayLst[i]));
                 lastlastDateStr = formatDate(lastlastDate);
-                wdsLst.length = 0;
-                // "select word from Words where level = 'level' and lastdate <= date('lastlastDateStr') and lastdate >= date('lastlastDateStr') and familiar < 10 limit curLimit"
-                // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
-                // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
-                if (await this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
-                    let num = this.WordsDict.size;
-                    for (let wd of wdsLst) {
-                        this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
-                        console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
+                let num = this.WordsDict.size;
+                let bMore = true;
+                while (bMore && curLimit > 0) {
+                    wdsLst.length = 0;
+                    // "select word from Words where level = 'level' and lastdate <= date('lastlastDateStr') and lastdate >= date('lastlastDateStr') and familiar < 10 limit curLimit"
+                    // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
+                    // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
+                    if (await this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, lastlastDateStr, 10, allLimit])) {
+                        for (let wd of wdsLst) {
+                            this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
+                            console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
+                            if(this.WordsDict.size >= allLimit) {
+                                break;
+                            }
+                        }
+                        bMore = (wdsLst.length == curLimit);
                     }
-                    let dif = this.WordsDict.size - num;
+                    else {
+                        bMore = false;
+                    }
+                    curLimit = allLimit - this.WordsDict.size;
+                }
+                let dif = this.WordsDict.size - num;
+                if (dif > 0) {
                     this.logger.info(`got ${dif} on ${timeDayLst[i]} day Ebbinghaus Forgetting Curve words.`);
                 }
 
-                curLimit = allLimit - this.WordsDict.size;
                 if (curLimit <= 0) {
                     break;
                 }

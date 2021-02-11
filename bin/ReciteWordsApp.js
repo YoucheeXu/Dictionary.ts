@@ -681,7 +681,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Go = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, learnCount, InProgressCount, allLimit, newWdsLimit, wdsLst, numOfWords, yesterday, yesterdayStr, _b, wdsLst_1, wd, timeDayLst, timeArray, _c, timeArray_1, timeGroup, curTotalLimit, lastlastDateStr, lastlastDate, _d, wdsLst_2, wd, i, curLimit, num, _e, wdsLst_3, wd, dif, totalLimit, _f, wdsLst_4, wd, _g, _h, word;
+            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, learnCount, InProgressCount, allLimit, newWdsLimit, wdsLst, numOfWords, yesterday, yesterdayStr, _b, wdsLst_1, wd, timeDayLst, timeArray, _c, timeArray_1, timeGroup, curTotalLimit, lastlastDateStr, lastlastDate, _d, wdsLst_2, wd, i, curLimit, num, bMore, _e, wdsLst_3, wd, dif, totalLimit, _f, wdsLst_4, wd, _g, _h, word;
             var _this_1 = this;
             return __generator(this, function (_j) {
                 switch (_j.label) {
@@ -817,37 +817,52 @@ var ReciteWordsApp = /** @class */ (function () {
                         i = timeDayLst.length - 1;
                         _j.label = 12;
                     case 12:
-                        if (!(i >= 0)) return [3 /*break*/, 15];
+                        if (!(i >= 0)) return [3 /*break*/, 17];
                         curLimit = allLimit - this.WordsDict.size;
-                        if (!(curLimit > 0)) return [3 /*break*/, 14];
+                        if (!(curLimit > 0)) return [3 /*break*/, 16];
                         lastlastDate = new Date();
                         lastlastDate.setDate(this.today.getDate() - Number(timeDayLst[i]));
                         lastlastDateStr = utils_1.formatDate(lastlastDate);
-                        wdsLst.length = 0;
-                        return [4 /*yield*/, this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, lastlastDateStr, 10, curLimit])];
+                        num = this.WordsDict.size;
+                        bMore = true;
+                        _j.label = 13;
                     case 13:
+                        if (!(bMore && curLimit > 0)) return [3 /*break*/, 15];
+                        wdsLst.length = 0;
+                        return [4 /*yield*/, this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, lastlastDateStr, 10, allLimit])];
+                    case 14:
                         // "select word from Words where level = 'level' and lastdate <= date('lastlastDateStr') and lastdate >= date('lastlastDateStr') and familiar < 10 limit curLimit"
                         // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
                         // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
                         if (_j.sent()) {
-                            num = this.WordsDict.size;
                             for (_e = 0, wdsLst_3 = wdsLst; _e < wdsLst_3.length; _e++) {
                                 wd = wdsLst_3[_e];
                                 this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
+                                if (this.WordsDict.size >= allLimit) {
+                                    break;
+                                }
                             }
-                            dif = this.WordsDict.size - num;
-                            this.logger.info("got " + dif + " on " + timeDayLst[i] + " day Ebbinghaus Forgetting Curve words.");
+                            bMore = (wdsLst.length == curLimit);
+                        }
+                        else {
+                            bMore = false;
                         }
                         curLimit = allLimit - this.WordsDict.size;
-                        if (curLimit <= 0) {
-                            return [3 /*break*/, 15];
+                        return [3 /*break*/, 13];
+                    case 15:
+                        dif = this.WordsDict.size - num;
+                        if (dif > 0) {
+                            this.logger.info("got " + dif + " on " + timeDayLst[i] + " day Ebbinghaus Forgetting Curve words.");
                         }
-                        _j.label = 14;
-                    case 14:
+                        if (curLimit <= 0) {
+                            return [3 /*break*/, 17];
+                        }
+                        _j.label = 16;
+                    case 16:
                         i--;
                         return [3 /*break*/, 12];
-                    case 15:
+                    case 17:
                         this.logger.info("got " + (this.WordsDict.size - numOfWords) + " Ebbinghaus Forgetting Curve words.");
                         numOfWords = this.WordsDict.size;
                         // get new words list (familiar = 0 and lastDate is null);
@@ -855,9 +870,9 @@ var ReciteWordsApp = /** @class */ (function () {
                         curTotalLimit = Math.min(allLimit - this.WordsDict.size, newWdsLimit);
                         totalLimit = curTotalLimit + this.WordsDict.size;
                         wdsLst.length = 0;
-                        if (!(curTotalLimit > 0)) return [3 /*break*/, 17];
+                        if (!(curTotalLimit > 0)) return [3 /*break*/, 19];
                         return [4 /*yield*/, this.usrProgress.GetWordsLst([wdsLst, 0])];
-                    case 16:
+                    case 18:
                         // "select word from Words where level = 'level' and familiar = 0"
                         // if (await this.usrProgress.GetWordsLst([wdsLst, level, 0])) {
                         // if (await this.usrProgress.GetWordsLst([wdsLst, level, 0])) {
@@ -871,8 +886,8 @@ var ReciteWordsApp = /** @class */ (function () {
                                 }
                             }
                         }
-                        _j.label = 17;
-                    case 17:
+                        _j.label = 19;
+                    case 19:
                         this.logger.info("got " + (this.WordsDict.size - numOfWords) + " new words.");
                         numOfWords = this.WordsDict.size;
                         // this.logger.info("WordsDict = " + String(this.WordsDict));
