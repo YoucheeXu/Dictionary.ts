@@ -79,12 +79,12 @@ export class UsrProgress {
     }
     public GetInProgressCount(level: string): Promise<number> {
         // let where = "level = '" + level + "' and familiar > 0";
-        let where = "LastDate is not null";
+        let where = "LastDate is not null and cast (Familiar as real) < 10";
         return this.GetCount(level, where);
     }
     public GetNewCount(level: string): Promise<number> {
         // let where = "level = '" + level + "' and LastDate is null ";
-        let where = "LastDate is null";
+        let where = "LastDate is null and cast (Familiar as real) < 10";
         return this.GetCount(level, where);
     }
     public GetFnshedCount(level: string): Promise<number> {

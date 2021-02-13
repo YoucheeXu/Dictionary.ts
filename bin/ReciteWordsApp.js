@@ -681,7 +681,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Go = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, learnCount, InProgressCount, allLimit, newWdsLimit, wdsLst, numOfWords, yesterday, yesterdayStr, _b, wdsLst_1, wd, timeDayLst, timeArray, _c, timeArray_1, timeGroup, curTotalLimit, lastlastDateStr, lastlastDate, _d, wdsLst_2, wd, i, curLimit, num, bMore, _e, wdsLst_3, wd, dif, totalLimit, _f, wdsLst_4, wd, _g, _h, word;
+            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, InProgressCount, allLimit, newWdsLimit, wdsLst, numOfWords, yesterday, yesterdayStr, _b, wdsLst_1, wd, timeDayLst, timeArray, _c, timeArray_1, timeGroup, curTotalLimit, lastlastDateStr, lastlastDate, _d, wdsLst_2, wd, i, curLimit, num, bMore, _e, wdsLst_3, wd, dif, totalLimit, _f, wdsLst_4, wd, _g, _h, word;
             var _this_1 = this;
             return __generator(this, function (_j) {
                 switch (_j.label) {
@@ -748,8 +748,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         this.logger.info("Words has recited: " + finishCount);
                         return [4 /*yield*/, this.usrProgress.GetInProgressCount(level)];
                     case 8:
-                        learnCount = _j.sent();
-                        InProgressCount = learnCount - finishCount;
+                        InProgressCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "InProgressCount", "Words in learning: " + InProgressCount);
                         this.logger.info("Words in learning: " + InProgressCount);
                         allLimit = this.cfg.General.Limit;

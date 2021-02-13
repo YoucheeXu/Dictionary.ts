@@ -726,8 +726,7 @@ export class ReciteWordsApp {
         this.logger.info(`Words has recited: ${finishCount}`);
 
         // where = "level = '" + level + "' and familiar > 0";
-        let learnCount = await this.usrProgress.GetInProgressCount(level);
-        let InProgressCount = learnCount - finishCount;
+        let InProgressCount = await this.usrProgress.GetInProgressCount(level);
         this.win.webContents.send("gui", "modifyValue", "InProgressCount", `Words in learning: ${InProgressCount}`);
         this.logger.info(`Words in learning: ${InProgressCount}`);
 
@@ -814,7 +813,7 @@ export class ReciteWordsApp {
                         for (let wd of wdsLst) {
                             this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
                             console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
-                            if(this.WordsDict.size >= allLimit) {
+                            if (this.WordsDict.size >= allLimit) {
                                 break;
                             }
                         }
