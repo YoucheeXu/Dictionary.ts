@@ -751,7 +751,7 @@ export class ReciteWordsApp {
         // if (await this.usrProgress.GetWordsLst([wdsLst, level, yesterdayStr, 0.5, allLimit])) {
         if (await this.usrProgress.GetWordsLst([wdsLst, yesterdayStr, 0.5, allLimit])) {
             for (let wd of wdsLst) {
-                this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
+                this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
                 console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
             }
         }
@@ -786,7 +786,7 @@ export class ReciteWordsApp {
             // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, 10, curTotalLimit])) {
             if (await this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, 10, curTotalLimit])) {
                 for (let wd of wdsLst) {
-                    this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
+                    this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
                     console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
                 }
             }
@@ -811,7 +811,7 @@ export class ReciteWordsApp {
                     // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
                     if (await this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, lastlastDateStr, 10, allLimit])) {
                         for (let wd of wdsLst) {
-                            this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
+                            this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
                             console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
                             if (this.WordsDict.size >= allLimit) {
                                 break;

@@ -98,11 +98,12 @@ export class UsrProgress {
         // let familiar: number = args[-2];
         let familiar: number;
         let limit: number;
+        // get new words
         if (args.length == 2) {
             // (wdsLst, familiar);
             familiar = args[1];
             // let sql = "select * from Words where level = '" + level + "' and familiar = " + String(familiar);
-            let sql = `select * from ${this.level} where familiar = ${String(familiar)}`;
+            let sql = `select * from ${this.level} where cast (Familiar as real) = ${String(familiar)}`;
             await this.dataBase.each(sql, [], (row: any) => {
                 wdsLst.push(row);
             });
@@ -113,18 +114,20 @@ export class UsrProgress {
             limit = args[2];
             // let sql = "select word from Words where level = '" + level + "' and familiar <= 0 and familiar >= " + String(familiar) + " limit " + String(limit);
             // let sql = "select * from Words where level = '" + level + "' and familiar = " + String(familiar) + " limit " + String(limit);
-            let sql = `select * from ${this.level} where familiar = ${String(familiar)} limit ${String(limit)}`;
+            let sql = `select * from ${this.level} where cast (Familiar as real) = ${String(familiar)} limit ${String(limit)}`;
             await this.dataBase.each(sql, [], (row: any) => {
                 wdsLst.push(row);
             });
         }
+        // get ancient words
+        // get forgotten words
         else if (args.length == 4) {
             // (wdsLst, lastlastdate, familiar, limit);
             let lastlastdate = args[1];
             familiar = args[2];
             limit = args[3];
             // let sql = "select * from Words where level = '" + level + "' and lastdate <= date('" + lastlastdate + "') and familiar < " + String(familiar);
-            let sql = `select * from ${this.level} where lastdate <= date('${lastlastdate}') and familiar < ${String(familiar)}`;
+            let sql = `select * from ${this.level} where lastdate <= date('${lastlastdate}') and cast (Familiar as real) < ${String(familiar)}`;
             sql += " limit " + String(limit);
 
             // this.dataBase.GetWordsLst(wdsLst, where);
@@ -132,6 +135,7 @@ export class UsrProgress {
                 wdsLst.push(row);
             });
         }
+        // get Ebbinghaus Forgetting Curve words
         else if (args.length == 5) {
             // (wdsLst, lastdate, lastlastdate, familiar, limit);
             let lastdate = args[1];

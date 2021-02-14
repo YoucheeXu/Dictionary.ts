@@ -183,7 +183,7 @@ var UsrProgress = /** @class */ (function () {
                         if (!(args.length == 2)) return [3 /*break*/, 2];
                         // (wdsLst, familiar);
                         familiar = args[1];
-                        sql = "select * from " + this.level + " where familiar = " + String(familiar);
+                        sql = "select * from " + this.level + " where cast (Familiar as real) = " + String(familiar);
                         return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
                                 wdsLst.push(row);
                             })];
@@ -195,7 +195,7 @@ var UsrProgress = /** @class */ (function () {
                         // (wdsLst, familiar, limit);
                         familiar = args[1];
                         limit = args[2];
-                        sql = "select * from " + this.level + " where familiar = " + String(familiar) + " limit " + String(limit);
+                        sql = "select * from " + this.level + " where cast (Familiar as real) = " + String(familiar) + " limit " + String(limit);
                         return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
                                 wdsLst.push(row);
                             })];
@@ -207,7 +207,7 @@ var UsrProgress = /** @class */ (function () {
                         lastlastdate = args[1];
                         familiar = args[2];
                         limit = args[3];
-                        sql = "select * from " + this.level + " where lastdate <= date('" + lastlastdate + "') and familiar < " + String(familiar);
+                        sql = "select * from " + this.level + " where lastdate <= date('" + lastlastdate + "') and cast (Familiar as real) < " + String(familiar);
                         sql += " limit " + String(limit);
                         // this.dataBase.GetWordsLst(wdsLst, where);
                         return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {

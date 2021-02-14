@@ -770,7 +770,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (_j.sent()) {
                             for (_b = 0, wdsLst_1 = wdsLst; _b < wdsLst_1.length; _b++) {
                                 wd = wdsLst_1[_b];
-                                this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
+                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
                             }
                         }
@@ -803,7 +803,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (_j.sent()) {
                             for (_d = 0, wdsLst_2 = wdsLst; _d < wdsLst_2.length; _d++) {
                                 wd = wdsLst_2[_d];
-                                this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
+                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
                             }
                         }
@@ -836,7 +836,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (_j.sent()) {
                             for (_e = 0, wdsLst_3 = wdsLst; _e < wdsLst_3.length; _e++) {
                                 wd = wdsLst_3[_e];
-                                this.WordsDict.set(wd.Word, [wd.Familiar, wd.LastDate]);
+                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
                                 console.log("word: " + wd.Word + ", familiar: " + wd.Familiar + ", date: " + wd.LastDate);
                                 if (this.WordsDict.size >= allLimit) {
                                     break;
