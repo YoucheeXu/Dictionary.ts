@@ -897,6 +897,7 @@ var ReciteWordsApp = /** @class */ (function () {
                                 _this_1.LearnLst.push(word);
                             }
                         });
+                        utils_1.randomArray2(this.LearnLst);
                         // this.logger.info("LearnLst = " + this.LearnLst);
                         this.logger.info("len of LearnList: " + this.LearnLst.length + ".");
                         for (_g = 0, _h = Array.from(this.WordsDict.keys()); _g < _h.length; _g++) {

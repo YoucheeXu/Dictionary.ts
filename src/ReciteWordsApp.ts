@@ -3,7 +3,7 @@ import * as path from "path";
 import * as log4js from "log4js";
 import { BrowserWindow, app, globalShortcut } from 'electron';
 
-import { formatDate, randomArray } from "./utils/utils";
+import { formatDate, randomArray, randomArray2 } from "./utils/utils";
 import { SDictBase } from "./components/SDictBase";
 import { AuidoArchive } from "./components/AuidoArchive";
 import { UsrProgress } from "./components/UsrProgress";
@@ -867,6 +867,7 @@ export class ReciteWordsApp {
                 this.LearnLst.push(word);
             }
         });
+        randomArray2(this.LearnLst);
 
         // this.logger.info("LearnLst = " + this.LearnLst);
         this.logger.info(`len of LearnList: ${this.LearnLst.length}.`);
