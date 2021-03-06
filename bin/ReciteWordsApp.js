@@ -905,7 +905,7 @@ var ReciteWordsApp = /** @class */ (function () {
                             this.TestLst.push(word);
                         }
                         // this.logger.info("TestLst = " + this.TestLst);
-                        this.logger.info("len of TestLst: " + this.TestLst.length + ".");
+                        // this.logger.info(`len of TestLst: ${this.TestLst.length}.`);
                         // this.TestLst = [...new Set(this.TestLst)];	// remove duplicate item
                         // random test list
                         this.TestLst = utils_1.randomArray(this.TestLst);
@@ -929,11 +929,11 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Save_Progress = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, word, _b, _c, word, data, familiar, lastDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, allLen, mapStr, todayStr, i, iterator, r, _h, word, _j, familiar, lastDate, percent, e_1;
+            var _i, _a, word, _b, _c, word, data, familiar, lastDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, allLen, mapStr, todayStr, i, nfnshd, iterator, r, _h, word, _j, familiar, lastDate, percent, e_1;
             return __generator(this, function (_k) {
                 switch (_k.label) {
                     case 0:
-                        this.logger.info("len of this.WordsDict: " + this.WordsDict.size);
+                        console.info("len of this.WordsDict: " + this.WordsDict.size);
                         for (_i = 0, _a = this.TestLst; _i < _a.length; _i++) {
                             word = _a[_i];
                             if (this.WordsDict.has(word)) {
@@ -976,7 +976,7 @@ var ReciteWordsApp = /** @class */ (function () {
                             }
                         }
                         allLen = this.WordsDict.size;
-                        this.logger.info("len of this.WordsDict: " + allLen);
+                        this.logger.info("number of words' familiar will be changed: " + allLen);
                         mapStr = "{";
                         this.WordsDict.forEach(function (_a, word) {
                             var familiar = _a[0], lastDate = _a[1];
@@ -985,7 +985,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         mapStr += "}";
                         console.log("WordsDict = " + mapStr);
                         todayStr = utils_1.formatDate(this.today);
-                        i = 0;
+                        i = 0, nfnshd = 0;
                         iterator = this.WordsDict.entries();
                         _k.label = 1;
                     case 1:
@@ -999,6 +999,9 @@ var ReciteWordsApp = /** @class */ (function () {
                             familiar = -10.0;
                         }
                         familiar = Number(familiar.toFixed(1));
+                        if (familiar >= 10) {
+                            nfnshd++;
+                        }
                         _k.label = 2;
                     case 2:
                         _k.trys.push([2, 4, , 5]);
@@ -1017,7 +1020,8 @@ var ReciteWordsApp = /** @class */ (function () {
                         return [3 /*break*/, 5];
                     case 5: return [3 /*break*/, 1];
                     case 6:
-                        console.log("OK to save progress.");
+                        this.logger.info("finish to receite number of words: " + nfnshd);
+                        // console.log("OK to save progress.");
                         this.win.webContents.send("gui", "modifyValue", "info", "OK to save progress.");
                         return [2 /*return*/];
                 }

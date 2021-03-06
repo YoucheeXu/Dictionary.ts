@@ -876,7 +876,7 @@ export class ReciteWordsApp {
             this.TestLst.push(word);
         }
         // this.logger.info("TestLst = " + this.TestLst);
-        this.logger.info(`len of TestLst: ${this.TestLst.length}.`);
+        // this.logger.info(`len of TestLst: ${this.TestLst.length}.`);
 
         // this.TestLst = [...new Set(this.TestLst)];	// remove duplicate item
 
@@ -901,7 +901,7 @@ export class ReciteWordsApp {
     }
 
     private async Save_Progress() {
-        this.logger.info(`len of this.WordsDict: ${this.WordsDict.size}`);
+        console.info(`len of this.WordsDict: ${this.WordsDict.size}`);
 
         for (let word of this.TestLst) {
             if (this.WordsDict.has(word)) {
@@ -947,7 +947,7 @@ export class ReciteWordsApp {
         }
 
         let allLen = this.WordsDict.size;
-        this.logger.info(`len of this.WordsDict: ${allLen}`);
+        this.logger.info(`number of words' familiar will be changed: ${allLen}`);
         let mapStr = "{";
         this.WordsDict.forEach(([familiar, lastDate], word) => {
             mapStr += `${word}: ${String(familiar)}, `;
@@ -979,7 +979,7 @@ export class ReciteWordsApp {
             }
         });*/
 
-        let i = 0;
+        let i = 0, nfnshd = 0;
         let iterator = this.WordsDict.entries();
         let r: IteratorResult<[string, [number, Date]]>;
         while (r = iterator.next(), !r.done) {
@@ -994,6 +994,11 @@ export class ReciteWordsApp {
             }
 
             familiar = Number(familiar.toFixed(1));
+
+            if (familiar >= 10) {
+                nfnshd++;
+            }
+
             try {
                 await this.usrProgress.UpdateProgress(word, familiar, todayStr);
                 i++;
@@ -1007,7 +1012,8 @@ export class ReciteWordsApp {
             }
         }
 
-        console.log("OK to save progress.");
+        this.logger.info(`finish to receite number of words: ${nfnshd}`);
+        // console.log("OK to save progress.");
         this.win.webContents.send("gui", "modifyValue", "info", `OK to save progress.`);
     }
 
