@@ -647,6 +647,11 @@ var ReciteWordsApp = /** @class */ (function () {
             });
         });
     };
+    // TODO: 
+    ReciteWordsApp.prototype.newLevel = function (usrName, level) {
+        console.log("usr: " + usrName + ", new level: " + level);
+        return false;
+    };
     ReciteWordsApp.prototype.NewUsr = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
             var progressFile, lvlWordsLst, _i, lvlWordsLst_1, word;

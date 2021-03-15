@@ -647,6 +647,12 @@ export class ReciteWordsApp {
         }
     }
 
+    // TODO: 
+    public newLevel(usrName: string, level: string): boolean {
+        console.log(`usr: ${usrName}, new level: ${level}`);
+        return false;
+    }
+
     public async NewUsr(usrName: number, level: string) {
         // TODO: record it in json
         this.bCfgModfied = true;

@@ -24,6 +24,20 @@
             border: 1px solid gray;
         }
 
+        #NewLvlDiag {
+            position: absolute;
+            width: 300px;
+            height: 240px;
+            z-index: 9999;
+            display: none;
+            background-color: white;
+            position: absolute;
+            left: 50%;
+            top: 25%;
+            transform: translate(-50%, -50%);
+            border: 1px solid gray;
+        }
+
         /*.form-group {
             width: 100%;
             float: left;
@@ -255,6 +269,21 @@
         </div>
     </div>
 
+    <div id="NewLvlDiag" class="diag">
+        <div id="SelDiag-title" class="diag-title">
+            <label>新Level</label>
+        </div>
+        <div class="form-group">
+            <label>Level: </label>
+            <select name="level" id="newlvl-select">
+            </select>
+        </div>
+        <div class="wrap4">
+            <button id="newlvlConfirmBtn" class="left btn-action">确定</button>
+            <button id="newCancleBtn" class="right btn-action">取消</button>
+        </div>
+    </div>
+
     <div id="ReciteDiag" class="diag">
         <div id="ReciteDiag-title" class="diag-title">
             <label id="title">学习模式</label>
@@ -367,6 +396,7 @@
         }
 
         // popup select dialog
+        let curUsr = "";
         let studyLearnBtn = document.getElementById("studyLearnBtn");
         studyLearnBtn.onclick = function () {
             ipcRenderer.on('gui', (event, fun, ...paras) => {
@@ -400,7 +430,7 @@
                 // let txt = usrSel.options[usrSel.selectedIndex].value;
                 // console.log("txt: " + txt);
                 let name = usrSel.value;
-                console.log("val: " + name);
+                console.log("user val: " + name);
                 if (name == "more") {
                     // To-Do: 
                 }
@@ -422,10 +452,33 @@
 
             let lvlSel = document.getElementById('lvl-select');
             lvlSel.addEventListener('change', (() => {
-                let lvl = usrSel.value;
-                console.log("val: " + lvl);
+                let lvl = lvlSel.value;
+                console.log("level val: " + lvl);
                 if (lvl == "more") {
-                    // To-Do: 
+                    
+                    curUsr = usrSel.value;
+                    console.log("current user: " + curUsr);
+
+                    displayOrHide('SelDiag', false);
+                    let allLvls = ipcRenderer.sendSync('syncMsg', 'readAllLvls');
+                    console.log("all levels: " + allLvls);
+
+                    let curLvls = usrDict.get(curUsr);
+                    let bMatch = false;
+                    for (let lvl of allLvls) {
+                        for (let curLvl of curLvls){
+                            if (lvl == curLvl){
+                                bMatch = true;
+                                break;
+                            }
+                        }
+                        if (bMatch == true){
+                            bMatch = false;
+                            continue;
+                        }
+                        appendOpt("newlvl-select", lvl);
+                    }
+                    displayOrHide('NewLvlDiag');
                 }
             }));
 
@@ -440,6 +493,34 @@
             if (test_value == true) {
                 // ipc.send('close-main-window');
                 ipcRenderer.send('ReciteWordsApp', 'quit');
+            }
+        }
+
+        // handle with new level dialog
+        let newCancleBtn = document.getElementById("newCancleBtn");
+        newCancleBtn.onclick = function () {
+            let test_value = confirm("你确定要取消吗？");
+            if (test_value == true) {
+                displayOrHide('NewLvlDiag', false);
+                displayOrHide('SelDiag');
+                selIndex('lvl-select', 0);
+            }
+        }
+
+        let newlvlConfirmBtn = document.getElementById("newlvlConfirmBtn");
+        newlvlConfirmBtn.onclick = function () {
+            // let newLvlSel = document.getElementById('newlvl-select');
+            // let newLvl = newLvlSel.value;
+            let newLvl = getSelVal('newlvl-select');
+            console.log('new level: ' + newLvl);
+            let ret = ipcRenderer.sendSync('syncMsg', 'newLevel', curUsr, newLvl);
+            displayOrHide('NewLvlDiag', false);
+            displayOrHide('SelDiag');
+            // option.options[index].setAttribute("selected", true);
+            let lvlSel = document.getElementById('lvl-select');
+            selIndex('lvl-select', 0);
+            if (ret == true) {
+                appendOpt("lvl-select", newLvl);
             }
         }
 
@@ -475,6 +556,7 @@
                 ipcRenderer.send('ReciteWordsApp', 'quit');
             }
         }
+
         let againBtn = document.getElementById('againBtn');
         againBtn.onclick = function () {
             ipcRenderer.send('ReciteWordsApp', 'Play_Again');

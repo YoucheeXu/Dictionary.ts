@@ -95,12 +95,12 @@ function getSelTxt(id) {
     var ele = document.getElementById(id);
     if (ele != null) {
         var selEle = ele;
-        var selIndex = selEle.selectedIndex;
-        if (selIndex < 0) {
+        var selIndex_1 = selEle.selectedIndex;
+        if (selIndex_1 < 0) {
             console.error(id + "is not prepared!");
             return "";
         }
-        return selEle.options[selIndex].text;
+        return selEle.options[selIndex_1].text;
     }
 }
 function getSelVal(id) {
@@ -108,6 +108,16 @@ function getSelVal(id) {
     if (ele != null) {
         var selEle = ele;
         return selEle.value;
+    }
+}
+function selIndex(id, index) {
+    var ele = document.getElementById(id);
+    if (ele != null) {
+        var selEle = ele;
+        selEle.options[index].setAttribute("selected", "selected");
+        var selIndex_2 = selEle.selectedIndex;
+        console.log(selIndex_2);
+        // selIndex = index;
     }
 }
 function clearOptions(id) {

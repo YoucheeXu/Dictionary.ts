@@ -117,6 +117,17 @@ function getSelVal(id: string) {
     }
 }
 
+function selIndex(id: string, index: number) {
+    let ele = document.getElementById(id);
+    if (ele != null) {
+        let selEle = <HTMLSelectElement>ele;
+        selEle.options[index].setAttribute("selected", "selected");
+        let selIndex = selEle.selectedIndex;
+        console.log(selIndex);
+        // selIndex = index;
+    }
+}
+
 function clearOptions(id: string) {
     let ele = document.getElementById(id);
     if (ele != null) {
