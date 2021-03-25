@@ -1,0 +1,1 @@
+python txt2dict.py "TOEFL.txt" "15000.dict" -lvl TOEFL
