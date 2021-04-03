@@ -84,6 +84,28 @@ var UsrProgress = /** @class */ (function () {
             });
         });
     };
+    UsrProgress.prototype.NewTable = function (dictSrc, lvl) {
+        return __awaiter(this, void 0, void 0, function () {
+            var r;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.dataBase = new SQLite_1.SQLite();
+                        return [4 /*yield*/, this.dataBase.Open(dictSrc)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.dataBase.run("CREATE TABLE " + lvl + "(Word text NOT NULL PRIMARY KEY, Familiar REAL, LastDate DATE, NextDate DATE)")];
+                    case 2:
+                        r = _a.sent();
+                        if (r) {
+                            this.level = lvl;
+                            console.log("Table created");
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     UsrProgress.prototype.InsertWord = function (wd) {
         return __awaiter(this, void 0, void 0, function () {
             var entry, sql, r;
@@ -91,12 +113,13 @@ var UsrProgress = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         entry = "'" + wd + "', 0";
-                        sql = "INSERT INTO " + this.level + "(word, familiar) VALUES (" + entry + ")";
+                        sql = "INSERT INTO " + this.level + " (Word, Familiar) VALUES (" + entry + ")";
+                        console.log(sql);
                         return [4 /*yield*/, this.dataBase.run(sql)];
                     case 1:
                         r = _a.sent();
                         if (r) {
-                            console.log("Inserted.");
+                            console.log(wd + " was inserted.");
                         }
                         return [2 /*return*/];
                 }
@@ -245,65 +268,6 @@ var UsrProgress = /** @class */ (function () {
             });
         });
     };
-    /*public async GetWordsLst0(args: any[]) {
-        let wdsLst: string[] = args[0];
-        let level: string = args[1];
-        // let familiar: number = args[-2];
-        let familiar: number;
-        let limit: number;
-        if (args.length == 3) {
-            // (wdsLst, level, familiar);
-            familiar = args[2];
-            let sql = "select word from Words where level = '" + level + "' and familiar = " + String(familiar);
-            await this.dataBase.each(sql, [], (row: any) => {
-                wdsLst.push(row.Word);
-            });
-        }
-        else if (args.length == 4) {
-            // (wdsLst, level, familiar, limit);
-            familiar = args[2];
-            limit = args[3];
-            // let sql = "select word from Words where level = '" + level + "' and familiar <= 0 and familiar >= " + String(familiar) + " limit " + String(limit);
-            let sql = "select word from Words where level = '" + level + "' and familiar = " + String(familiar) + " limit " + String(limit);
-            await this.dataBase.each(sql, [], (row: any) => {
-                wdsLst.push(row.Word);
-            });
-        }
-        else if (args.length == 6) {
-            // (wdsLst, level, lastdate, lastlastdate, familiar, limit);
-            let lastdate = args[2];
-            let lastlastdate = args[3];
-            familiar = args[4];
-            limit = args[5];
-
-            let sql = "select word from Words where level = '" + level + "' and lastdate <= date('" + lastdate + "') and lastdate >= date('" + lastlastdate + "') and familiar < " + String(familiar);
-            sql += " order by familiar limit " + String(limit);
-
-            // this.dataBase.GetWordsLst(wdsLst, where);
-            await this.dataBase.each(sql, [], (row: any) => {
-                wdsLst.push(row.Word);
-            });
-        }
-        else if (args.length == 5) {
-            // (wdsLst, level, lastlastdate, familiar, limit);
-            let lastlastdate = args[2];
-            familiar = args[3];
-            limit = args[4];
-            let sql = "select word from Words where level = '" + level + "' and lastdate <= date('" + lastlastdate + "') and familiar < " + String(familiar);
-            sql += " order by familiar limit " + String(limit);
-
-            // this.dataBase.GetWordsLst(wdsLst, where);
-            await this.dataBase.each(sql, [], (row: any) => {
-                wdsLst.push(row.Word);
-            });
-        }
-        if (wdsLst.length >= 1) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }*/
     UsrProgress.prototype.UpdateProgress = function (word, familiar, today) {
         return __awaiter(this, void 0, void 0, function () {
             var sql;

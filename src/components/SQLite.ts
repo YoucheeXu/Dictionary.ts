@@ -32,6 +32,7 @@ export class SQLite {
         return new Promise((resolve, reject) => {
             _this.db.run(query, (err: Error | null) => {
                 if (err) {
+                    console.error(err.message);
                     reject(err.message);
                 }
                 else {

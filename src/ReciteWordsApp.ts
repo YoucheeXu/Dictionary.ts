@@ -137,28 +137,6 @@ export class ReciteWordsApp {
         return true;
     }
 
-    public readUsrs() {
-        /*this.usrDict.forEach((usrName: string, levels: Array<string>) => {
-            this.logger.info(`User: ${usrName}, Levels: ${levels}`);
-            this.win.webContents.send("gui", "appendList", "usr-select", usrName);
-            for (let lvl of levels){
-
-            }
-        });
-
-        this.win.webContents.send("gui", "appendList", "usr-select", "Add more...");
-        this.win.webContents.send("gui", "appendList", "lvl-select", "Add more...");
-        
-        this.win.webContents.send("gui", "displayOrHide", "SelDiag", true);
-        this.win.webContents.send("gui", "displayOrHide", "bg", true);
-        */
-        return this.usrsDict
-    }
-
-    public readAllLvls() {
-        return this.cfg["DictBase"]["DictBase"]["allLvls"];
-    }
-
     public async Start(bDev: boolean) {
         this.CreateWindow(bDev);
         this.initDict();
@@ -647,10 +625,59 @@ export class ReciteWordsApp {
         }
     }
 
+    public readUsrs() {
+        /*this.usrDict.forEach((usrName: string, levels: Array<string>) => {
+            this.logger.info(`User: ${usrName}, Levels: ${levels}`);
+            this.win.webContents.send("gui", "appendList", "usr-select", usrName);
+            for (let lvl of levels){
+
+            }
+        });
+
+        this.win.webContents.send("gui", "appendList", "usr-select", "Add more...");
+        this.win.webContents.send("gui", "appendList", "lvl-select", "Add more...");
+        
+        this.win.webContents.send("gui", "displayOrHide", "SelDiag", true);
+        this.win.webContents.send("gui", "displayOrHide", "bg", true);
+        */
+        return this.usrsDict
+    }
+
+    public readAllLvls() {
+        return this.cfg["DictBase"]["DictBase"]["allLvls"];
+    }
+
     // TODO: 
-    public newLevel(usrName: string, level: string): boolean {
+    public async newLevel(usrName: string, level: string) {
         console.log(`usr: ${usrName}, new level: ${level}`);
-        return false;
+        for (let usrCfg of this.cfg.Users) {
+            if (usrName == usrCfg.Name) {
+                if (this.usrProgress === undefined) {
+                    this.usrProgress = new UsrProgress();
+                }
+                let progressFile = path.join(__dirname, usrCfg.Progress).replace(/\\/g, '/');
+                await this.usrProgress.NewTable(progressFile, level);
+
+                let lvlWordsLst: string[] = new Array();
+                let ret = await this.dictBase.GetWordsLst(lvlWordsLst, level);
+                if (ret) {
+                    for (let word of lvlWordsLst) {
+                        // console.log("Going to insert: " + word);
+                        await this.usrProgress.InsertWord(word);
+                    }
+                }
+                else {
+                    return Promise.resolve<boolean>(false);
+                }
+
+                let target = usrCfg.Target;
+                target[target.length] = level;
+                this.bCfgModfied = true;
+
+                return Promise.resolve<boolean>(true);
+            }
+        }
+        return Promise.resolve<boolean>(false);
     }
 
     public async NewUsr(usrName: number, level: string) {
@@ -1025,7 +1052,8 @@ export class ReciteWordsApp {
 
     private SaveConfigure(): Promise<string | boolean> {
         return new Promise((resolve, reject) => {
-            fs.writeFile(this.cfgFile, JSON.stringify(this.cfg), { 'flag': 'w' }, (err: any) => {
+            // Indent by 4 spaces
+            fs.writeFile(this.cfgFile, JSON.stringify(this.cfg, null, 4), { 'flag': 'w' }, (err: any) => {
                 if (err) {
                     this.logger.error("Fail to SaveConfigure!");
                     reject("Fail to SaveConfigure!");

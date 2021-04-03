@@ -49,6 +49,7 @@ var SQLite = /** @class */ (function () {
         return new Promise(function (resolve, reject) {
             _this.db.run(query, function (err) {
                 if (err) {
+                    console.error(err.message);
                     reject(err.message);
                 }
                 else {

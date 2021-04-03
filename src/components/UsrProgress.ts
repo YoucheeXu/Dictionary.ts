@@ -28,12 +28,23 @@ export class UsrProgress {
         }
     }
 
+    public async NewTable(dictSrc: string, lvl: string) {
+        this.dataBase = new SQLite();
+        await this.dataBase.Open(dictSrc);
+        let r = await this.dataBase.run(`CREATE TABLE ${lvl}(Word text NOT NULL PRIMARY KEY, Familiar REAL, LastDate DATE, NextDate DATE)`);
+        if (r) {
+            this.level = lvl;
+            console.log("Table created");
+        }
+    }
+
     public async InsertWord(wd: string) {
         let entry = `'${wd}', 0`;
-        let sql = `INSERT INTO ${this.level}(word, familiar) VALUES (${entry})`;
+        let sql = `INSERT INTO ${this.level} (Word, Familiar) VALUES (${entry})`;
+        console.log(sql);
         let r = await this.dataBase.run(sql)
         if (r) {
-            console.log("Inserted.");
+            console.log(wd + " was inserted.");
         }
     }
 
@@ -161,66 +172,6 @@ export class UsrProgress {
             return false;
         }
     }
-
-    /*public async GetWordsLst0(args: any[]) {
-        let wdsLst: string[] = args[0];
-        let level: string = args[1];
-        // let familiar: number = args[-2];
-        let familiar: number;
-        let limit: number;
-        if (args.length == 3) {
-            // (wdsLst, level, familiar);
-            familiar = args[2];
-            let sql = "select word from Words where level = '" + level + "' and familiar = " + String(familiar);
-            await this.dataBase.each(sql, [], (row: any) => {
-                wdsLst.push(row.Word);
-            });
-        }
-        else if (args.length == 4) {
-            // (wdsLst, level, familiar, limit);
-            familiar = args[2];
-            limit = args[3];
-            // let sql = "select word from Words where level = '" + level + "' and familiar <= 0 and familiar >= " + String(familiar) + " limit " + String(limit);
-            let sql = "select word from Words where level = '" + level + "' and familiar = " + String(familiar) + " limit " + String(limit);
-            await this.dataBase.each(sql, [], (row: any) => {
-                wdsLst.push(row.Word);
-            });
-        }
-        else if (args.length == 6) {
-            // (wdsLst, level, lastdate, lastlastdate, familiar, limit);
-            let lastdate = args[2];
-            let lastlastdate = args[3];
-            familiar = args[4];
-            limit = args[5];
-
-            let sql = "select word from Words where level = '" + level + "' and lastdate <= date('" + lastdate + "') and lastdate >= date('" + lastlastdate + "') and familiar < " + String(familiar);
-            sql += " order by familiar limit " + String(limit);
-
-            // this.dataBase.GetWordsLst(wdsLst, where);
-            await this.dataBase.each(sql, [], (row: any) => {
-                wdsLst.push(row.Word);
-            });
-        }
-        else if (args.length == 5) {
-            // (wdsLst, level, lastlastdate, familiar, limit);
-            let lastlastdate = args[2];
-            familiar = args[3];
-            limit = args[4];
-            let sql = "select word from Words where level = '" + level + "' and lastdate <= date('" + lastlastdate + "') and familiar < " + String(familiar);
-            sql += " order by familiar limit " + String(limit);
-
-            // this.dataBase.GetWordsLst(wdsLst, where);
-            await this.dataBase.each(sql, [], (row: any) => {
-                wdsLst.push(row.Word);
-            });
-        }
-        if (wdsLst.length >= 1) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }*/
 
     public async UpdateProgress(word: string, familiar: number, today: string): Promise<boolean> {
         // let entry = `'${String(familiar)}','date("${today}")'`;

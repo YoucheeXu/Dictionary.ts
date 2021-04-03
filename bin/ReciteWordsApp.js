@@ -166,26 +166,6 @@ var ReciteWordsApp = /** @class */ (function () {
         }
         return true;
     };
-    ReciteWordsApp.prototype.readUsrs = function () {
-        /*this.usrDict.forEach((usrName: string, levels: Array<string>) => {
-            this.logger.info(`User: ${usrName}, Levels: ${levels}`);
-            this.win.webContents.send("gui", "appendList", "usr-select", usrName);
-            for (let lvl of levels){
-
-            }
-        });
-
-        this.win.webContents.send("gui", "appendList", "usr-select", "Add more...");
-        this.win.webContents.send("gui", "appendList", "lvl-select", "Add more...");
-        
-        this.win.webContents.send("gui", "displayOrHide", "SelDiag", true);
-        this.win.webContents.send("gui", "displayOrHide", "bg", true);
-        */
-        return this.usrsDict;
-    };
-    ReciteWordsApp.prototype.readAllLvls = function () {
-        return this.cfg["DictBase"]["DictBase"]["allLvls"];
-    };
     ReciteWordsApp.prototype.Start = function (bDev) {
         return __awaiter(this, void 0, void 0, function () {
             var dQueue;
@@ -647,14 +627,84 @@ var ReciteWordsApp = /** @class */ (function () {
             });
         });
     };
+    ReciteWordsApp.prototype.readUsrs = function () {
+        /*this.usrDict.forEach((usrName: string, levels: Array<string>) => {
+            this.logger.info(`User: ${usrName}, Levels: ${levels}`);
+            this.win.webContents.send("gui", "appendList", "usr-select", usrName);
+            for (let lvl of levels){
+
+            }
+        });
+
+        this.win.webContents.send("gui", "appendList", "usr-select", "Add more...");
+        this.win.webContents.send("gui", "appendList", "lvl-select", "Add more...");
+        
+        this.win.webContents.send("gui", "displayOrHide", "SelDiag", true);
+        this.win.webContents.send("gui", "displayOrHide", "bg", true);
+        */
+        return this.usrsDict;
+    };
+    ReciteWordsApp.prototype.readAllLvls = function () {
+        return this.cfg["DictBase"]["DictBase"]["allLvls"];
+    };
     // TODO: 
     ReciteWordsApp.prototype.newLevel = function (usrName, level) {
-        console.log("usr: " + usrName + ", new level: " + level);
-        return false;
+        return __awaiter(this, void 0, void 0, function () {
+            var _i, _a, usrCfg, progressFile, lvlWordsLst, ret, _b, lvlWordsLst_1, word, target;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        console.log("usr: " + usrName + ", new level: " + level);
+                        _i = 0, _a = this.cfg.Users;
+                        _c.label = 1;
+                    case 1:
+                        if (!(_i < _a.length)) return [3 /*break*/, 11];
+                        usrCfg = _a[_i];
+                        if (!(usrName == usrCfg.Name)) return [3 /*break*/, 10];
+                        if (this.usrProgress === undefined) {
+                            this.usrProgress = new UsrProgress_1.UsrProgress();
+                        }
+                        progressFile = path.join(__dirname, usrCfg.Progress).replace(/\\/g, '/');
+                        return [4 /*yield*/, this.usrProgress.NewTable(progressFile, level)];
+                    case 2:
+                        _c.sent();
+                        lvlWordsLst = new Array();
+                        return [4 /*yield*/, this.dictBase.GetWordsLst(lvlWordsLst, level)];
+                    case 3:
+                        ret = _c.sent();
+                        if (!ret) return [3 /*break*/, 8];
+                        _b = 0, lvlWordsLst_1 = lvlWordsLst;
+                        _c.label = 4;
+                    case 4:
+                        if (!(_b < lvlWordsLst_1.length)) return [3 /*break*/, 7];
+                        word = lvlWordsLst_1[_b];
+                        // console.log("Going to insert: " + word);
+                        return [4 /*yield*/, this.usrProgress.InsertWord(word)];
+                    case 5:
+                        // console.log("Going to insert: " + word);
+                        _c.sent();
+                        _c.label = 6;
+                    case 6:
+                        _b++;
+                        return [3 /*break*/, 4];
+                    case 7: return [3 /*break*/, 9];
+                    case 8: return [2 /*return*/, Promise.resolve(false)];
+                    case 9:
+                        target = usrCfg.Target;
+                        target[target.length] = level;
+                        this.bCfgModfied = true;
+                        return [2 /*return*/, Promise.resolve(true)];
+                    case 10:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 11: return [2 /*return*/, Promise.resolve(false)];
+                }
+            });
+        });
     };
     ReciteWordsApp.prototype.NewUsr = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var progressFile, lvlWordsLst, _i, lvlWordsLst_1, word;
+            var progressFile, lvlWordsLst, _i, lvlWordsLst_2, word;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -667,11 +717,11 @@ var ReciteWordsApp = /** @class */ (function () {
                         _a.sent();
                         lvlWordsLst = new Array();
                         this.dictBase.GetWordsLst(lvlWordsLst, level);
-                        _i = 0, lvlWordsLst_1 = lvlWordsLst;
+                        _i = 0, lvlWordsLst_2 = lvlWordsLst;
                         _a.label = 2;
                     case 2:
-                        if (!(_i < lvlWordsLst_1.length)) return [3 /*break*/, 5];
-                        word = lvlWordsLst_1[_i];
+                        if (!(_i < lvlWordsLst_2.length)) return [3 /*break*/, 5];
+                        word = lvlWordsLst_2[_i];
                         return [4 /*yield*/, this.usrProgress.InsertWord(word)];
                     case 3:
                         _a.sent();
@@ -1036,7 +1086,8 @@ var ReciteWordsApp = /** @class */ (function () {
     ReciteWordsApp.prototype.SaveConfigure = function () {
         var _this_1 = this;
         return new Promise(function (resolve, reject) {
-            fs.writeFile(_this_1.cfgFile, JSON.stringify(_this_1.cfg), { 'flag': 'w' }, function (err) {
+            // Indent by 4 spaces
+            fs.writeFile(_this_1.cfgFile, JSON.stringify(_this_1.cfg, null, 4), { 'flag': 'w' }, function (err) {
                 if (err) {
                     _this_1.logger.error("Fail to SaveConfigure!");
                     reject("Fail to SaveConfigure!");

@@ -56,7 +56,7 @@ myApp.Start(typ, bDev).catch((error: any) => {
 //-----------------------------------------------------------------
 //监听与渲染进程的通信
 
-ipcMain.on('syncMsg', (event: any, fun: string, ...paras: string[]) => {
+ipcMain.on('syncMsg', async (event: any, fun: string, ...paras: string[]) => {
     let parasStr: string = paras.join('`, `');
     if (paras.length >= 1) {
         parasStr = '`' + parasStr + '`';
@@ -67,10 +67,11 @@ ipcMain.on('syncMsg', (event: any, fun: string, ...paras: string[]) => {
     // console.log("command: " + command);
 
     try {
-        event.returnValue = eval(command);
+        // event.returnValue = eval(command);
+        event.returnValue = await eval(command);
     }
     catch (e) {
-        console.exception(`Fail to exec ${command} because ${(e as Error).message}`);
+        console.error(`Fail to exec ${command} because ${(e as Error).message}`);
         event.returnValue = 'false';
     }
 });

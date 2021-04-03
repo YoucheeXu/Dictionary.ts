@@ -53,11 +53,14 @@ export class SDictBase extends DictBase {
     public async GetWordsLst(wdsLst: string[], lvl: string): Promise<boolean> {
         let sql = "select Word,Level from Words"
         let r = await this.dict.each(sql, [], function (row: any) {
-            console.log("Word: ", row.ID, " Level: ", row.Level);
+            console.log("Word: ", row.Word, " Level: ", row.Level);
             if (row.Level != null) {
-                let lvlLst = row.Level.split(";");
-                if (lvlLst.has(lvl)) {
-                    wdsLst.push(row.Word);
+                if (row.Level.length > 0) {
+                    let lvlLst = row.Level.split(";");
+                    let index = lvlLst.indexOf(lvl)
+                    if (index != -1) {
+                        wdsLst.push(row.Word);
+                    }
                 }
             }
         });

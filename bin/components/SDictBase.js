@@ -124,11 +124,14 @@ var SDictBase = /** @class */ (function (_super) {
                     case 0:
                         sql = "select Word,Level from Words";
                         return [4 /*yield*/, this.dict.each(sql, [], function (row) {
-                                console.log("Word: ", row.ID, " Level: ", row.Level);
+                                console.log("Word: ", row.Word, " Level: ", row.Level);
                                 if (row.Level != null) {
-                                    var lvlLst = row.Level.split(";");
-                                    if (lvlLst.has(lvl)) {
-                                        wdsLst.push(row.Word);
+                                    if (row.Level.length > 0) {
+                                        var lvlLst = row.Level.split(";");
+                                        var index = lvlLst.indexOf(lvl);
+                                        if (index != -1) {
+                                            wdsLst.push(row.Word);
+                                        }
                                     }
                                 }
                             })];
