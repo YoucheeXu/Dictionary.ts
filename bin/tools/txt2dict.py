@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 import os
+import re
 import sqlite3
 import argparse
 
-class SQLite():
+class SQLiteDict():
 	def Open(self, file):
 
 		if os.path.isfile(file) == False:
@@ -17,14 +18,14 @@ class SQLite():
 		return True
 
 	def UpdateItem(self, word, item, v):
-		command = "update Words set " + item + " = '" + v + "' where Word = '" + word + "'"
-		print(command)
+		command = 'update Words set ' + item + ' = "' + v + '" where Word = "' + word + '"'
+		# print(command)
 		self.__cur.execute(command)
-		self.__conn.commit()
+		# self.__conn.commit()
 
 	def GetItem(self, word, item):
 		try:
-			command = "select " + item + " from Words where Word = '" + word + "'"
+			command = 'select ' + item + ' from Words where Word = "' + word + '"'
 			self.__cur.execute(command)
 			content = self.__cur.fetchone()
 		except:
@@ -34,6 +35,16 @@ class SQLite():
 			return True, content[0]
 		else:
 			return False, None
+
+	def InsertItems(self, word, items, values):
+		# 'INSERT INTO Words (Word, Symbol, Meaing) VALUES("", "apple", "broccoli")'
+		command = 'insert into Words ' + items + ' values ' + values
+		print(command)
+		self.__cur.execute(command)
+		# self.__conn.commit()
+
+	def Commit(self):
+		self.__conn.commit()
 
 
 def main():
@@ -47,26 +58,28 @@ def main():
 
 	level = args.level
 
-	dictPath = os.path.abspath(os.path.join(
-		os.path.abspath(os.path.dirname(__file__)), "..\dict"))
+	dictPath = os.path.abspath(os.path.dirname(__file__))
 	print("dictPath: " + dictPath)
 
-	sqlDict = SQLite()
+	sqlDict = SQLiteDict()
 	sqlDict.Open(os.path.join(dictPath, args.sqlDict))
 
 	txtDict = os.path.join(dictPath, args.txtDict)
 
-	file, ext = os.path.splitext(txtDict)
+	file, _ = os.path.splitext(txtDict)
 	log = os.path.join(dictPath, file + "_log.log")
 
 	with open(txtDict, 'r', encoding='utf8') as fidin:
-		with open(log, "w") as loger:
+		with open(log, "w", encoding='utf8') as loger:
 			tLines = fidin.readlines()
 			for tLine in tLines:
-				strAry = tLine.split("\t")
+				strAry = re.split(r"[\t]+", tLine)
+				# print(strAry)
 				word = strAry[0].strip().strip("*")
+				symbol = strAry[1].strip()[1: -1]
+				meaning = strAry[2].strip()
 				ret, oldLvl = sqlDict.GetItem(word, "Level")
-				if ret:
+				if ret == True:
 					bModified = False
 					if oldLvl == None:
 						print(word + " has no level!")
@@ -82,9 +95,21 @@ def main():
 					if bModified == True:
 						print(word + "'s new level: " + newLvl)
 						sqlDict.UpdateItem(word, "Level", newLvl)
+					ret, existSymbol = sqlDict.GetItem(word, "Symbol")
+					if ret == True:
+						if existSymbol == None:
+							print(word + " has no symbol")
+							print("symbol in txtDict: " + symbol)
+							sqlDict.UpdateItem(word, "Symbol", symbol)
+						else:
+							print(word + "'s symbol: " + existSymbol)
 				else:
-					loger.write(word + "\n")
-					print("miss word: " + word)
+					print(word, symbol, meaning)
+					loger.write(word + "\n" + symbol + "\n" + meaning + "\n\n")
+					sqlDict.InsertItems(word, '(Word, Symbol, Meaning, Level)', '("' + word + '", "' + symbol + '", "' + meaning + '", "' + level + '")')
+					# sqlDict.Commit()
+
+		sqlDict.Commit()
 
 
 if __name__ == '__main__':
