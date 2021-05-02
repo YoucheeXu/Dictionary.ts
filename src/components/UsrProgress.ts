@@ -192,6 +192,88 @@ export class UsrProgress {
         return await this.dataBase.run(sql);
     }
 
+
+    public async GetForgottenWordsLst(wdsLst: string[], today: string) {
+
+        let familiar = 0;
+
+        let sql = `select * from ${this.level} where cast (Familiar as real) < ${String(familiar)}`;
+
+        await this.dataBase.each(sql, [], (row: any) => {
+            wdsLst.push(row);
+        });
+
+        if (wdsLst.length >= 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public async GetOvrDueWordsLst(wdsLst: string[], today: string) {
+
+        let familiar = 10;
+
+        let sql = `select * from ${this.level} where NextDate < date('${today}') and cast (Familiar as real) < ${String(familiar)}`;
+
+        await this.dataBase.each(sql, [], (row: any) => {
+            wdsLst.push(row);
+        });
+
+        if (wdsLst.length >= 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public async GetDueWordsLst(wdsLst: string[], today: string) {
+
+        let familiar = 10;
+
+        let sql = `select * from ${this.level} where NextDate = date('${today}') and cast (Familiar as real) < ${String(familiar)}`;
+
+        await this.dataBase.each(sql, [], (row: any) => {
+            wdsLst.push(row);
+        });
+
+        if (wdsLst.length >= 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public async GetNewWordsLst(wdsLst: string[], limit: number) {
+
+        let familiar = 0;
+
+        let sql = `select * from ${this.level} where LastDate is null and cast (Familiar as real) = ${String(familiar)}`;
+        sql += " limit " + String(limit);
+
+        await this.dataBase.each(sql, [], (row: any) => {
+            wdsLst.push(row);
+        });
+
+        if (wdsLst.length >= 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public async UpdateProgress2(word: string, familiar: number, lstDate: string, nxtDate: string): Promise<boolean> {
+        let sql = `update ${this.level} set Familiar=${familiar}, LastDate=date('${lstDate}'), NextDate=date('${nxtDate}')`;
+        sql += ` where Word='${word}'`;
+        console.info(sql);
+
+        return await this.dataBase.run(sql);
+    }
+
     public async Close() {
         await this.dataBase.close();
     };

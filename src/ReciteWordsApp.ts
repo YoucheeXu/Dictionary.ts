@@ -26,10 +26,11 @@ export class ReciteWordsApp {
     private win: BrowserWindow;
 
     private readonly today = new Date();
+    private timeDayLst: number[] = new Array();
 
     private Mode = "Study Mode";
 
-    private WordsDict = new Map<string, [number, Date]>();
+    private WordsDict = new Map<string, [number, Date, Date]>();
 
     private LearnLst: string[] = new Array();
     private CurLearnLst: string[] = new Array();
@@ -246,8 +247,10 @@ export class ReciteWordsApp {
             if (data != undefined) {
                 let familiar = data[0];
                 let lastDate = data[1];
-                console.log(`LearnWord: ${word}, familiar: ${familiar}, lastDate: ${lastDate}`);
-                this.win.webContents.send("gui", "modifyValue", "info", `Familiar: ${familiar}, LastDate: ${lastDate}`);
+                let nextDate = data[2];
+                let msg = `Familiar: ${familiar}, LastDate: ${formatDate(lastDate)}, NextDate: ${formatDate(nextDate)}`;
+                console.log(`LearnWord: ${word}, ${msg}`);
+                this.win.webContents.send("gui", "modifyValue", "info", msg);
             }
 
             this.Show_Content(word, true);
@@ -310,8 +313,10 @@ export class ReciteWordsApp {
         if (data != undefined) {
             let familiar = data[0];
             let lastDate = data[1];
-            console.log(`LearnWord: ${word}, familiar: ${familiar}, lastDate: ${lastDate}`);
-            this.win.webContents.send("gui", "modifyValue", "info", `Familiar: ${familiar}, LastDate: ${lastDate}`);
+            let nextDate = data[2];
+            let msg = `Familiar: ${familiar}, LastDate: ${formatDate(lastDate)}, NextDate: ${formatDate(nextDate)}`;
+            console.log(`TestWord: ${word}, ${msg}`);
+            this.win.webContents.send("gui", "modifyValue", "info", msg);
         }
 
         this.win.webContents.send("gui", "modifyValue", "word", "");
@@ -357,6 +362,7 @@ export class ReciteWordsApp {
                 }
                 let familiar = data[0];
                 let lastDate = data[1];
+                let nextDate = data[2];
 
                 if (this.ErrCount == 1) {
                     // this.CurTestPos -= 1;
@@ -364,7 +370,7 @@ export class ReciteWordsApp {
                 }
                 else if (this.ErrCount < 3) {
                     // this.CurTestPos -= 1;
-                    this.WordsDict.set(word, [familiar - 1, lastDate]);
+                    this.WordsDict.set(word, [familiar - 1, lastDate, nextDate]);
                 }
                 else {
                     this.Play_MP3(word);
@@ -372,7 +378,7 @@ export class ReciteWordsApp {
                     this.Show_Content(word, true);
 
                     this.win.webContents.send("gui", "modifyValue", "score", "Go on!");
-                    this.WordsDict.set(word, [familiar - 4, lastDate]);
+                    this.WordsDict.set(word, [familiar - 4, lastDate, nextDate]);
                     this.LearnLst.push(word);
                     console.log(word + " has been added in learn list.");
                     this.ErrCount = 0;
@@ -434,9 +440,9 @@ export class ReciteWordsApp {
 
             let data = this.WordsDict.get(word);
             if (data != undefined) {
-                // let familiar = data[0];
-                let lastDate = data[1];
-                this.WordsDict.set(word, [10, lastDate]);
+                let lastDate = this.today;
+                let nextDate = data[2];
+                this.WordsDict.set(word, [10, lastDate, nextDate]);
             }
 
             console.log(`${word} has been chopped!`);
@@ -491,9 +497,9 @@ export class ReciteWordsApp {
 
             let data = this.WordsDict.get(word);
             if (data != undefined) {
-                // let familiar = data[0];
-                let lastDate = data[1];
-                this.WordsDict.set(word, [10, lastDate]);
+                let lastDate = this.today;
+                let nextDate = data[2];
+                this.WordsDict.set(word, [10, lastDate, nextDate]);
             }
             console.log(`${word} has been chopped!`);
             this.win.webContents.send("gui", "modifyValue", "numOfTest", `${this.TestLst.length} words to Test!`);
@@ -536,8 +542,10 @@ export class ReciteWordsApp {
             let data = this.WordsDict.get(word);
             if (data != undefined) {
                 let familiar = data[0];
-                let lastDate = data[1];
-                this.WordsDict.set(word, [familiar - 5, lastDate]);
+                let lastDate = this.today;
+                let nextDate = new Date();
+                // nextDate.setDate(this.today.getDate() - Number(this.timeDayLst[0]));
+                this.WordsDict.set(word, [familiar - 5, lastDate, nextDate]);
             }
 
             this.LearnLst.push(word);
@@ -616,10 +624,14 @@ export class ReciteWordsApp {
             let meaning = txtLst[1];
 
             if (txtLst[2] == null) {
-                return;
+                txtLst[2] = "";
             }
 
-            let txtContent = meaning + "\n" + txtLst[2].replace(/\/r\/n/g, "\n");
+            let sentences = txtLst[2].replace(/\"/g, "\\\"");
+            sentences = sentences.replace(/\'/g, "\\\'");
+            sentences = sentences.replace(/\`/g, "\\\`");
+
+            let txtContent = meaning + "\n" + sentences.replace(/\/r\/n/g, "\n");
             // txtContent = txtContent.replace(/<br>/g, "");
             this.win.webContents.send("gui", "modifyValue", "txtArea", txtContent);
         }
@@ -764,157 +776,91 @@ export class ReciteWordsApp {
         this.logger.info(`Words in learning: ${InProgressCount}`);
 
         // read configuration
-
-        let allLimit = this.cfg.General.Limit;
-        let newWdsLimit = this.cfg.StudyMode.Limit;
-        this.TestCount = this.cfg.TestMode.Times;
-
-        // let wdsLst: string[] = new Array();
-        let wdsLst = new Array();
-        let numOfWords = 0;
-
-        // get forgotten words
-        console.log("starting to get forgotten words");
-        let yesterday = new Date();
-        yesterday.setDate(this.today.getDate() - 1);
-        let yesterdayStr = formatDate(yesterday);
-        wdsLst.length = 0;
-        // "select word from Words where level = 'level' and lastdate <= date('yesterdayStr') and familiar < 0.5 limit allLimit"
-        // if (await this.usrProgress.GetWordsLst([wdsLst, level, yesterdayStr, 0.5, allLimit])) {
-        // if (await this.usrProgress.GetWordsLst([wdsLst, level, yesterdayStr, 0.5, allLimit])) {
-        if (await this.usrProgress.GetWordsLst([wdsLst, yesterdayStr, 0.5, allLimit])) {
-            for (let wd of wdsLst) {
-                this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
-                console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
-            }
-        }
-        this.logger.info(`got ${this.WordsDict.size - numOfWords} forgotten words.`);
-        numOfWords = this.WordsDict.size;
-
-        // get old words;
-        let timeDayLst: string[] = new Array;
         let timeArray = this.cfg["TimeInterval"];
         for (let timeGroup of timeArray) {
             if (timeGroup["Unit"] == "d") {
-                timeDayLst.push(timeGroup["Interval"]);
+                this.timeDayLst.push(timeGroup["Interval"]);
             }
         }
+        let allLimit = this.cfg.General.Limit;
+        let newWdsLimit = this.cfg.StudyMode.Limit;
+        this.TestCount = this.cfg.TestMode.Times;
+        let limit = 0;
 
-        // timeDayLst = timeDayLst.reverse();
-        console.log("timeDayLst = " + timeDayLst);
+        // start get words to recite
 
-        let curTotalLimit = allLimit - this.WordsDict.size;
+        let wdsLst = new Array();
+        let numOfWords = 0;
+        let todayStr = formatDate(this.today);
 
-        let lastlastDateStr = "";
+        // get over due words
+        console.log("starting to get over due words");
+        wdsLst.length = 0;
+        limit = allLimit;
 
-        // get ancient words
-        console.log("starting to get ancient words");
-        let lastlastDate = new Date();
-        if (curTotalLimit > 0) {
-            lastlastDate.setDate(this.today.getDate() - Number(timeDayLst[timeDayLst.length - 1]));
-            lastlastDateStr = formatDate(lastlastDate);
-            wdsLst.length = 0;
-            // "select word from Words where level = 'level' and lastdate <= date('lastlastDateStr') and familiar < 10 limit curTotalLimit"
-            // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, 10, curTotalLimit])) {
-            // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, 10, curTotalLimit])) {
-            if (await this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, 10, curTotalLimit])) {
-                for (let wd of wdsLst) {
-                    this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
-                    console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
-                }
-            }
-        }
-        this.logger.info(`got ${this.WordsDict.size - numOfWords} ancient words.`);
-        numOfWords = this.WordsDict.size;
-
-        // get Ebbinghaus Forgetting Curve words
-        console.log("starting to get Ebbinghaus Forgetting Curve words");
-        for (let i = timeDayLst.length - 1; i >= 0; i--) {
-            let curLimit = allLimit - this.WordsDict.size;
-            if (curLimit > 0) {
-                lastlastDate = new Date();
-                lastlastDate.setDate(this.today.getDate() - Number(timeDayLst[i]));
-                lastlastDateStr = formatDate(lastlastDate);
-                let num = this.WordsDict.size;
-                let bMore = true;
-                while (bMore && curLimit > 0) {
-                    wdsLst.length = 0;
-                    // "select word from Words where level = 'level' and lastdate <= date('lastlastDateStr') and lastdate >= date('lastlastDateStr') and familiar < 10 limit curLimit"
-                    // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
-                    // if (await this.usrProgress.GetWordsLst([wdsLst, level, lastlastDateStr, lastlastDateStr, 10, curLimit])) {
-                    if (await this.usrProgress.GetWordsLst([wdsLst, lastlastDateStr, lastlastDateStr, 10, allLimit])) {
-                        for (let wd of wdsLst) {
-                            this.WordsDict.set(wd.Word, [Number(wd.Familiar), wd.LastDate]);
-                            console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
-                            if (this.WordsDict.size >= allLimit) {
-                                break;
-                            }
-                        }
-                        bMore = (wdsLst.length == curLimit);
-                    }
-                    else {
-                        bMore = false;
-                    }
-                    curLimit = allLimit - this.WordsDict.size;
-                }
-                let dif = this.WordsDict.size - num;
-                if (dif > 0) {
-                    this.logger.info(`got ${dif} on ${timeDayLst[i]} day Ebbinghaus Forgetting Curve words.`);
-                }
-
-                if (curLimit <= 0) {
+        if (await this.usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)) {
+            for (let wd of wdsLst) {
+                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                if (this.WordsDict.size >= limit) {
                     break;
                 }
             }
         }
-        this.logger.info(`got ${this.WordsDict.size - numOfWords} Ebbinghaus Forgetting Curve words.`);
+        this.logger.info(`got ${this.WordsDict.size - numOfWords} over due words.`);
         numOfWords = this.WordsDict.size;
 
-        // get new words list (familiar = 0 and lastDate is null);
-        console.log("starting to get new words.");
-        curTotalLimit = Math.min(allLimit - this.WordsDict.size, newWdsLimit);
-        let totalLimit = curTotalLimit + this.WordsDict.size;
+        // get due words
+        console.log("starting to get due words");
         wdsLst.length = 0;
-        if (curTotalLimit > 0) {
-            // "select word from Words where level = 'level' and familiar = 0"
-            // if (await this.usrProgress.GetWordsLst([wdsLst, level, 0])) {
-            // if (await this.usrProgress.GetWordsLst([wdsLst, level, 0])) {
-            if (await this.usrProgress.GetWordsLst([wdsLst, 0])) {
+        limit = allLimit - this.WordsDict.size;
+
+        if (limit > 0) {
+            if (await this.usrProgress.GetDueWordsLst(wdsLst, todayStr)) {
                 for (let wd of wdsLst) {
-                    this.WordsDict.set(wd.Word, [0, wd.LastDate]);
-                    console.log(`word: ${wd.Word}, familiar: ${wd.Familiar}, date: ${wd.LastDate}`);
-                    if (this.WordsDict.size >= totalLimit) {
+                    this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                    console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                    if (this.WordsDict.size >= limit) {
                         break;
                     }
                 }
             }
         }
-        this.logger.info(`got ${this.WordsDict.size - numOfWords} new words.`);
+        this.logger.info(`got ${this.WordsDict.size - numOfWords} due words.`);
         numOfWords = this.WordsDict.size;
 
-        // this.logger.info("WordsDict = " + String(this.WordsDict));
-        this.logger.info(`len of WordsDict: ${this.WordsDict.size}.`);
+        // get new words
+        console.log("starting to get new words");
+        wdsLst.length = 0;
+        limit = Math.min(allLimit - this.WordsDict.size, newWdsLimit);
 
-        this.WordsDict.forEach(([familiar, lastDate], word) => {
-            if (familiar <= 0) {
+        if (limit > 0) {
+            if (await this.usrProgress.GetNewWordsLst(wdsLst, limit)) {
+                for (let wd of wdsLst) {
+                    this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                    console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                    this.LearnLst.push(wd.Word);
+                }
+            }
+        }
+        this.logger.info(`got ${this.WordsDict.size - numOfWords} new words.`);
+
+        // complement learn list
+        this.WordsDict.forEach(([familiar, lastDate, nextDate], word) => {
+            if (familiar < 0) {
                 this.LearnLst.push(word);
             }
         });
         randomArray2(this.LearnLst);
-
-        // this.logger.info("LearnLst = " + this.LearnLst);
         this.logger.info(`len of LearnList: ${this.LearnLst.length}.`);
 
         for (let word of Array.from(this.WordsDict.keys())) {
             this.TestLst.push(word);
         }
-        // this.logger.info("TestLst = " + this.TestLst);
-        // this.logger.info(`len of TestLst: ${this.TestLst.length}.`);
-
-        // this.TestLst = [...new Set(this.TestLst)];	// remove duplicate item
 
         // random test list
         this.TestLst = randomArray(this.TestLst);
+        this.logger.info(`len of TestList: ${this.TestLst.length}.`);
 
         //this.wordInput['state'] = 'readonly';
 
@@ -922,20 +868,17 @@ export class ReciteWordsApp {
         this.win.webContents.send("gui", "modifyValue", "numOfTest", `${this.TestLst.length} words to Test!`);
 
         if (this.LearnLst.length > 0) {
-            // this.win.webContents.send("gui", "modifyAttr", "forgetBtn", "disabled", true);
             this.win.webContents.send("gui", "DisaOrEnaBtn", "forgetBtn");
             this.GoStudyMode();
         }
         else {
-            // this.win.webContents.send("gui", "modifyAttr", "forgetBtn", "disabled", false);
             this.win.webContents.send("gui", "DisaOrEnaBtn", "forgetBtn", false);
             this.GoTestMode();
         }
     }
 
     private async Save_Progress() {
-        console.info(`len of this.WordsDict: ${this.WordsDict.size}`);
-
+        // remove words which hadn't be recited
         for (let word of this.TestLst) {
             if (this.WordsDict.has(word)) {
                 this.WordsDict.delete(word);
@@ -945,12 +888,12 @@ export class ReciteWordsApp {
         if (this.Mode == "Study Mode") {
             for (let word of this.CurLearnLst) {
                 if (this.WordsDict.has(word)) {
-                    // this.WordsDict.delete(word);
                     let data = this.WordsDict.get(word);
                     if (data != undefined) {
                         let familiar = data[0] - 1;
                         let lastDate = data[1];
-                        this.WordsDict.set(word, [familiar, lastDate]);
+                        let nextDate = data[2];
+                        this.WordsDict.set(word, [familiar, lastDate, nextDate]);
                     }
                 }
             }
@@ -969,54 +912,48 @@ export class ReciteWordsApp {
 
         for (let word of this.LearnLst) {
             if (this.WordsDict.has(word)) {
-                // this.WordsDict.delete(word);
                 let data = this.WordsDict.get(word);
                 if (data != undefined) {
                     let familiar = data[0] - 1;
                     let lastDate = data[1];
-                    this.WordsDict.set(word, [familiar, lastDate]);
+                    let nextDate = data[2];
+                    this.WordsDict.set(word, [familiar, lastDate, nextDate]);
                 }
             }
         }
 
         let allLen = this.WordsDict.size;
         this.logger.info(`number of words' familiar will be changed: ${allLen}`);
+
+        let lastDateStr = "", nexDateStr = "";
         let mapStr = "{";
-        this.WordsDict.forEach(([familiar, lastDate], word) => {
-            mapStr += `${word}: ${String(familiar)}, `;
+        this.WordsDict.forEach(([familiar, lastDate, nextDate], word) => {
+            if (lastDate != null) {
+                lastDateStr = formatDate(lastDate);
+            }
+            else {
+                lastDateStr = "";
+            }
+            if (nextDate != null) {
+                nexDateStr = formatDate(nextDate);
+            }
+            else {
+                nexDateStr = "";
+            }
+
+            mapStr += `${word}: ${String(familiar)}, lastDate: ${lastDateStr}, nextDate: ${nexDateStr};`;
         });
         mapStr += "}";
         console.log("WordsDict = " + mapStr);
 
-        let todayStr = formatDate(this.today);
-
-        /*let _this = this;
-        this.WordsDict.forEach(async function (familiar: number, word: string) {
-            familiar += 1.0;
-        
-            if (familiar > 10) {
-                familiar = 10.0;
-            }
-            else if (familiar < -10) {
-                familiar = -10.0;
-            }
-        
-            familiar = Number(familiar.toFixed(1));
-            try {
-                console.info(`update ${word} familiar: ${familiar}.`)
-                await _this.usrProgress.UpdateProgress(word, familiar, todayStr);
-            }
-            catch (e) {
-                _this.logger.error((e as Error).message);
-                _this.logger.error(e);
-            }
-        });*/
-
-        let i = 0, nfnshd = 0;
+        let i = 0, nFnshd = 0;
         let iterator = this.WordsDict.entries();
-        let r: IteratorResult<[string, [number, Date]]>;
+        let r: IteratorResult<[string, [number, Date, Date]]>;
+        let todayStr = formatDate(this.today);
+        let interval = 0, index = 0;
+        let nextInterval = 0;
         while (r = iterator.next(), !r.done) {
-            let [word, [familiar, lastDate]] = r.value;
+            let [word, [familiar, lastDate, nextDate]] = r.value;
             familiar += 1.0;
 
             if (familiar > 10) {
@@ -1029,11 +966,46 @@ export class ReciteWordsApp {
             familiar = Number(familiar.toFixed(1));
 
             if (familiar >= 10) {
-                nfnshd++;
+                nFnshd++;
             }
 
+            // calc next date
+            if (lastDate != null && nextDate != null) {
+                interval = (nextDate.valueOf() - lastDate.valueOf()) / 1000 / 60 / 60 / 24;
+            }
+            else {
+                interval = 0;
+                index = 0;
+            }
+            if (interval > 0) {
+                if ((nextDate.getFullYear() == this.today.getFullYear()) && (nextDate.getMonth() == this.today.getMonth()) && (nextDate.getDate() == this.today.getDate())) {  // due
+                    index = this.timeDayLst.indexOf(interval)
+                    if (index != -1) {
+                        index++;
+                        if (index >= this.timeDayLst.length) {
+                            index = 0;
+                        }
+                    }
+                    else {
+                        index = 0;
+                    }
+                }
+                else {   // over due
+                    index = 0;
+                }
+            }
+            else {
+                index = 0;
+            }
+            nextInterval = this.timeDayLst[index];
+            nextDate = new Date();
+            // Object.assign(nextDate, this.today);
+            nextDate.setDate(this.today.getDate() + nextInterval);
+            nexDateStr = formatDate(nextDate);
+
             try {
-                await this.usrProgress.UpdateProgress(word, familiar, todayStr);
+                console.log(`${word}: ${String(familiar)}, lastDate: ${todayStr}, nextDate: ${nexDateStr}`);
+                await this.usrProgress.UpdateProgress2(word, familiar, todayStr, nexDateStr);
                 i++;
                 let percent = i / allLen * 100;
                 console.log(`${percent.toFixed(2)}% to save progress.`);
@@ -1045,7 +1017,7 @@ export class ReciteWordsApp {
             }
         }
 
-        this.logger.info(`finish to receite number of words: ${nfnshd}`);
+        this.logger.info(`finish to receite number of words: ${nFnshd}`);
         // console.log("OK to save progress.");
         this.win.webContents.send("gui", "modifyValue", "info", `OK to save progress.`);
     }

@@ -406,7 +406,7 @@
                 }
 
                 let command = `${fun}(${parasStr})`;
-                // console.log('command: ' + command);
+                console.log('command: ' + command);
                 eval(command);
 
                 event.returnValue = 'true';
@@ -455,7 +455,7 @@
                 let lvl = lvlSel.value;
                 console.log("level val: " + lvl);
                 if (lvl == "more") {
-                    
+
                     curUsr = usrSel.value;
                     console.log("current user: " + curUsr);
 
@@ -466,13 +466,13 @@
                     let curLvls = usrDict.get(curUsr);
                     let bMatch = false;
                     for (let lvl of allLvls) {
-                        for (let curLvl of curLvls){
-                            if (lvl == curLvl){
+                        for (let curLvl of curLvls) {
+                            if (lvl == curLvl) {
                                 bMatch = true;
                                 break;
                             }
                         }
-                        if (bMatch == true){
+                        if (bMatch == true) {
                             bMatch = false;
                             continue;
                         }

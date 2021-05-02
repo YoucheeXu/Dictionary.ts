@@ -290,6 +290,118 @@ var UsrProgress = /** @class */ (function () {
             });
         });
     };
+    UsrProgress.prototype.GetForgottenWordsLst = function (wdsLst, today) {
+        return __awaiter(this, void 0, void 0, function () {
+            var familiar, sql;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        familiar = 0;
+                        sql = "select * from " + this.level + " where cast (Familiar as real) < " + String(familiar);
+                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
+                                wdsLst.push(row);
+                            })];
+                    case 1:
+                        _a.sent();
+                        if (wdsLst.length >= 1) {
+                            return [2 /*return*/, true];
+                        }
+                        else {
+                            return [2 /*return*/, false];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UsrProgress.prototype.GetOvrDueWordsLst = function (wdsLst, today) {
+        return __awaiter(this, void 0, void 0, function () {
+            var familiar, sql;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        familiar = 10;
+                        sql = "select * from " + this.level + " where NextDate < date('" + today + "') and cast (Familiar as real) < " + String(familiar);
+                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
+                                wdsLst.push(row);
+                            })];
+                    case 1:
+                        _a.sent();
+                        if (wdsLst.length >= 1) {
+                            return [2 /*return*/, true];
+                        }
+                        else {
+                            return [2 /*return*/, false];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UsrProgress.prototype.GetDueWordsLst = function (wdsLst, today) {
+        return __awaiter(this, void 0, void 0, function () {
+            var familiar, sql;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        familiar = 10;
+                        sql = "select * from " + this.level + " where NextDate = date('" + today + "') and cast (Familiar as real) < " + String(familiar);
+                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
+                                wdsLst.push(row);
+                            })];
+                    case 1:
+                        _a.sent();
+                        if (wdsLst.length >= 1) {
+                            return [2 /*return*/, true];
+                        }
+                        else {
+                            return [2 /*return*/, false];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UsrProgress.prototype.GetNewWordsLst = function (wdsLst, limit) {
+        return __awaiter(this, void 0, void 0, function () {
+            var familiar, sql;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        familiar = 0;
+                        sql = "select * from " + this.level + " where LastDate is null and cast (Familiar as real) = " + String(familiar);
+                        sql += " limit " + String(limit);
+                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
+                                wdsLst.push(row);
+                            })];
+                    case 1:
+                        _a.sent();
+                        if (wdsLst.length >= 1) {
+                            return [2 /*return*/, true];
+                        }
+                        else {
+                            return [2 /*return*/, false];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UsrProgress.prototype.UpdateProgress2 = function (word, familiar, lstDate, nxtDate) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        sql = "update " + this.level + " set Familiar=" + familiar + ", LastDate=date('" + lstDate + "'), NextDate=date('" + nxtDate + "')";
+                        sql += " where Word='" + word + "'";
+                        console.info(sql);
+                        return [4 /*yield*/, this.dataBase.run(sql)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     UsrProgress.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
