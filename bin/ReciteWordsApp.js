@@ -1048,10 +1048,10 @@ var ReciteWordsApp = /** @class */ (function () {
                         _k.label = 2;
                     case 2:
                         _k.trys.push([2, 4, , 5]);
+                        console.log(word + ": " + String(familiar) + ", lastDate: " + todayStr + ", nextDate: " + nexDateStr);
                         return [4 /*yield*/, this.usrProgress.UpdateProgress2(word, familiar, todayStr, nexDateStr)];
                     case 3:
                         _k.sent();
-                        console.log(word + ": " + String(familiar) + ", lastDate: " + todayStr + ", nextDate: " + nexDateStr);
                         i++;
                         percent = i / allLen * 100;
                         console.log(percent.toFixed(2) + "% to save progress.");

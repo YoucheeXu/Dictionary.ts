@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsrProgress = void 0;
+var console_1 = require("console");
 var SQLite_1 = require("./SQLite");
 /*
 To-Do{
@@ -84,13 +85,41 @@ var UsrProgress = /** @class */ (function () {
             });
         });
     };
+    UsrProgress.prototype.ExistTable = function (lvl) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql, ret, num;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        sql = "select count(*) from sqlite_master where type='table' and name = '" + lvl + "'";
+                        return [4 /*yield*/, this.dataBase.get(sql)];
+                    case 1:
+                        ret = _a.sent();
+                        if (ret) {
+                            num = ret['count(*)'];
+                            if (num >= 1) {
+                                return [2 /*return*/, Promise.resolve(true)];
+                            }
+                            else {
+                                return [2 /*return*/, Promise.resolve(false)];
+                            }
+                        }
+                        else {
+                            return [2 /*return*/, Promise.reject(false)];
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     UsrProgress.prototype.NewTable = function (dictSrc, lvl) {
         return __awaiter(this, void 0, void 0, function () {
             var r;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.dataBase = new SQLite_1.SQLite();
+                        // this.dataBase = new SQLite();
+                        console_1.assert(this.dataBase);
                         return [4 /*yield*/, this.dataBase.Open(dictSrc)];
                     case 1:
                         _a.sent();
@@ -100,6 +129,33 @@ var UsrProgress = /** @class */ (function () {
                         if (r) {
                             this.level = lvl;
                             console.log("Table created");
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UsrProgress.prototype.ExistWord = function (wd) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql, ret, num;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        sql = "select count(*) from " + this.level + " where Word = '" + wd + "'";
+                        return [4 /*yield*/, this.dataBase.get(sql)];
+                    case 1:
+                        ret = _a.sent();
+                        if (ret) {
+                            num = ret['count(*)'];
+                            if (num >= 1) {
+                                return [2 /*return*/, Promise.resolve(true)];
+                            }
+                            else {
+                                return [2 /*return*/, Promise.resolve(false)];
+                            }
+                        }
+                        else {
+                            return [2 /*return*/, Promise.reject(false)];
                         }
                         return [2 /*return*/];
                 }

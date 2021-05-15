@@ -65,6 +65,7 @@ var GDictBase_1 = require("./components/GDictBase");
 var SDictBase_1 = require("./components/SDictBase");
 var DownloardQueue_1 = require("./utils/DownloardQueue");
 var globalInterface_1 = require("./utils/globalInterface");
+var UsrProgress_1 = require("./components/UsrProgress");
 var dictApp = /** @class */ (function () {
     function dictApp() {
         this.bCfgModfied = false;
@@ -74,73 +75,91 @@ var dictApp = /** @class */ (function () {
         this.bDebug = false;
     }
     dictApp.prototype.ReadAndConfigure = function () {
-        this.cfgFile = path.join(__dirname, '../bin/Dictionary.json').replace(/\\/g, '/');
-        var _this = this;
-        if (fs.existsSync(this.cfgFile) == false) {
-            console.log(_this.cfgFile + " doesn't exist");
-            return false;
-        }
-        ;
-        this.cfg = JSON.parse(fs.readFileSync(this.cfgFile).toString());
-        // console.log(this.cfg);
-        var common = JSON.parse(JSON.stringify(this.cfg.common));
-        console.log('ver: ' + common.ver);
-        var debugCfg = JSON.parse(JSON.stringify(this.cfg.Debug));
-        this.bDebug = debugCfg.bEnable;
-        var debugLvl = 'INFO';
-        if (this.bDebug == true) {
-            debugLvl = 'DEBUG';
-            var logFile = path.join(__dirname, debugCfg.file);
-            console.log("logFile: " + logFile);
-            log4js.configure({
-                appenders: {
-                    consoleAppender: {
-                        type: 'console',
-                        layout: {
-                            type: 'pattern',
-                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+        return __awaiter(this, void 0, void 0, function () {
+            var _this, common, debugCfg, debugLvl, logFile, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, _a, _b, tabGroup, dictSrc, audioCfg, audioFile, audioFormatCfg, usrCfg, progressFile, missCfg;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        this.cfgFile = path.join(__dirname, '../bin/Dictionary.json').replace(/\\/g, '/');
+                        _this = this;
+                        if (fs.existsSync(this.cfgFile) == false) {
+                            console.log(_this.cfgFile + " doesn't exist");
+                            return [2 /*return*/, false];
                         }
-                    },
-                    dictLogs: {
-                        type: 'file', filename: logFile, category: 'dictionary',
-                        layout: {
-                            type: 'pattern',
-                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                        ;
+                        this.cfg = JSON.parse(fs.readFileSync(this.cfgFile).toString());
+                        common = JSON.parse(JSON.stringify(this.cfg.common));
+                        console.log('ver: ' + common.ver);
+                        debugCfg = JSON.parse(JSON.stringify(this.cfg.Debug));
+                        this.bDebug = debugCfg.bEnable;
+                        debugLvl = 'INFO';
+                        if (this.bDebug == true) {
+                            debugLvl = 'DEBUG';
+                            logFile = path.join(__dirname, debugCfg.file);
+                            console.log("logFile: " + logFile);
+                            log4js.configure({
+                                appenders: {
+                                    consoleAppender: {
+                                        type: 'console',
+                                        layout: {
+                                            type: 'pattern',
+                                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                                        }
+                                    },
+                                    dictLogs: {
+                                        type: 'file', filename: logFile, category: 'dictionary',
+                                        layout: {
+                                            type: 'pattern',
+                                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                                        }
+                                    },
+                                },
+                                categories: {
+                                    default: { appenders: ['consoleAppender', 'dictLogs'], level: debugLvl, enableCallStack: true },
+                                },
+                            });
                         }
-                    },
-                },
-                categories: {
-                    default: { appenders: ['consoleAppender', 'dictLogs'], level: debugLvl, enableCallStack: true },
-                },
+                        this.logger = log4js.getLogger('dictLogs');
+                        agentCfg = JSON.parse(JSON.stringify(this.cfg['Agents']));
+                        bIEAgent = agentCfg.bIEAgent;
+                        activeAgent = agentCfg.activeAgent;
+                        agentInfo = JSON.parse(JSON.stringify(agentCfg['Info']));
+                        for (_i = 0, agentInfo_1 = agentInfo; _i < agentInfo_1.length; _i++) {
+                            agent = agentInfo_1[_i];
+                            this.dictAgent.push({ name: agent.name, ip: agent.ip, program: agent.program });
+                        }
+                        this.dictAgent.push({ name: '', ip: '', program: '' });
+                        this.ActiveAgent(activeAgent);
+                        for (_a = 0, _b = JSON.parse(JSON.stringify(this.cfg['Tabs'])); _a < _b.length; _a++) {
+                            tabGroup = _b[_a];
+                            dictSrc = path.join(__dirname, tabGroup.Dict);
+                            this.AddDictBase(tabGroup.Name, dictSrc, JSON.parse(JSON.stringify(tabGroup['Format'])));
+                        }
+                        audioCfg = JSON.parse(JSON.stringify(this.cfg['Audio']))[0];
+                        audioFile = path.join(__dirname, audioCfg.Audio);
+                        audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
+                        if (audioFormatCfg.Type == 'ZIP') {
+                            this.audioPackage = new AuidoArchive_1.AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.Compress_Level);
+                            // this.AddAudio(name, audioPackage);
+                        }
+                        usrCfg = JSON.parse(JSON.stringify(this.cfg['Users']))[0];
+                        progressFile = path.join(__dirname, usrCfg.Progress).replace(/\\/g, '/');
+                        this.usrProgress = new UsrProgress_1.UsrProgress();
+                        return [4 /*yield*/, this.usrProgress.Open(progressFile, "New")];
+                    case 1:
+                        _c.sent();
+                        return [4 /*yield*/, this.usrProgress.ExistTable("New")];
+                    case 2:
+                        if ((_c.sent()) == false) {
+                            this.usrProgress.NewTable(progressFile, "New");
+                        }
+                        missCfg = JSON.parse(JSON.stringify(this.cfg['Miss']));
+                        this.miss_dict = path.join(__dirname, missCfg.miss_dict);
+                        this.miss_audio = path.join(__dirname, missCfg.miss_audio);
+                        return [2 /*return*/, true];
+                }
             });
-        }
-        this.logger = log4js.getLogger('dictLogs');
-        var agentCfg = JSON.parse(JSON.stringify(this.cfg['Agents']));
-        var bIEAgent = agentCfg.bIEAgent;
-        var activeAgent = agentCfg.activeAgent;
-        var agentInfo = JSON.parse(JSON.stringify(agentCfg['Info']));
-        for (var _i = 0, agentInfo_1 = agentInfo; _i < agentInfo_1.length; _i++) {
-            var agent = agentInfo_1[_i];
-            this.dictAgent.push({ name: agent.name, ip: agent.ip, program: agent.program });
-        }
-        this.dictAgent.push({ name: '', ip: '', program: '' });
-        this.ActiveAgent(activeAgent);
-        for (var _a = 0, _b = JSON.parse(JSON.stringify(this.cfg['Tabs'])); _a < _b.length; _a++) {
-            var tabGroup = _b[_a];
-            var dictSrc = path.join(__dirname, tabGroup.Dict);
-            this.AddDictBase(tabGroup.Name, dictSrc, JSON.parse(JSON.stringify(tabGroup['Format'])));
-        }
-        var audioCfg = JSON.parse(JSON.stringify(this.cfg['Audio']))[0];
-        var audioFile = path.join(__dirname, audioCfg.Audio);
-        var audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
-        if (audioFormatCfg.Type == 'ZIP') {
-            this.audioPackage = new AuidoArchive_1.AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.Compress_Level);
-            // this.AddAudio(name, audioPackage);
-        }
-        var missCfg = JSON.parse(JSON.stringify(this.cfg['Miss']));
-        this.miss_dict = path.join(__dirname, missCfg.miss_dict);
-        this.miss_audio = path.join(__dirname, missCfg.miss_audio);
-        return true;
+        });
     };
     dictApp.prototype.SaveConfigure = function () {
         var _this_1 = this;
@@ -157,42 +176,57 @@ var dictApp = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var dQueue;
             return __generator(this, function (_a) {
-                this.CreateWindow(bDev);
-                dQueue = new DownloardQueue_1.DownloardQueue(this.win);
-                globalInterface_1.globalVar.dQueue = dQueue;
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.CreateWindow(bDev)];
+                    case 1:
+                        _a.sent();
+                        dQueue = new DownloardQueue_1.DownloardQueue(this.win);
+                        globalInterface_1.globalVar.dQueue = dQueue;
+                        return [2 /*return*/];
+                }
             });
         });
     };
     dictApp.prototype.CreateWindow = function (bDev) {
-        var size = { w: 0, h: 0 };
-        if (this.ReadAndConfigure() == false) {
-            return;
-        }
-        this.getWinSize(size);
-        // Create the browser window.
-        this.win = new electron_1.BrowserWindow({
-            icon: path.join(__dirname, 'assets/img/dictApp.ico'),
-            width: size.w,
-            height: size.h,
-            frame: false,
-            webPreferences: {
-                nodeIntegration: true,
-            },
-        });
-        // and load the index.html of the app.
-        this.win.loadURL("file://" + __dirname + "/assets/Dictionary.html");
-        if (bDev) {
-            // Open the DevTools.
-            this.win.webContents.openDevTools({ mode: 'detach' });
-        }
-        // let _this = this;
-        // Emitted when the window is closed.
-        this.win.on('closed', function () {
-            // Dereference the window object, usually you would store windows
-            // in an array if your app supports multi windows, this is the time
-            // when you should delete the corresponding element.
-            // _this.win = null;
+        return __awaiter(this, void 0, void 0, function () {
+            var size;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        size = { w: 0, h: 0 };
+                        return [4 /*yield*/, this.ReadAndConfigure()];
+                    case 1:
+                        if ((_a.sent()) == false) {
+                            return [2 /*return*/];
+                        }
+                        this.getWinSize(size);
+                        // Create the browser window.
+                        this.win = new electron_1.BrowserWindow({
+                            icon: path.join(__dirname, 'assets/img/dictApp.ico'),
+                            width: size.w,
+                            height: size.h,
+                            frame: false,
+                            webPreferences: {
+                                nodeIntegration: true,
+                            },
+                        });
+                        // and load the index.html of the app.
+                        this.win.loadURL("file://" + __dirname + "/assets/Dictionary.html");
+                        if (bDev) {
+                            // Open the DevTools.
+                            this.win.webContents.openDevTools({ mode: 'detach' });
+                        }
+                        // let _this = this;
+                        // Emitted when the window is closed.
+                        this.win.on('closed', function () {
+                            // Dereference the window object, usually you would store windows
+                            // in an array if your app supports multi windows, this is the time
+                            // when you should delete the corresponding element.
+                            // _this.win = null;
+                        });
+                        return [2 /*return*/];
+                }
+            });
         });
     };
     dictApp.prototype.GetWindow = function () {
@@ -488,15 +522,23 @@ var dictApp = /** @class */ (function () {
                         return [4 /*yield*/, this.audioPackage.query_audio(word)];
                     case 2:
                         _b = _c.sent(), retAudio = _b[0], audio = _b[1];
-                        if (retDict <= 0) {
-                            this.logger.error("dict: " + dict);
-                            dict =
-                                "<div class=\"headword\">\n                    <div class=\"text\">" + word + "</div>\n                    <div class=\"phonetic\">" + dict + "</div>\n                </div>";
-                            dict = dict.replace(/[\r\n]/g, "");
-                            if (retDict < 0) {
-                                this.Record2File(this.miss_dict, "Dict of " + word + ": " + dict + "\n");
-                            }
+                        if (!(retDict <= 0)) return [3 /*break*/, 3];
+                        this.logger.error("dict: " + dict);
+                        dict =
+                            "<div class=\"headword\">\n                    <div class=\"text\">" + word + "</div>\n                    <div class=\"phonetic\">" + dict + "</div>\n                </div>";
+                        dict = dict.replace(/[\r\n]/g, "");
+                        if (retDict < 0) {
+                            this.Record2File(this.miss_dict, "Dict of " + word + ": " + dict + "\n");
                         }
+                        return [3 /*break*/, 6];
+                    case 3: return [4 /*yield*/, this.usrProgress.ExistWord(word)];
+                    case 4:
+                        if (!((_c.sent()) == false)) return [3 /*break*/, 6];
+                        return [4 /*yield*/, this.usrProgress.InsertWord(word)];
+                    case 5:
+                        _c.sent();
+                        _c.label = 6;
+                    case 6:
                         if (retAudio <= 0) {
                             this.logger.error("audio: " + audio);
                             this.info(-1, 2, word, audio);
@@ -506,7 +548,7 @@ var dictApp = /** @class */ (function () {
                                 audio = path.join(__dirname, "audio", "WrongHint.mp3");
                             }
                         }
-                        else if (retDict == 1) {
+                        else if (retDict < 0) {
                             this.Record2File(this.miss_audio, "\n");
                         }
                         if (retAudio == 1) {

@@ -1,3 +1,4 @@
+import { assert } from "console";
 import { SQLite } from "./SQLite";
 
 /*
@@ -28,13 +29,51 @@ export class UsrProgress {
         }
     }
 
+    public async ExistTable(lvl: string) {
+
+        let sql = `select count(*) from sqlite_master where type='table' and name = '${lvl}'`;
+        let ret = await this.dataBase.get(sql);
+
+        if (ret) {
+            let num = ret['count(*)'];
+            if (num >= 1) {
+                return Promise.resolve(true);
+            }
+            else {
+                return Promise.resolve(false);
+            }
+        }
+        else {
+            return Promise.reject(false);
+        }
+    }
+
     public async NewTable(dictSrc: string, lvl: string) {
-        this.dataBase = new SQLite();
+        // this.dataBase = new SQLite();
+        assert(this.dataBase);
         await this.dataBase.Open(dictSrc);
         let r = await this.dataBase.run(`CREATE TABLE ${lvl}(Word text NOT NULL PRIMARY KEY, Familiar REAL, LastDate DATE, NextDate DATE)`);
         if (r) {
             this.level = lvl;
             console.log("Table created");
+        }
+    }
+
+    public async ExistWord(wd: string) {
+        let sql = `select count(*) from ${this.level} where Word = '${wd}'`;
+        let ret = await this.dataBase.get(sql);
+
+        if (ret) {
+            let num = ret['count(*)'];
+            if (num >= 1) {
+                return Promise.resolve(true);
+            }
+            else {
+                return Promise.resolve(false);
+            }
+        }
+        else {
+            return Promise.reject(false);
         }
     }
 

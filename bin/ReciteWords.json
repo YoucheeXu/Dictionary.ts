@@ -64,7 +64,8 @@
             "Dict": "dict/15000.dict",
             "allLvls": [
                 "CET6",
-                "TOEFL"
+                "TOEFL",
+				"New"
             ],
             "Format": {
                 "Type": "SQLite"

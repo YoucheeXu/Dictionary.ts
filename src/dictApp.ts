@@ -9,6 +9,8 @@ import { SDictBase } from "./components/SDictBase";
 import { DownloardQueue } from "./utils/DownloardQueue";
 import { globalVar } from "./utils/globalInterface";
 
+import { UsrProgress } from "./components/UsrProgress";
+
 export class dictApp {
     private cfg: any;
     private cfgFile: string;
@@ -24,6 +26,8 @@ export class dictApp {
     private dictBaseDict: any = new Map();
     private dictSysMenu: string[] | any;
 
+    private usrProgress: UsrProgress;
+
     private miss_dict: string;
     private miss_audio: string;
 
@@ -33,7 +37,7 @@ export class dictApp {
         this.bDebug = false;
     }
 
-    public ReadAndConfigure(): boolean {
+    public async ReadAndConfigure(): Promise<boolean> {
         this.cfgFile = path.join(__dirname, '../bin/Dictionary.json').replace(/\\/g, '/');
 
         let _this = this;
@@ -108,6 +112,16 @@ export class dictApp {
             // this.AddAudio(name, audioPackage);
         }
 
+        let usrCfg = JSON.parse(JSON.stringify(this.cfg['Users']))[0];
+        let progressFile = path.join(__dirname, usrCfg.Progress).replace(/\\/g, '/');
+
+        this.usrProgress = new UsrProgress();
+        await this.usrProgress.Open(progressFile, "New");
+
+        if (await this.usrProgress.ExistTable("New") == false) {
+            this.usrProgress.NewTable(progressFile, "New");
+        }
+
         let missCfg = JSON.parse(JSON.stringify(this.cfg['Miss']));
         this.miss_dict = path.join(__dirname, missCfg.miss_dict);
         this.miss_audio = path.join(__dirname, missCfg.miss_audio);
@@ -127,15 +141,15 @@ export class dictApp {
 
     public async Start(bDev: boolean) {
 
-        this.CreateWindow(bDev);
+        await this.CreateWindow(bDev);
 
         let dQueue = new DownloardQueue(this.win);
         globalVar.dQueue = dQueue;
     }
 
-    public CreateWindow(bDev: boolean): void {
+    public async CreateWindow(bDev: boolean) {
         let size = { w: 0, h: 0 };
-        if (this.ReadAndConfigure() == false) {
+        if (await this.ReadAndConfigure() == false) {
             return;
         }
 
@@ -486,6 +500,11 @@ export class dictApp {
                 this.Record2File(this.miss_dict, "Dict of " + word + ": " + dict + "\n");
             }
         }
+        else {
+            if ((await this.usrProgress.ExistWord(word)) == false) {
+                await this.usrProgress.InsertWord(word);
+            }
+        }
 
         if (retAudio <= 0) {
             this.logger.error("audio: " + audio);
@@ -496,7 +515,7 @@ export class dictApp {
                 audio = path.join(__dirname, "audio", "WrongHint.mp3");
             }
         }
-        else if (retDict == 1) {
+        else if (retDict < 0) {
             this.Record2File(this.miss_audio, "\n");
         }
 

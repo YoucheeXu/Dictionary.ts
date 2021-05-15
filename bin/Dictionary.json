@@ -68,6 +68,12 @@
             }
         ]
     },
+    "Users": [
+        {
+            "Name": "XYQ",
+            "Progress": "dict/XYQ.progress"
+        }
+    ],
     "Miss": {
         "miss_dict": "log/miss.txt",
         "miss_audio": "log/miss.txt"
