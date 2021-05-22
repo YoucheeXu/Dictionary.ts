@@ -1,7 +1,8 @@
 # custom
-bin/audio
-bin/dict
-bin/log
+publish/audio
+publish/dict
+publish/log
+dist
 
 # Logs
 logs

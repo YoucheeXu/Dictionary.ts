@@ -67,6 +67,8 @@ electron -v
 
 #### 链接electron
 
+进入到node_modules目录后执行命令
+
 ```bash
 npm link electron
 ```

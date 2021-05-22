@@ -1,7 +1,9 @@
+import * as path from "path";
 import { BrowserWindow, app, dialog } from 'electron';
 import { dictApp } from "./dictApp";
 import { ReciteWordsApp } from "./ReciteWordsApp";
 import { globalVar } from "./utils/globalInterface";
+import { fstat } from "fs";
 
 export class ElectronApp {
     private win: BrowserWindow;
@@ -81,7 +83,18 @@ export class ElectronApp {
             app.quit();
         }
 
-        this.myApp.Start(bDev).catch((error: any) => {
+        let startPath = "";
+        // if (process.env.NODE_ENV === 'development') {
+        if (bDev) {
+            startPath = path.join(process.cwd(), "/publish/");
+        }
+        else {
+            startPath = path.join(process.env.PORTABLE_EXECUTABLE_DIR || process.cwd(), "../");
+        }
+
+        console.log(startPath);
+
+        this.myApp.Start(bDev, startPath).catch((error: any) => {
             console.error(`ElectronApp fatal error: ${error}`);
         });
 

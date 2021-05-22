@@ -1,1 +1,0 @@
-electron . "--type d" "--dev"

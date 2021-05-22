@@ -12,7 +12,8 @@
     },
     "search.exclude": {
         "**/node_modules": true,
-        "/bin": true
+        "/publish": true,
+		"/dist": true
     },
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true

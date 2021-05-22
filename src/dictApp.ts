@@ -37,8 +37,8 @@ export class dictApp {
         this.bDebug = false;
     }
 
-    public async ReadAndConfigure(): Promise<boolean> {
-        this.cfgFile = path.join(__dirname, '../bin/Dictionary.json').replace(/\\/g, '/');
+    public async ReadAndConfigure(startPath: string): Promise<boolean> {
+        this.cfgFile = path.join(startPath, 'Dictionary.json').replace(/\\/g, '/');
 
         let _this = this;
         if (fs.existsSync(this.cfgFile) == false) {
@@ -59,7 +59,7 @@ export class dictApp {
         let debugLvl = 'INFO';
         if (this.bDebug == true) {
             debugLvl = 'DEBUG';
-            let logFile = path.join(__dirname, debugCfg.file);
+            let logFile = path.join(startPath, debugCfg.file);
             console.log("logFile: " + logFile);
 
             log4js.configure({
@@ -99,12 +99,12 @@ export class dictApp {
         this.ActiveAgent(activeAgent);
 
         for (let tabGroup of JSON.parse(JSON.stringify(this.cfg['Tabs']))) {
-            let dictSrc = path.join(__dirname, tabGroup.Dict);
+            let dictSrc = path.join(startPath, tabGroup.Dict);
             this.AddDictBase(tabGroup.Name, dictSrc, JSON.parse(JSON.stringify(tabGroup['Format'])));
         }
 
         let audioCfg = JSON.parse(JSON.stringify(this.cfg['Audio']))[0];
-        let audioFile = path.join(__dirname, audioCfg.Audio);
+        let audioFile = path.join(startPath, audioCfg.Audio);
         let audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
 
         if (audioFormatCfg.Type == 'ZIP') {
@@ -113,18 +113,18 @@ export class dictApp {
         }
 
         let usrCfg = JSON.parse(JSON.stringify(this.cfg['Users']))[0];
-        let progressFile = path.join(__dirname, usrCfg.Progress).replace(/\\/g, '/');
+        let progressFile = path.join(startPath, usrCfg.Progress).replace(/\\/g, '/');
 
         this.usrProgress = new UsrProgress();
         await this.usrProgress.Open(progressFile, "New");
 
         if (await this.usrProgress.ExistTable("New") == false) {
-            this.usrProgress.NewTable(progressFile, "New");
+            this.usrProgress.NewTable("New");
         }
 
         let missCfg = JSON.parse(JSON.stringify(this.cfg['Miss']));
-        this.miss_dict = path.join(__dirname, missCfg.miss_dict);
-        this.miss_audio = path.join(__dirname, missCfg.miss_audio);
+        this.miss_dict = path.join(startPath, missCfg.miss_dict);
+        this.miss_audio = path.join(startPath, missCfg.miss_audio);
 
         return true;
     }
@@ -139,17 +139,17 @@ export class dictApp {
         })
     }
 
-    public async Start(bDev: boolean) {
+    public async Start(bDev: boolean, startPath: string) {
 
-        await this.CreateWindow(bDev);
+        await this.CreateWindow(bDev, startPath);
 
         let dQueue = new DownloardQueue(this.win);
         globalVar.dQueue = dQueue;
     }
 
-    public async CreateWindow(bDev: boolean) {
+    public async CreateWindow(bDev: boolean, startPath: string) {
         let size = { w: 0, h: 0 };
-        if (await this.ReadAndConfigure() == false) {
+        if (await this.ReadAndConfigure(startPath) == false) {
             return;
         }
 
@@ -503,6 +503,9 @@ export class dictApp {
         else {
             if ((await this.usrProgress.ExistWord(word)) == false) {
                 await this.usrProgress.InsertWord(word);
+            }
+            else {
+                console.log(word + " has been marked as new.");
             }
         }
 

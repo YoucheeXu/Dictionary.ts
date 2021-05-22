@@ -19,9 +19,10 @@
       "sourceMaps": true, // 必须为true
       "stopOnEntry": false,   // 自动断点到第一行代码处
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
-      "program": "${workspaceFolder}/bin/main.js", // 这里要写编译后的js文件, 即electron入口
+      "program": "${workspaceFolder}/publish/bin/main.js", // 这里要写编译后的js文件, 即electron入口
       "args": ["--type ?", "--dev"],
-      "outFiles": ["${workspaceFolder}/bin/*.js", "${workspaceFolder}/bin/**/*.js"],
+      "outFiles": ["${workspaceFolder}/publish/bin/*.js",
+	    "${workspaceFolder}/publish/bin/**/*.js"],
       "protocol": "inspector" // 默认的协议是legacy，该协议导致不进入断点
     }
   ]

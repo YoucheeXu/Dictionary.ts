@@ -11,6 +11,7 @@ import { DownloardQueue } from "./utils/DownloardQueue";
 import { globalVar } from "./utils/globalInterface";
 
 export class ReciteWordsApp {
+    private startPath: string;
     private cfgFile: string;
     private cfg: any;
     private bDebug: boolean = false;
@@ -56,7 +57,8 @@ export class ReciteWordsApp {
 
     public ReadAndConfigure(): boolean {
 
-        this.cfgFile = path.join(__dirname, '../bin/ReciteWords.json').replace(/\\/g, '/');
+        this.cfgFile = path.join(this.startPath, 'ReciteWords.json').replace(/\\/g, '/');
+
         let _this = this;
         if (fs.existsSync(_this.cfgFile) == false) {
             console.log(_this.cfgFile + " doesn't exist");
@@ -75,7 +77,7 @@ export class ReciteWordsApp {
         let debugLvl = 'INFO';
         if (this.bDebug == true) {
             debugLvl = 'DEBUG';
-            let logFile = path.join(__dirname, debugCfg.file);
+            let logFile = path.join(this.startPath, debugCfg.file);
             console.log("logFile: " + logFile);
 
             // %r time in toLocaleTimeString format
@@ -138,7 +140,8 @@ export class ReciteWordsApp {
         return true;
     }
 
-    public async Start(bDev: boolean) {
+    public async Start(bDev: boolean, startPath: string) {
+        this.startPath = startPath;
         this.CreateWindow(bDev);
         this.initDict();
 
@@ -182,13 +185,13 @@ export class ReciteWordsApp {
     private initDict() {
         try {
             let dict = this.cfg["DictBase"]["DictBase"]["Dict"];
-            let dictFile = path.join(__dirname, dict).replace(/\\/g, '/');
+            let dictFile = path.join(this.startPath, dict).replace(/\\/g, '/');
             console.log(`dict: ${dictFile}`);
             this.dictBase = new SDictBase(dictFile);
 
             let audioCfg = this.cfg["DictBase"]["AudioBase"];
             let audio = audioCfg["Audio"];
-            let audioFile = path.join(__dirname, audio).replace(/\\/g, '/');
+            let audioFile = path.join(this.startPath, audio).replace(/\\/g, '/');
             console.log(`audio: ${audioFile}`);
             let compression = audioCfg["Format"]["Compression"];
             let compressLevel = audioCfg["Format"]["Compress Level"];
@@ -598,7 +601,7 @@ export class ReciteWordsApp {
             [retAudio, audioFile] = await this.audioBase.query_audio(word);
             if (retAudio <= 0) {
                 this.logger.error(audioFile);
-                audioFile = path.join(__dirname, "audio", "WrongHint.mp3");
+                audioFile = path.join(this.startPath, "audio", "WrongHint.mp3");
                 this.win.webContents.send("gui", "loadAndPlayAudio", audioFile.replace(/\\/g, '/'));
                 this.curWord = word;
                 return false;
@@ -667,9 +670,11 @@ export class ReciteWordsApp {
                 if (this.usrProgress === undefined) {
                     this.usrProgress = new UsrProgress();
                 }
-                let progressFile = path.join(__dirname, usrCfg.Progress).replace(/\\/g, '/');
-                await this.usrProgress.NewTable(progressFile, level);
-
+                let progressFile = path.join(this.startPath, usrCfg.Progress).replace(/\\/g, '/');
+                await this.usrProgress.Open(progressFile, level);
+                if (await this.usrProgress.ExistTable(level) == false) {
+                    this.usrProgress.NewTable(level);
+                }
                 let lvlWordsLst: string[] = new Array();
                 let ret = await this.dictBase.GetWordsLst(lvlWordsLst, level);
                 if (ret) {
@@ -698,7 +703,7 @@ export class ReciteWordsApp {
 
         this.usrProgress = new UsrProgress();
         // dict/XYQ.progress
-        let progressFile = path.join(__dirname, "dict", "usrName" + ".progress").replace(/\\/g, '/');
+        let progressFile = path.join(this.startPath, "dict", "usrName" + ".progress").replace(/\\/g, '/');
         await this.usrProgress.New(progressFile, level);
 
         let lvlWordsLst: string[] = new Array();
@@ -730,7 +735,7 @@ export class ReciteWordsApp {
             if (usrName == usrCfg.Name) {
                 this.logger.info(`selectUser: ${usrName}, Level: ${level}`);
                 let progress = usrCfg.Progress;
-                let progressFile = path.join(__dirname, progress).replace(/\\/g, '/');
+                let progressFile = path.join(this.startPath, progress).replace(/\\/g, '/');
                 this.logger.info("progress: ", progressFile);
                 if (this.usrProgress === undefined) {
                     this.usrProgress = new UsrProgress();

@@ -48,10 +48,7 @@ export class UsrProgress {
         }
     }
 
-    public async NewTable(dictSrc: string, lvl: string) {
-        // this.dataBase = new SQLite();
-        assert(this.dataBase);
-        await this.dataBase.Open(dictSrc);
+    public async NewTable(lvl: string) {
         let r = await this.dataBase.run(`CREATE TABLE ${lvl}(Word text NOT NULL PRIMARY KEY, Familiar REAL, LastDate DATE, NextDate DATE)`);
         if (r) {
             this.level = lvl;

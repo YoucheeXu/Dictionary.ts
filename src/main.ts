@@ -12,7 +12,7 @@ import { ElectronApp } from "./ElectronApp";
 // const globalAny: any = global;
 
 globalVar.argvs = process.argv;
-console.log('params: ', globalVar.argvs)
+// console.log('params: ', globalVar.argvs)
 
 let typ = "";
 
@@ -21,7 +21,7 @@ let typIndex = -1;
 for (let argv of globalVar.argvs) {
     typIndex = argv.indexOf("--type ");
     if (typIndex >= 0) {
-        console.log(argv);
+        // console.log(argv);
         typ = argv.substring(7);
         break;
     }
