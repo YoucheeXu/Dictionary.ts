@@ -93,10 +93,6 @@ tsc -v
 cnpm install
 ```
 
-## 启动
-
-运行“Dictionary.cmd”或“ReciteWords.cmd”启动相应功能
-
 ## 格式说明
 
 软件运行需要相关字典文件，由于字典文件受版权保护，所以无法提供。以下只是字典格式说明
@@ -131,10 +127,12 @@ Level内容如”CET4“或”CET6;TOFEL“等
 位于 ./bin/dict，该文件为sqlite格式。里面包含以相应Level命名的表格用来记录用户背单词的进度，格式如下：
 
 ```sqlite
-CREATE TABLE [CET6](
-    [Word] CHAR(255) CONSTRAINT [PrimaryKey] PRIMARY KEY, 
-    [Familiar] REAL, 
-    [LastDate] DATE);
+CREATE TABLE ${Level}(
+    Word text NOT NULL PRIMARY KEY,
+    Familiar REAL,
+    LastDate DATE,
+    NextDate DATE
+);
 ```
 
-其中Familiar用于记录用户对单词的熟练程度；LastDate用于记录用户上次背诵该单词的时间。
+其中Familiar用于记录用户对单词的熟练程度；LastDate用于记录用户上次背诵该单词的时间；NextDate用于记录根据遗忘曲线，下次需要复习单词的时间。

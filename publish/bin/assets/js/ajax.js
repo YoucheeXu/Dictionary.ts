@@ -23,6 +23,7 @@ function load_word(word, audio) {
         '							Your browser does not support the audio tag.\n' +
         '						</audio>\n' +
         '					</div>\n' +
+		"" +
         "					<ul class = 'stars'>\n" +
         '						<li>★</li>\n' +
         '						<li>★</li>\n' +

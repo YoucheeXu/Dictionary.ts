@@ -1,8 +1,8 @@
 function load_starts(n) {
-    //为星星设置hover效果
+    // 为星星设置hover效果
     let isClicked = false;
     let beforeClickedIndex = -1;
-    let clickNum = 0; //点击同一颗星次数
+    let clickNum = 0; // 点击同一颗星次数
 
     for (let i = 1; i <= n; i++) {
         $('.stars li:nth-child(' + i + ')').css('color', '#F0AD4E');

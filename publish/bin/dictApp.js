@@ -351,8 +351,9 @@ var dictApp = /** @class */ (function () {
                 this.Close();
                 electron_1.app.quit(); // 退出程序
                 break;
-            // case "btn_min":
-            // 	break;
+            case "btn_min":
+                this.win.minimize();
+                break;
             case 'btn_prev':
                 this.QueryPrev();
                 break;
@@ -578,11 +579,8 @@ var dictApp = /** @class */ (function () {
         }
     };
     dictApp.prototype.TopMostOrNot = function () {
-        throw new Error('Method not implemented.');
-        /*
-        this.bTop = !this.bTop;
-        this.window.TopMostOrNot(this.bTop);
-        */
+        var bTop = this.win.isAlwaysOnTop();
+        this.win.setAlwaysOnTop(!bTop);
     };
     dictApp.prototype.OnTextChanged = function (word) {
         return __awaiter(this, void 0, void 0, function () {

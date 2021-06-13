@@ -309,8 +309,9 @@ export class dictApp {
                 this.Close();
                 app.quit(); // 退出程序
                 break;
-            // case "btn_min":
-            // 	break;
+            case "btn_min":
+				this.win.minimize();
+            	break;
             case 'btn_prev':
                 this.QueryPrev();
                 break;
@@ -547,11 +548,8 @@ export class dictApp {
     }
 
     public TopMostOrNot(): void {
-        throw new Error('Method not implemented.');
-        /*
-        this.bTop = !this.bTop;
-        this.window.TopMostOrNot(this.bTop);
-        */
+		var bTop = this.win.isAlwaysOnTop();
+		this.win.setAlwaysOnTop(!bTop);
     }
 
     public async OnTextChanged(word: string): Promise<boolean> {
