@@ -175,6 +175,32 @@ var UsrProgress = /** @class */ (function () {
             });
         });
     };
+    UsrProgress.prototype.DelWord = function (wd) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql, r, e_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        sql = "DELETE FROM " + this.level + " WHERE Word='" + wd + "'";
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this.dataBase.run(sql)];
+                    case 2:
+                        r = _a.sent();
+                        if (r) {
+                            console.log(wd + " was deleted.");
+                        }
+                        return [3 /*break*/, 4];
+                    case 3:
+                        e_1 = _a.sent();
+                        console.log(e_1);
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
     UsrProgress.prototype.GetItem = function (word, item) {
         return __awaiter(this, void 0, void 0, function () {
             var sql, ret, anything;

@@ -1,54 +1,71 @@
-// $(document).ready(function () {
-$(function () {
-    // JQuery code to be added in here.
-    //alert('doc ready')
-    //norm_search();
-    //ajax_search();
-    //$('#search_box').focus();
-    //google_search();
-    //alert('\x26quot;');
-});
-
-function load_word(word, audio) {
+function load_word(word, audio, level) {
     let html =
-        "\n					<div class = 'text'>" +
-        word +
-        '</div>\n' +
-        "					<div class = 'sound' id = 'Player'>\n" +
-        "						<button class = 'jp-play' id = 'playpause' title = 'Play'></button>\n" +
-        "						<audio autoplay = 'autoplay' id = 'webAudio'>\n" +
-        '							<source src = ' +
-        audio +
-        " type = 'audio/mpeg'>\n" +
-        '							Your browser does not support the audio tag.\n' +
-        '						</audio>\n' +
-        '					</div>\n' +
-		"" +
-        "					<ul class = 'stars'>\n" +
-        '						<li>★</li>\n' +
-        '						<li>★</li>\n' +
-        '						<li>★</li>\n' +
-        '						<li>★</li>\n' +
-        '						<li>★</li>\n' +
-        '					</ul>\n				';
+        `					<div class = "text">${word}</div>\n` +
+        `					<div class = "sound" id = "Player">\n` +
+        `						<button class = "jp-play" id = "playpause" title = "Play"></button>\n` +
+        `						<audio autoplay = "autoplay" id = "webAudio">\n` +
+        `							<source src = ${audio} type = "audio/mpeg">\n` +
+        `							Your browser does not support the audio tag.\n` +
+        `						</audio>\n` +
+        `					</div>\n` +
+        `					<div class = "newMmark">NEW</div>\n` +
+        `					<div class = "level">${level}</div>\n` +
+        `					<ul class = "stars">\n` +
+        `						<li>★</li>\n` +
+        `						<li>★</li>\n` +
+        `						<li>★</li>\n` +
+        `						<li>★</li>\n` +
+        `						<li>★</li>\n` +
+        `					</ul>\n`;
     return html;
 }
 
-function dictJson(word, tabId, dict, audio) {
+function load_new(bNew, callback_setNew) {
+    mark_new(bNew);
+
+    console.log(typeof callback_setNew);
+    let bNewBefore = bNew === 'true';
+
+    $('.newMmark').on('click', function () {
+        if (bNewBefore) {
+            $('.newMmark').css('color', 'Gainsboro');
+            $('.newMmark').css('font-weight', 'normal');
+            callback_setNew(false);
+        } else {
+            $('.newMmark').css('color', 'Black');
+            $('.newMmark').css('font-weight', 'bold');
+            callback_setNew(true);
+        }
+
+        bNewBefore = !bNewBefore;
+    });
+}
+
+function mark_new(bNew) {
+    if (bNew === 'true') {
+        $('.newMmark').css('color', 'Black');
+        $('.newMmark').css('font-weight', 'bold');
+    } else {
+        $('.newMmark').css('color', 'Gainsboro');
+        $('.newMmark').css('font-weight', 'normal');
+    }
+}
+
+function dictJson(word, tabId, dict, audio, bNew, level, nStars) {
     if ($('#panel1 first').html() == 'false') {
         return;
     }
     try {
-        // let obj = eval("(" + dict + ")");
         let obj = JSON.parse(dict);
         let tabAlign = '\t\t\t\t\t\t\t';
         let display = '\r\n' + process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
-        // log("info", display, false);
-        // $('#panel1 p').html(display);
-        // log("info", display, false);
+
         $('#' + tabId + ' p').html(display);
-        $('.Word').html(load_word(word, audio));
-        load_starts(1);
+        $('.Word').html(load_word(word, audio, level));
+        load_new(bNew, function (bSetNew) {
+            ipcRenderer.send('dictApp', 'markNew', word, bSetNew);
+        });
+        load_starts(nStars);
         loadPlayer();
     } catch (error) {
         log('error', error, true);
@@ -57,19 +74,19 @@ function dictJson(word, tabId, dict, audio) {
     $('#panel1 first').html('false');
 }
 
-function dictHtml(word, tabId, dict, audio) {
+function dictHtml(word, tabId, dict, audio, bNew, level, nStars) {
     if ($('#panel1 first').html() == 'false') {
         return;
     }
-    // log("info", word, false);
-    // log("info", tabId, false);
     try {
         let display = dict;
         $('#' + tabId + ' p').html(display);
-        $('.Word').html(load_word(word, audio));
-        load_starts(2);
+        $('.Word').html(load_word(word, audio, level));
+        load_new(bNew, function (bSetNew) {
+            ipcRenderer.send('dictApp', 'markNew', word, bSetNew);
+        });
+        load_starts(nStars);
         loadPlayer();
-        // log("info", "dictHtml OK", false);
     } catch (error) {
         log('error', error, true);
     }
@@ -310,8 +327,7 @@ function wordnet_search() {
     /*$.getJSON(curl, function(data){
 	  console.log(data.title); // Logs "jQuery Howto";
 	alert('getJSON');});
-	
-	
+
 	$.ajax({
 	  type:     "GET",
 	  url:      "https://graph.facebook.com/10150232496792613",
@@ -397,7 +413,8 @@ function googleenglish_search() {
     //translate(word);
 }
 
-$('#likes').click(function () {
+// $('#likes').click(function () {
+$('#likes').on('click', () => {
     let catid;
     catid = $(this).attr('data-catid');
     // alert("I am an alert box!");
@@ -413,7 +430,8 @@ $('#likes').click(function () {
     );
 });
 
-$('#suggestion').keyup(function () {
+// $('#suggestion').keyup(function () {
+$('#suggestion').on('keyup', () => {
     let query;
     query = $(this).val();
     $.get(

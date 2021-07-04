@@ -310,8 +310,8 @@ export class dictApp {
                 app.quit(); // 退出程序
                 break;
             case "btn_min":
-				this.win.minimize();
-            	break;
+                this.win.minimize();
+                break;
             case 'btn_prev':
                 this.QueryPrev();
                 break;
@@ -485,6 +485,10 @@ export class dictApp {
         let retAudio = -1;
         let audio = "";
 
+        let bNew = false;
+        let level = 'CET6 TOEFL';
+        let nStars = 3;
+
         [retDict, dict] = await this.curDictBase.query_word(word);
         [retAudio, audio] = await this.audioPackage.query_audio(word);
 
@@ -503,10 +507,16 @@ export class dictApp {
         }
         else {
             if ((await this.usrProgress.ExistWord(word)) == false) {
-                await this.usrProgress.InsertWord(word);
+                this.usrProgress.InsertWord(word).then(() => {
+                    console.log(word + " has been marked as new.");
+                    this.win.webContents.send("QueryWord", "mark_new", true);
+                });
+
+                bNew = false;
             }
             else {
                 console.log(word + " has been marked as new.");
+                bNew = true;
             }
         }
 
@@ -529,7 +539,8 @@ export class dictApp {
         }
 
         audio = audio.replace(/\\/g, "/");
-        this.win.webContents.send("QueryWord", this.dictParseFun, word, this.dictId, dict, audio);
+
+        this.win.webContents.send("QueryWord", this.dictParseFun, word, this.dictId, dict, audio, bNew, level, nStars);
 
         // this.lastWord = word;
     }
@@ -547,9 +558,24 @@ export class dictApp {
         }
     }
 
+    public markNew(word: string, bNew: string): void {
+        if (bNew === 'true') {
+            this.usrProgress.InsertWord(word).then(() => {
+                console.log(word + " has been marked as new.");
+                this.win.webContents.send("QueryWord", "mark_new", true);
+            });
+        }
+        else {
+            this.usrProgress.DelWord(word).then(() => {
+                console.log(word + " has been removed mark of new.");
+                this.win.webContents.send("QueryWord", "mark_new", false);
+            });
+        }
+    }
+
     public TopMostOrNot(): void {
-		var bTop = this.win.isAlwaysOnTop();
-		this.win.setAlwaysOnTop(!bTop);
+        var bTop = this.win.isAlwaysOnTop();
+        this.win.setAlwaysOnTop(!bTop);
     }
 
     public async OnTextChanged(word: string): Promise<boolean> {

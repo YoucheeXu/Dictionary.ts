@@ -84,6 +84,18 @@ export class UsrProgress {
         }
     }
 
+    public async DelWord(wd: string) {
+        let sql = `DELETE FROM ${this.level} WHERE Word='${wd}'`;
+        try {
+            let r = await this.dataBase.run(sql)
+            if (r) {
+                console.log(wd + " was deleted.");
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
     public async GetItem(word: string, item: string): Promise<any> {
         // let sql = "select " + item + " from Words where word = '" + word + "'";
         let sql = `select ${item} from ${this.level} where Word = '${word}'`;

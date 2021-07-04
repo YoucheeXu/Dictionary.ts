@@ -9,15 +9,34 @@
 	padding-left:20px;
 }
 
-#content{
+/* #content{
 	
-}
+} */
 
 .Word >.text{
 	color: #0000FF;
     /*text-transform:capitalize;*/
 	margin:10px auto 20px 0px;
     font-size: 25pt;
+    font-weight: bold;
+}
+
+.Word >.newMmark{
+	color: Gainsboro;
+    margin:0px 0px 0px 5px;
+	vertical-align: middle;
+    font-size: 15pt;
+    font-weight: normal;
+    display: inline-block;
+	display: inline;
+}
+
+.Word >.level{
+	color: #ff0080;
+    position: absolute;
+    top: 10px;
+    right: 150px;
+    font-size: 15pt;
     font-weight: bold;
 }
 
@@ -98,12 +117,12 @@
     font-weight:normal;
 }
 
-.meaning>.related>.text{
-    /*margin:0px auto auto 20px;
+/* .meaning>.related>.text{
+    margin:0px auto auto 20px;
     display: list-item;
     list-style-type: square;
-    list-style:decimal*/
-}
+    list-style:decimal
+} */
 
 .example,.meaning{
     display: list-item;

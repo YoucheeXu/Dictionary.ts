@@ -480,8 +480,9 @@ var dictApp = /** @class */ (function () {
     dictApp.prototype.QueryWord = function (word, nDirect) {
         if (nDirect === void 0) { nDirect = 0; }
         return __awaiter(this, void 0, void 0, function () {
-            var retDict, dict, retAudio, audio;
+            var retDict, dict, retAudio, audio, bNew, level, nStars;
             var _a, _b;
+            var _this_1 = this;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -517,6 +518,9 @@ var dictApp = /** @class */ (function () {
                         dict = "";
                         retAudio = -1;
                         audio = "";
+                        bNew = false;
+                        level = 'CET6 TOEFL';
+                        nStars = 3;
                         return [4 /*yield*/, this.curDictBase.query_word(word)];
                     case 1:
                         _a = _c.sent(), retDict = _a[0], dict = _a[1];
@@ -531,18 +535,22 @@ var dictApp = /** @class */ (function () {
                         if (retDict < 0) {
                             this.Record2File(this.miss_dict, "Dict of " + word + ": " + dict + "\n");
                         }
-                        return [3 /*break*/, 7];
+                        return [3 /*break*/, 5];
                     case 3: return [4 /*yield*/, this.usrProgress.ExistWord(word)];
                     case 4:
-                        if (!((_c.sent()) == false)) return [3 /*break*/, 6];
-                        return [4 /*yield*/, this.usrProgress.InsertWord(word)];
+                        if ((_c.sent()) == false) {
+                            this.usrProgress.InsertWord(word).then(function () {
+                                console.log(word + " has been marked as new.");
+                                _this_1.win.webContents.send("QueryWord", "mark_new", true);
+                            });
+                            bNew = false;
+                        }
+                        else {
+                            console.log(word + " has been marked as new.");
+                            bNew = true;
+                        }
+                        _c.label = 5;
                     case 5:
-                        _c.sent();
-                        return [3 /*break*/, 7];
-                    case 6:
-                        console.log(word + " has been marked as new.");
-                        _c.label = 7;
-                    case 7:
                         if (retAudio <= 0) {
                             this.logger.error("audio: " + audio);
                             this.info(-1, 2, word, audio);
@@ -560,7 +568,7 @@ var dictApp = /** @class */ (function () {
                             this.info(0, 2, "", "");
                         }
                         audio = audio.replace(/\\/g, "/");
-                        this.win.webContents.send("QueryWord", this.dictParseFun, word, this.dictId, dict, audio);
+                        this.win.webContents.send("QueryWord", this.dictParseFun, word, this.dictId, dict, audio, bNew, level, nStars);
                         return [2 /*return*/];
                 }
             });
@@ -576,6 +584,21 @@ var dictApp = /** @class */ (function () {
         catch (e) {
             this.logger.error("wrong mp3: " + audio);
             this.logger.error(e.message);
+        }
+    };
+    dictApp.prototype.markNew = function (word, bNew) {
+        var _this_1 = this;
+        if (bNew === 'true') {
+            this.usrProgress.InsertWord(word).then(function () {
+                console.log(word + " has been marked as new.");
+                _this_1.win.webContents.send("QueryWord", "mark_new", true);
+            });
+        }
+        else {
+            this.usrProgress.DelWord(word).then(function () {
+                console.log(word + " has been removed mark of new.");
+                _this_1.win.webContents.send("QueryWord", "mark_new", false);
+            });
         }
     };
     dictApp.prototype.TopMostOrNot = function () {
