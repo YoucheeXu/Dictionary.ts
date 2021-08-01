@@ -90,7 +90,7 @@ ipcMain.on('dictApp', (event: any, fun: string, ...paras: string[]) => {
         eval(command);
     }
     catch (e) {
-        console.exception(`Fail to exec ${command} because ${(e as Error).message}`);
+        console.error(`Fail to exec ${command} because ${(e as Error).message}`);
     }
 
     event.returnValue = 'true';
@@ -110,7 +110,7 @@ ipcMain.on('ReciteWordsApp', (event: any, fun: string, ...paras: string[]) => {
         eval(command);
     }
     catch (e) {
-        console.exception(`Fail to exec ${command} because ${(e as Error).message}`);
+        console.error(`Fail to exec ${command} because ${(e as Error).message}`);
     }
 
     // asynchronous-reply

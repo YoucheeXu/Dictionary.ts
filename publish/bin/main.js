@@ -132,7 +132,7 @@ electron_1.ipcMain.on('dictApp', function (event, fun) {
         eval(command);
     }
     catch (e) {
-        console.exception("Fail to exec " + command + " because " + e.message);
+        console.error("Fail to exec " + command + " because " + e.message);
     }
     event.returnValue = 'true';
 });
@@ -152,7 +152,7 @@ electron_1.ipcMain.on('ReciteWordsApp', function (event, fun) {
         eval(command);
     }
     catch (e) {
-        console.exception("Fail to exec " + command + " because " + e.message);
+        console.error("Fail to exec " + command + " because " + e.message);
     }
     // asynchronous-reply
     // event.reply('log', 'pong');

@@ -253,24 +253,36 @@ $(':button').on('click', function () {
     }
 });
 
+let lstWordLen = 0;
+
 $(function () {
     // $('#word_input').bind('keyup', function (event) {
     $('#word_input').on('keyup', function (event) {
-        if (event.keyCode == '13') {
-            //return key
-            // alert('你输入的内容为：' + $('#word_input').val());
+        let inputChar = event.keyCode;
+        if (inputChar == '13') {
+            // return/Enter key
             hide_words_list();
             query_word();
         } else {
-            let word = $('#word_input').val();
-            // get current tabRef
+            let rawWord = $('#word_input').val();
+            let rawWordLen = rawWord.length;
+            if(lstWordLen == rawWordLen){
+                return;
+            }
+            let word = rawWord.replace(/[^\w -]/g, '');
+            let wordLen = word.length;
+            if (wordLen != rawWordLen) {
+                modifyValue('word_input', word);
+                return;
+            }
 
-            // $('#panel1 p').html('你输入的内容为：' + word);
-            // tabRef = $(".nav-tabs").children('.active').attr('href');
+            lstWordLen = wordLen;
+
+            // get current tabRef
             let tabRef = get_active_tab_href();
             // log("info", tabRef, false);
 
-            if (word.length >= 1) {
+            if (wordLen >= 1) {
                 $(tabRef + ' p').html('你输入的内容为：' + word);
                 // clear_words_list();
                 clearOptions('words_list');
@@ -407,7 +419,7 @@ function getValue(id) {
     }
 }
 
-function loadAndPlayAudio(audioFile){
+function loadAndPlayAudio(audioFile) {
     loadPlayer();
 }
 
