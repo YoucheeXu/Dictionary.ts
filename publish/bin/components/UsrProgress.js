@@ -258,7 +258,8 @@ var UsrProgress = /** @class */ (function () {
     };
     UsrProgress.prototype.GetInProgressCount = function (level) {
         // let where = "level = '" + level + "' and familiar > 0";
-        var where = "LastDate is not null and cast (Familiar as real) < 10";
+        // let where = "LastDate is not null and cast (Familiar as real) < 10";
+        var where = "cast (Familiar as real) < 10";
         return this.GetCount(level, where);
     };
     UsrProgress.prototype.GetNewCount = function (level) {

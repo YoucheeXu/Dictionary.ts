@@ -527,23 +527,40 @@
         // popup recite dialog
         let confirmBtn = document.getElementById("confirmBtn");
         confirmBtn.onclick = function () {
-            displayOrHide('SelDiag', false);
-            displayOrHide('ReciteDiag');
-
             let usrName = getSelVal("usr-select");
             let level = getSelVal("lvl-select");
             console.log(`selUser: ${usrName}, Level: ${level}`)
 
-            // Enter
-            HotKeyHandler.Register("", "Enter", function () {
-                // console.log("enter was clicked!");
-                let word = getValue("word");
-                ipcRenderer.send('ReciteWordsApp', 'Check_Input', word);
-            });
+            let bLevelDone = true;
+            try {
+                bLevelDone = ipcRenderer.sendSync('syncMsg', 'isLevelDone', usrName, level);
+            }
+            catch (e) {
+                console.error(e);
+                return;
+            }
+            if (bLevelDone == true) {
+                console.log(`User: ${usrName}, Level: ${level} is done!`);
+                return;
+            }
+            else if (bLevelDone == false) {
+                console.log(`User: ${usrName}, Level: ${level} is not done!`);
 
-            ipcRenderer.send('ReciteWordsApp', 'Go', usrName, level);
+                displayOrHide('SelDiag', false);
+                displayOrHide('ReciteDiag');
 
-            return false;
+                // Enter
+                HotKeyHandler.Register("", "Enter", function () {
+                    // console.log("enter was clicked!");
+                    let word = getValue("word");
+                    ipcRenderer.send('ReciteWordsApp', 'Check_Input', word);
+                });
+
+                ipcRenderer.send('ReciteWordsApp', 'Go', usrName, level);
+            }
+            else {
+                console.error(bLevelDone);
+            }
         }
 
         let closeBtn = document.getElementById('closeBtn');

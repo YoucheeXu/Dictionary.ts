@@ -71,8 +71,9 @@ ipcMain.on('syncMsg', async (event: any, fun: string, ...paras: string[]) => {
         event.returnValue = await eval(command);
     }
     catch (e) {
-        console.error(`Fail to exec ${command} because ${(e as Error).message}`);
-        event.returnValue = 'false';
+        // console.error(`Fail to exec ${command} because ${(e as Error).message}`);
+        console.error(`Fail to exec ${command} because ${e}`);
+        event.returnValue = e;
     }
 });
 

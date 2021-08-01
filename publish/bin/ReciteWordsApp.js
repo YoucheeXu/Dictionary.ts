@@ -751,6 +751,67 @@ var ReciteWordsApp = /** @class */ (function () {
             });
         });
     };
+    ReciteWordsApp.prototype.isLevelDone = function (usrName, level) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _i, _a, usrCfg, progress, progressFile, numOfUnrecitedWord, ret, e_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _i = 0, _a = this.cfg.Users;
+                        _b.label = 1;
+                    case 1:
+                        if (!(_i < _a.length)) return [3 /*break*/, 14];
+                        usrCfg = _a[_i];
+                        if (!(usrName == usrCfg.Name)) return [3 /*break*/, 13];
+                        progress = usrCfg.Progress;
+                        progressFile = path.join(this.startPath, progress).replace(/\\/g, '/');
+                        // this.logger.info("progress: ", progressFile);
+                        if (this.usrProgress === undefined) {
+                            this.usrProgress = new UsrProgress_1.UsrProgress();
+                        }
+                        _b.label = 2;
+                    case 2:
+                        _b.trys.push([2, 11, , 12]);
+                        return [4 /*yield*/, this.usrProgress.Open(progressFile, level)];
+                    case 3:
+                        _b.sent();
+                        return [4 /*yield*/, this.usrProgress.GetInProgressCount(level)];
+                    case 4:
+                        numOfUnrecitedWord = _b.sent();
+                        if (!(numOfUnrecitedWord == 0)) return [3 /*break*/, 9];
+                        return [4 /*yield*/, electron_1.dialog.showMessageBox({
+                                type: "info",
+                                message: usrName + "'s " + level + " is done! Do you want to reset?",
+                                buttons: ["Yes", "No"]
+                            })];
+                    case 5:
+                        ret = _b.sent();
+                        if (!(ret.response == 0)) return [3 /*break*/, 7];
+                        return [4 /*yield*/, electron_1.dialog.showMessageBox({
+                                type: "info",
+                                message: "Reset function is not implemented!",
+                                buttons: ["Confirm"]
+                            })];
+                    case 6:
+                        ret = _b.sent();
+                        return [2 /*return*/, Promise.resolve(true)];
+                    case 7: return [2 /*return*/, Promise.resolve(true)];
+                    case 8: return [3 /*break*/, 10];
+                    case 9: return [2 /*return*/, Promise.resolve(false)];
+                    case 10: return [3 /*break*/, 12];
+                    case 11:
+                        e_1 = _b.sent();
+                        this.logger.error(e_1);
+                        return [2 /*return*/, Promise.reject(e_1)];
+                    case 12: return [3 /*break*/, 14];
+                    case 13:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 14: return [2 /*return*/, Promise.reject("Usr doesn't exist!")];
+                }
+            });
+        });
+    };
     ReciteWordsApp.prototype.Go = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
             var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, InProgressCount, timeArray, _b, timeArray_1, timeGroup, allLimit, newWdsLimit, limit, wdsLst, numOfWords, todayStr, _c, wdsLst_1, wd, _d, wdsLst_2, wd, _e, wdsLst_3, wd, _f, _g, word;
@@ -928,7 +989,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Save_Progress = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, word, _b, _c, word, data, familiar, lastDate, nextDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, nextDate, allLen, lastDateStr, nexDateStr, mapStr, i, nFnshd, iterator, r, todayStr, interval, index, nextInterval, _h, word, _j, familiar, lastDate, nextDate, percent, e_1;
+            var _i, _a, word, _b, _c, word, data, familiar, lastDate, nextDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, nextDate, allLen, lastDateStr, nexDateStr, mapStr, i, nFnshd, iterator, r, todayStr, interval, index, nextInterval, _h, word, _j, familiar, lastDate, nextDate, percent, e_2;
             return __generator(this, function (_k) {
                 switch (_k.label) {
                     case 0:
@@ -1064,9 +1125,9 @@ var ReciteWordsApp = /** @class */ (function () {
                         this.win.webContents.send("gui", "modifyValue", "info", percent.toFixed(2) + "% to save progress.");
                         return [3 /*break*/, 5];
                     case 4:
-                        e_1 = _k.sent();
-                        this.logger.error(e_1.message);
-                        this.logger.error(e_1);
+                        e_2 = _k.sent();
+                        this.logger.error(e_2.message);
+                        this.logger.error(e_2);
                         return [3 /*break*/, 5];
                     case 5: return [3 /*break*/, 1];
                     case 6:

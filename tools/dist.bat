@@ -1,7 +1,10 @@
+@echo off
+
 :start
-echo 1 generate dist bin;
+echo 1 generate dist bin
 echo 2 copy bin to Green folder
 echo 3 exit
+echo which you want to choose?
 set /p a=
 if %a%==1 goto genBin
 if %a%==2 goto copyFolder

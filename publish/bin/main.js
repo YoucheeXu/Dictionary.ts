@@ -108,8 +108,9 @@ electron_1.ipcMain.on('syncMsg', function (event, fun) {
                     return [3 /*break*/, 4];
                 case 3:
                     e_1 = _b.sent();
-                    console.error("Fail to exec " + command + " because " + e_1.message);
-                    event.returnValue = 'false';
+                    // console.error(`Fail to exec ${command} because ${(e as Error).message}`);
+                    console.error("Fail to exec " + command + " because " + e_1);
+                    event.returnValue = e_1;
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as log4js from "log4js";
-import { BrowserWindow, app, globalShortcut } from 'electron';
+import { BrowserWindow, app, globalShortcut, dialog } from 'electron';
 
 import { formatDate, randomArray, randomArray2 } from "./utils/utils";
 import { SDictBase } from "./components/SDictBase";
@@ -9,6 +9,7 @@ import { AuidoArchive } from "./components/AuidoArchive";
 import { UsrProgress } from "./components/UsrProgress";
 import { DownloardQueue } from "./utils/DownloardQueue";
 import { globalVar } from "./utils/globalInterface";
+import { ExecException } from "child_process";
 
 export class ReciteWordsApp {
     private startPath: string;
@@ -713,7 +714,53 @@ export class ReciteWordsApp {
         }
     }
 
-    public async Go(usrName: number, level: string) {
+    public async isLevelDone(usrName: string, level: string): Promise<boolean | string> {
+        for (let usrCfg of this.cfg.Users) {
+            if (usrName == usrCfg.Name) {
+                // this.logger.info(`selectUser: ${usrName}, Level: ${level}`);
+                let progress = usrCfg.Progress;
+                let progressFile = path.join(this.startPath, progress).replace(/\\/g, '/');
+                // this.logger.info("progress: ", progressFile);
+                if (this.usrProgress === undefined) {
+                    this.usrProgress = new UsrProgress();
+                }
+                try {
+                    await this.usrProgress.Open(progressFile, level);
+                    let numOfUnrecitedWord = await this.usrProgress.GetInProgressCount(level);
+                    if (numOfUnrecitedWord == 0) {
+                        let ret = await dialog.showMessageBox({
+                            type: "info",
+                            message: `${usrName}'s ${level} is done! Do you want to reset?`,
+                            buttons: ["Yes", "No"]
+                        });
+
+                        if (ret.response == 0) {
+                            ret = await dialog.showMessageBox({
+                                type: "info",
+                                message: `Reset function is not implemented!`,
+                                buttons: ["Confirm"]
+                            });
+                            return Promise.resolve(true);
+                        }
+                        else {
+                            return Promise.resolve(true);
+                        }
+                    }
+                    else {
+                        return Promise.resolve(false);
+                    }
+                }
+                catch (e) {
+                    this.logger.error(e);
+                    return Promise.reject(e);
+                }
+                break;
+            }
+        }
+        return Promise.reject("Usr doesn't exist!");
+    }
+
+    public async Go(usrName: string, level: string) {
         console.log("Go!");
 
         /*globalShortcut.unregister('Enter');
