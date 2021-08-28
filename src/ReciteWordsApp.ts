@@ -533,6 +533,8 @@ export class ReciteWordsApp {
 
         if (this.Mode == "Test Mode") {
 
+            this.ErrCount = 0;
+
             word = this.CurTestLst[this.CurTestPos];
 
             for (var i = 0; i < this.CurTestLst.length; i++) {
