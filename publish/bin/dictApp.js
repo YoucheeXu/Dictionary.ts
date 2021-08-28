@@ -66,6 +66,7 @@ var SDictBase_1 = require("./components/SDictBase");
 var DownloardQueue_1 = require("./utils/DownloardQueue");
 var globalInterface_1 = require("./utils/globalInterface");
 var UsrProgress_1 = require("./components/UsrProgress");
+var WordsDict_1 = require("./components/WordsDict");
 var dictApp = /** @class */ (function () {
     function dictApp() {
         this.bCfgModfied = false;
@@ -76,7 +77,7 @@ var dictApp = /** @class */ (function () {
     }
     dictApp.prototype.ReadAndConfigure = function (startPath) {
         return __awaiter(this, void 0, void 0, function () {
-            var _this, common, debugCfg, debugLvl, logFile, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, _a, _b, tabGroup, dictSrc, audioCfg, audioFile, audioFormatCfg, usrCfg, progressFile, missCfg;
+            var _this, common, debugCfg, debugLvl, logFile, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, _a, _b, tabGroup, dictSrc_1, dictSrc, audioCfg, audioFile, audioFormatCfg, usrCfg, progressFile, missCfg;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -132,9 +133,14 @@ var dictApp = /** @class */ (function () {
                         this.ActiveAgent(activeAgent);
                         for (_a = 0, _b = JSON.parse(JSON.stringify(this.cfg['Tabs'])); _a < _b.length; _a++) {
                             tabGroup = _b[_a];
-                            dictSrc = path.join(startPath, tabGroup.Dict);
-                            this.AddDictBase(tabGroup.Name, dictSrc, JSON.parse(JSON.stringify(tabGroup['Format'])));
+                            dictSrc_1 = path.join(startPath, tabGroup.Dict);
+                            this.AddDictBase(tabGroup.Name, dictSrc_1, JSON.parse(JSON.stringify(tabGroup['Format'])));
                         }
+                        dictSrc = path.join(startPath, 'dict/words.dict');
+                        this.wordsDict = new WordsDict_1.WordsDict();
+                        return [4 /*yield*/, this.wordsDict.Open(dictSrc)];
+                    case 1:
+                        _c.sent();
                         audioCfg = JSON.parse(JSON.stringify(this.cfg['Audio']))[0];
                         audioFile = path.join(startPath, audioCfg.Audio);
                         audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
@@ -146,10 +152,10 @@ var dictApp = /** @class */ (function () {
                         progressFile = path.join(startPath, usrCfg.Progress).replace(/\\/g, '/');
                         this.usrProgress = new UsrProgress_1.UsrProgress();
                         return [4 /*yield*/, this.usrProgress.Open(progressFile, "New")];
-                    case 1:
+                    case 2:
                         _c.sent();
                         return [4 /*yield*/, this.usrProgress.ExistTable("New")];
-                    case 2:
+                    case 3:
                         if ((_c.sent()) == false) {
                             this.usrProgress.NewTable("New");
                         }
@@ -519,8 +525,6 @@ var dictApp = /** @class */ (function () {
                         retAudio = -1;
                         audio = "";
                         bNew = false;
-                        level = 'CET6 TOEFL';
-                        nStars = 3;
                         return [4 /*yield*/, this.curDictBase.query_word(word)];
                     case 1:
                         _a = _c.sent(), retDict = _a[0], dict = _a[1];
@@ -540,7 +544,7 @@ var dictApp = /** @class */ (function () {
                     case 4:
                         if ((_c.sent()) == false) {
                             this.usrProgress.InsertWord(word).then(function () {
-                                console.log(word + " has been marked as new.");
+                                console.log(word + " will be marked as new.");
                                 _this_1.win.webContents.send("QueryWord", "mark_new", true);
                             });
                             bNew = false;
@@ -568,6 +572,12 @@ var dictApp = /** @class */ (function () {
                             this.info(0, 2, "", "");
                         }
                         audio = audio.replace(/\\/g, "/");
+                        return [4 /*yield*/, this.wordsDict.GetLevel(word)];
+                    case 6:
+                        level = _c.sent();
+                        return [4 /*yield*/, this.wordsDict.GetStar(word)];
+                    case 7:
+                        nStars = _c.sent();
                         this.win.webContents.send("QueryWord", this.dictParseFun, word, this.dictId, dict, audio, bNew, level, nStars);
                         return [2 /*return*/];
                 }

@@ -62,15 +62,21 @@
         "DictBase": {
             "Name": "15000",
             "Dict": "dict/15000.dict",
-            "allLvls": [
-                "CET6",
-                "TOEFL",
-				"New"
-            ],
             "Format": {
                 "Type": "SQLite"
             }
         },
+        "WordsDict": {
+            "Name": "Words",
+            "Dict": "dict/Words.dict",
+            "allLvls": [
+                "CET6",
+                "TOEFL"
+            ],
+            "Format": {
+                "Type": "SQLite"
+            }
+        },		
         "AudioBase": {
             "Name": "Google",
             "Audio": "audio/Google.zip",

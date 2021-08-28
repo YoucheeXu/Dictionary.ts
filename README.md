@@ -4,7 +4,7 @@
 
 ## 免责申明
 
-本软件及本软件所使用了一些网上代码及资源是以研究或个人/学习交流为目的，未经原公司（作者）许可请勿用于任何商业用途，如需商用请自行联系原公司（作者）商议商用事宜！请勿擅自私自商用！否则后果自负！
+本软件及本软件所使用了一些网上代码及资源是以研究或个人/学习交流为目的，未经原公司（作者）许可请勿用于任何商业用途，如需商用请自行联系原公司（作者）商议商用事宜！请勿擅自或私自商用！否则后果自负！
 
 本软件及作者不承担因使用、分发、再开发等所带来侵权或其它法律责任。
 
@@ -103,20 +103,18 @@ cnpm install
 
 ### 15000.dict
 
-位于 ./bin/dict，该文件为sqlite格式。该字典会被用于背单词时，根据Level建立所需背单词列表，及背单词提提示的含义、例句等。其存储格式如下：
+位于 ./bin/dict，该文件为sqlite格式。该字典会被用于背单词时显示示音标含义、例句等。其存储格式如下：
 
 ```sqlite
 CREATE TABLE [Words](
     [Word] CHAR(255) CONSTRAINT [PrimaryKey] PRIMARY KEY, 
     [Symbol] CHAR(255), 
     [Meaning] CHAR(255), 
-    [Sentences] TEXT, 
-    [Level] CHAR(255);
+    [Sentences] TEXT
+);
 ```
 
 其中Sentences为该单词使用例句。
-
-Level内容如”CET4“或”CET6;TOFEL“等
 
 ### *.progress
 
@@ -131,4 +129,21 @@ CREATE TABLE ${Level}(
 );
 ```
 
-其中Familiar用于记录用户对单词的熟练程度；LastDate用于记录用户上次背诵该单词的时间；NextDate用于记录根据遗忘曲线，下次需要复习单词的时间。
+其中Familiar用于记录用户对单词的熟练程度（从最不熟悉-10，到最熟悉10）；LastDate用于记录用户上次背诵该单词的时间；NextDate用于记录根据遗忘曲线，下次需要复习单词的时间。
+
+### Words.dict
+
+位于 ./bin/dict，该文件为sqlite格式。该字典会被用于背单词时，根据Level建立所需背单词列表。其存储格式如下：
+
+```sqlite
+CREATE TABLE [Words](
+    [Word] CHAR(255) CONSTRAINT [PrimaryKey] PRIMARY KEY, 
+    [USSymbol] CHAR(255),
+	[UKSymbol] CHAR(255),
+    [Level] CHAR(255),
+	[Stars] TINYINT
+);
+```
+
+Level内容如”CET4“或”CET6;TOFEL“等
+

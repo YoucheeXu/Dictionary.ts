@@ -10,6 +10,7 @@ import { DownloardQueue } from "./utils/DownloardQueue";
 import { globalVar } from "./utils/globalInterface";
 
 import { UsrProgress } from "./components/UsrProgress";
+import { WordsDict } from "./components/WordsDict";
 
 export class dictApp {
     private cfg: any;
@@ -23,6 +24,7 @@ export class dictApp {
     private dictId: string;
     private dictParseFun: string;
     private curDictBase: DictBase;
+    private wordsDict: WordsDict;
     private dictBaseDict: any = new Map();
     private dictSysMenu: string[] | any;
 
@@ -90,7 +92,6 @@ export class dictApp {
         let agentCfg = JSON.parse(JSON.stringify(this.cfg['Agents']));
         let bIEAgent = agentCfg.bIEAgent;
         let activeAgent = agentCfg.activeAgent;
-
         let agentInfo = JSON.parse(JSON.stringify(agentCfg['Info']));
         for (let agent of agentInfo) {
             this.dictAgent.push({ name: agent.name, ip: agent.ip, program: agent.program });
@@ -103,10 +104,13 @@ export class dictApp {
             this.AddDictBase(tabGroup.Name, dictSrc, JSON.parse(JSON.stringify(tabGroup['Format'])));
         }
 
+		let dictSrc = path.join(startPath, 'dict/words.dict');
+		this.wordsDict = new WordsDict();
+		await this.wordsDict.Open(dictSrc);
+
         let audioCfg = JSON.parse(JSON.stringify(this.cfg['Audio']))[0];
         let audioFile = path.join(startPath, audioCfg.Audio);
         let audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
-
         if (audioFormatCfg.Type == 'ZIP') {
             this.audioPackage = new AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.Compress_Level);
             // this.AddAudio(name, audioPackage);
@@ -486,8 +490,6 @@ export class dictApp {
         let audio = "";
 
         let bNew = false;
-        let level = 'CET6 TOEFL';
-        let nStars = 3;
 
         [retDict, dict] = await this.curDictBase.query_word(word);
         [retAudio, audio] = await this.audioPackage.query_audio(word);
@@ -508,10 +510,9 @@ export class dictApp {
         else {
             if ((await this.usrProgress.ExistWord(word)) == false) {
                 this.usrProgress.InsertWord(word).then(() => {
-                    console.log(word + " has been marked as new.");
+                    console.log(word + " will be marked as new.");
                     this.win.webContents.send("QueryWord", "mark_new", true);
                 });
-
                 bNew = false;
             }
             else {
@@ -540,6 +541,9 @@ export class dictApp {
 
         audio = audio.replace(/\\/g, "/");
 
+        let level = await this.wordsDict.GetLevel(word);
+        let nStars = await this.wordsDict.GetStar(word);
+		
         this.win.webContents.send("QueryWord", this.dictParseFun, word, this.dictId, dict, audio, bNew, level, nStars);
 
         // this.lastWord = word;

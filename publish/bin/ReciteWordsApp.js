@@ -61,11 +61,12 @@ var path = __importStar(require("path"));
 var log4js = __importStar(require("log4js"));
 var electron_1 = require("electron");
 var utils_1 = require("./utils/utils");
-var SDictBase_1 = require("./components/SDictBase");
-var AuidoArchive_1 = require("./components/AuidoArchive");
-var UsrProgress_1 = require("./components/UsrProgress");
 var DownloardQueue_1 = require("./utils/DownloardQueue");
 var globalInterface_1 = require("./utils/globalInterface");
+var WordsDict_1 = require("./components/WordsDict");
+var AuidoArchive_1 = require("./components/AuidoArchive");
+var UsrProgress_1 = require("./components/UsrProgress");
+var SDictBase_1 = require("./components/SDictBase");
 var ReciteWordsApp = /** @class */ (function () {
     function ReciteWordsApp() {
         this.bDebug = false;
@@ -210,7 +211,8 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.initDict = function () {
         try {
-            var dict = this.cfg["DictBase"]["DictBase"]["Dict"];
+            var dictCfg = this.cfg["DictBase"]["DictBase"];
+            var dict = dictCfg["Dict"];
             var dictFile = path.join(this.startPath, dict).replace(/\\/g, '/');
             console.log("dict: " + dictFile);
             this.dictBase = new SDictBase_1.SDictBase(dictFile);
@@ -657,12 +659,12 @@ var ReciteWordsApp = /** @class */ (function () {
         return this.usrsDict;
     };
     ReciteWordsApp.prototype.readAllLvls = function () {
-        return this.cfg["DictBase"]["DictBase"]["allLvls"];
+        return this.cfg["DictBase"]["WordsDict"]["allLvls"];
     };
     // TODO: 
     ReciteWordsApp.prototype.newLevel = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progressFile, lvlWordsLst, ret, _b, lvlWordsLst_1, word, target;
+            var _i, _a, usrCfg, progressFile, wordsCfg, words, wordsFile, wordsDict, lvlWordsLst, ret, _b, lvlWordsLst_1, word, target;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -685,10 +687,17 @@ var ReciteWordsApp = /** @class */ (function () {
                         if ((_c.sent()) == false) {
                             this.usrProgress.NewTable(level);
                         }
+                        wordsCfg = this.cfg["DictBase"]["WordsDict"];
+                        words = wordsCfg["Dict"];
+                        wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
+                        console.log("words: " + wordsFile);
+                        wordsDict = new WordsDict_1.WordsDict();
+                        wordsDict.Open(wordsFile);
                         lvlWordsLst = new Array();
-                        return [4 /*yield*/, this.dictBase.GetWordsLst(lvlWordsLst, level)];
+                        return [4 /*yield*/, wordsDict.GetWordsLst(lvlWordsLst, level)];
                     case 4:
                         ret = _c.sent();
+                        wordsDict.Close();
                         if (!ret) return [3 /*break*/, 9];
                         _b = 0, lvlWordsLst_1 = lvlWordsLst;
                         _c.label = 5;
@@ -721,7 +730,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.NewUsr = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var progressFile, lvlWordsLst, _i, lvlWordsLst_2, word;
+            var progressFile, wordsCfg, words, wordsFile, wordsDict, lvlWordsLst, ret, _i, lvlWordsLst_2, word;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -732,21 +741,35 @@ var ReciteWordsApp = /** @class */ (function () {
                         return [4 /*yield*/, this.usrProgress.New(progressFile, level)];
                     case 1:
                         _a.sent();
+                        wordsCfg = this.cfg["DictBase"]["WordsDict"];
+                        words = wordsCfg["Dict"];
+                        wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
+                        console.log("words: " + wordsFile);
+                        wordsDict = new WordsDict_1.WordsDict();
+                        wordsDict.Open(wordsFile);
                         lvlWordsLst = new Array();
-                        this.dictBase.GetWordsLst(lvlWordsLst, level);
-                        _i = 0, lvlWordsLst_2 = lvlWordsLst;
-                        _a.label = 2;
+                        return [4 /*yield*/, wordsDict.GetWordsLst(lvlWordsLst, level)];
                     case 2:
-                        if (!(_i < lvlWordsLst_2.length)) return [3 /*break*/, 5];
-                        word = lvlWordsLst_2[_i];
-                        return [4 /*yield*/, this.usrProgress.InsertWord(word)];
+                        ret = _a.sent();
+                        wordsDict.Close();
+                        if (!ret) return [3 /*break*/, 7];
+                        _i = 0, lvlWordsLst_2 = lvlWordsLst;
+                        _a.label = 3;
                     case 3:
-                        _a.sent();
-                        _a.label = 4;
+                        if (!(_i < lvlWordsLst_2.length)) return [3 /*break*/, 6];
+                        word = lvlWordsLst_2[_i];
+                        // console.log("Going to insert: " + word);
+                        return [4 /*yield*/, this.usrProgress.InsertWord(word)];
                     case 4:
+                        // console.log("Going to insert: " + word);
+                        _a.sent();
+                        _a.label = 5;
+                    case 5:
                         _i++;
-                        return [3 /*break*/, 2];
-                    case 5: return [2 /*return*/];
+                        return [3 /*break*/, 3];
+                    case 6: return [3 /*break*/, 8];
+                    case 7: return [2 /*return*/, Promise.resolve(false)];
+                    case 8: return [2 /*return*/];
                 }
             });
         });

@@ -1,8 +1,14 @@
 import { DictBase } from "./DictBase";
 import { SQLite } from "./SQLite";
 
-// Words: word, symbol, meaning, sentences, level, familiar, lastdate;
-// Words: word, symbol, meaning, sentences;
+/*
+CREATE TABLE [Words](
+    [Word] CHAR(255) CONSTRAINT [PrimaryKey] PRIMARY KEY, 
+    [Symbol] CHAR(255), 
+    [Meaning] CHAR(255), 
+    [Sentences] TEXT
+);
+*/
 
 export class SDictBase extends DictBase {
     private bWritable: boolean = false;
@@ -44,34 +50,6 @@ export class SDictBase extends DictBase {
 
         if (wdsLst.length >= 1) {
             return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    public async GetWordsLst(wdsLst: string[], lvl: string): Promise<boolean> {
-        let sql = "select Word,Level from Words"
-        let r = await this.dict.each(sql, [], function (row: any) {
-            console.log("Word: ", row.Word, " Level: ", row.Level);
-            if (row.Level != null) {
-                if (row.Level.length > 0) {
-                    let lvlLst = row.Level.split(";");
-                    let index = lvlLst.indexOf(lvl)
-                    if (index != -1) {
-                        wdsLst.push(row.Word);
-                    }
-                }
-            }
-        });
-
-        if (r) {
-            if (wdsLst.length >= 1) {
-                return true;
-            }
-            else {
-                return false;
-            }
         }
         else {
             return false;

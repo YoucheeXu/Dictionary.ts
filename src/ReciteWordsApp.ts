@@ -4,12 +4,16 @@ import * as log4js from "log4js";
 import { BrowserWindow, app, globalShortcut, dialog } from 'electron';
 
 import { formatDate, randomArray, randomArray2 } from "./utils/utils";
-import { SDictBase } from "./components/SDictBase";
-import { AuidoArchive } from "./components/AuidoArchive";
-import { UsrProgress } from "./components/UsrProgress";
+
 import { DownloardQueue } from "./utils/DownloardQueue";
 import { globalVar } from "./utils/globalInterface";
 import { ExecException } from "child_process";
+
+import { WordsDict } from "./components/WordsDict";
+import { AuidoArchive } from "./components/AuidoArchive";
+import { UsrProgress } from "./components/UsrProgress";
+
+import { SDictBase } from "./components/SDictBase";
 
 export class ReciteWordsApp {
     private startPath: string;
@@ -21,9 +25,10 @@ export class ReciteWordsApp {
 
     private usrsDict = new Map();
 
-    private dictBase: SDictBase;
     private audioBase: AuidoArchive;
     private usrProgress: UsrProgress;
+
+	private dictBase: SDictBase;
 
     private win: BrowserWindow;
 
@@ -185,7 +190,8 @@ export class ReciteWordsApp {
 
     private initDict() {
         try {
-            let dict = this.cfg["DictBase"]["DictBase"]["Dict"];
+            let dictCfg = this.cfg["DictBase"]["DictBase"];
+			let dict = dictCfg["Dict"];
             let dictFile = path.join(this.startPath, dict).replace(/\\/g, '/');
             console.log(`dict: ${dictFile}`);
             this.dictBase = new SDictBase(dictFile);
@@ -660,7 +666,7 @@ export class ReciteWordsApp {
     }
 
     public readAllLvls() {
-        return this.cfg["DictBase"]["DictBase"]["allLvls"];
+        return this.cfg["DictBase"]["WordsDict"]["allLvls"];
     }
 
     // TODO: 
@@ -676,8 +682,17 @@ export class ReciteWordsApp {
                 if (await this.usrProgress.ExistTable(level) == false) {
                     this.usrProgress.NewTable(level);
                 }
+
+				let wordsCfg = this.cfg["DictBase"]["WordsDict"];
+				let words = wordsCfg["Dict"];
+				let wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
+				console.log(`words: ${wordsFile}`);
+				let wordsDict = new WordsDict();
+				wordsDict.Open(wordsFile);
+
                 let lvlWordsLst: string[] = new Array();
-                let ret = await this.dictBase.GetWordsLst(lvlWordsLst, level);
+                let ret = await wordsDict.GetWordsLst(lvlWordsLst, level);
+				wordsDict.Close();
                 if (ret) {
                     for (let word of lvlWordsLst) {
                         // console.log("Going to insert: " + word);
@@ -707,10 +722,24 @@ export class ReciteWordsApp {
         let progressFile = path.join(this.startPath, "dict", "usrName" + ".progress").replace(/\\/g, '/');
         await this.usrProgress.New(progressFile, level);
 
+        let wordsCfg = this.cfg["DictBase"]["WordsDict"];
+        let words = wordsCfg["Dict"];
+        let wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
+        console.log(`words: ${wordsFile}`);
+        let wordsDict = new WordsDict();
+        wordsDict.Open(wordsFile);
+
         let lvlWordsLst: string[] = new Array();
-        this.dictBase.GetWordsLst(lvlWordsLst, level);
-        for (let word of lvlWordsLst) {
-            await this.usrProgress.InsertWord(word);
+        let ret = await wordsDict.GetWordsLst(lvlWordsLst, level);
+        wordsDict.Close();
+        if (ret) {
+            for (let word of lvlWordsLst) {
+                // console.log("Going to insert: " + word);
+                await this.usrProgress.InsertWord(word);
+            }
+        }
+        else {
+            return Promise.resolve<boolean>(false);
         }
     }
 

@@ -51,90 +51,96 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SDictBase = void 0;
-var DictBase_1 = require("./DictBase");
-var SQLite_1 = require("./SQLite");
+exports.WordsDict = void 0;
+// WordsDict.ts
+var SQLiteDict_1 = require("./SQLiteDict");
 /*
 CREATE TABLE [Words](
     [Word] CHAR(255) CONSTRAINT [PrimaryKey] PRIMARY KEY,
-    [Symbol] CHAR(255),
-    [Meaning] CHAR(255),
-    [Sentences] TEXT
+    [USSymbol] CHAR(255),
+    [UKSymbol] CHAR(255),
+    [Level] CHAR(255),
+    [Stars] TINYINT
 );
 */
-var SDictBase = /** @class */ (function (_super) {
-    __extends(SDictBase, _super);
-    function SDictBase(dictSrc) {
-        var _this = _super.call(this) || this;
-        _this.bWritable = false;
-        _this.dict = new SQLite_1.SQLite();
-        _this.dict.Open(dictSrc);
-        return _this;
+var WordsDict = /** @class */ (function (_super) {
+    __extends(WordsDict, _super);
+    function WordsDict() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    SDictBase.prototype.close = function () {
-        this.dict.close();
-    };
-    SDictBase.prototype.get_parseFun = function () {
-        return "dictHtml";
-    };
-    // [symbol, meaning, sentences]
-    // To-Do: to html
-    SDictBase.prototype.query_word = function (word) {
+    WordsDict.prototype.Open = function (dictSrc) {
         return __awaiter(this, void 0, void 0, function () {
-            var sql, r;
+            return __generator(this, function (_a) {
+                _super.prototype.Open.call(this, dictSrc, "Words");
+                return [2 /*return*/];
+            });
+        });
+    };
+    WordsDict.prototype.GetLevel = function (word) {
+        return __awaiter(this, void 0, void 0, function () {
+            var ret;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        sql = "select * from Words where word=?";
-                        return [4 /*yield*/, this.dict.get(sql, [word])];
+                    case 0: return [4 /*yield*/, _super.prototype.GetItem.call(this, word, "Level")];
                     case 1:
-                        r = _a.sent();
-                        if (r === undefined) {
-                            return [2 /*return*/, [-1, word + " not in dict!"]];
+                        ret = _a.sent();
+                        if (ret) {
+                            return [2 /*return*/, ret];
                         }
                         else {
-                            return [2 /*return*/, [1, r.Symbol + ";;" + r.Meaning + ";;" + r.Sentences]];
+                            if (typeof (ret) != "undefined" && ret != 0) {
+                                console.log(word + " has no Level");
+                            }
+                            else {
+                                console.log("no " + word);
+                            }
+                            return [2 /*return*/, ""];
                         }
                         return [2 /*return*/];
                 }
             });
         });
     };
-    SDictBase.prototype.get_wordsLst = function (word, wdsLst) {
+    WordsDict.prototype.SetLevel = function (word, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var sql, r;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, _super.prototype.UpdateItem.call(this, word, "Level", level)];
+            });
+        });
+    };
+    WordsDict.prototype.GetStar = function (word) {
+        return __awaiter(this, void 0, void 0, function () {
+            var ret;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        sql = "select word from Words where word like '" + word + "%' limit 100";
-                        return [4 /*yield*/, this.dict.all(sql)];
+                    case 0: return [4 /*yield*/, _super.prototype.GetItem.call(this, word, "Stars")];
                     case 1:
-                        r = _a.sent();
-                        r.forEach(function (row) {
-                            wdsLst.push(row.Word);
-                        });
-                        if (wdsLst.length >= 1) {
-                            return [2 /*return*/, true];
+                        ret = _a.sent();
+                        if (ret) {
+                            return [2 /*return*/, ret];
                         }
                         else {
-                            return [2 /*return*/, false];
+                            if (typeof (ret) != "undefined" && ret != 0) {
+                                console.log(word + " has no Star");
+                            }
+                            else {
+                                console.log("no " + word);
+                            }
+                            return [2 /*return*/, 0];
                         }
                         return [2 /*return*/];
                 }
             });
         });
     };
-    SDictBase.prototype.getWritable = function () {
-        return this.bWritable;
+    WordsDict.prototype.SetStar = function (word, star) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, _super.prototype.UpdateItem.call(this, word, "Stars", star)];
+            });
+        });
     };
-    SDictBase.prototype.del_word = function (word) {
-        throw new Error('Method not implemented.');
-        var sql = '';
-        this.dict.run(sql);
-        return true;
-    };
-    return SDictBase;
-}(DictBase_1.DictBase));
-exports.SDictBase = SDictBase;
-;
-//# sourceMappingURL=SDictBase.js.map
+    return WordsDict;
+}(SQLiteDict_1.SQLiteDict));
+exports.WordsDict = WordsDict;
+//# sourceMappingURL=WordsDict.js.map
