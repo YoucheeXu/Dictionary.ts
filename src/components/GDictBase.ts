@@ -46,14 +46,12 @@ export class GDictBase extends DictBase {
         let wordFile = "";
         try {
             if (this.dictZip.bFileIn(fileName)) {
-                // [ret, datum] = this.dictZip.readFile(fileName);
                 [ret, datum] = await this.dictZip.readFileAsync(fileName);
                 if (!ret) {
-                    return Promise.reject([-1, `Fail to read ${word} in ${this.dictArchive}`]);
+                    return Promise.resolve([-1, `Fail to read ${word} in ${this.dictArchive}`]);
                 }
             }
             else if (this.bWritable) {
-                // wordFile = path.join(this.tempDictDir, word + ".json").replace(/\\/g, '/');
                 wordFile = path.join(this.tempDictDir, word + ".json");
                 let jsonURL = "http://dictionary.so8848.com/ajax_search?q=" + word;
                 jsonURL = jsonURL.replace(" ", "%20");
@@ -64,13 +62,11 @@ export class GDictBase extends DictBase {
             }
 
             let strDatum = String(datum);
-
             let dictDatum = JSON.parse(strDatum);
 
             if (dictDatum["ok"]) {
                 let info = dictDatum["info"];
-                // console.log(info);
-                info = String(info).replace(/\\x/g, "%");
+                info = String(info).replace(/\\x/g, "\\u00");
                 let obj = JSON.parse(info);
                 let tabAlign = '\t\t\t\t\t\t\t';
                 let html = '\r\n' + process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
@@ -79,20 +75,17 @@ export class GDictBase extends DictBase {
                 return Promise.resolve([1, html]);
             }
             else {
-                // return [false, "Fail to read: " + word];
-                return Promise.reject([-1, "Fail to read: " + word]);
+                return Promise.resolve([-1, "Fail to read: " + word]);
             }
         }
         catch (e) {
-            // print("fail to query dict of " + word)
-            // GetApp().log("error", "fail to query dict of " + word);
             if (fs.existsSync(wordFile)) {
                 fs.unlinkSync(wordFile);
             }
-            // return [false, (e as Error).message.replace("<", "").replace(">", "")];
-            return Promise.reject([-1, (e as Error).message.replace("<", "").replace(">", "")]);
+            // console.error(e);
+            let errMsg = (e as Error).message.replace("<", "").replace(">", "");
+            return Promise.resolve([-1, errMsg]);
         }
-        // return [false, "Unknown error!"];
     }
 
     private notify(name: string, progress: number, state: string, why?: string) {
@@ -149,11 +142,17 @@ export class GDictBase extends DictBase {
 
         if (datum["ok"]) {
             let info = datum["info"];
-            info = String(info).replace(/\\x/g, "%");
-            info = info.replace('\\', '\\\\');
-            datum = JSON.parse(info);
-            if(datum["primaries"][0]["type"] == "headword"){
-                return datum["primaries"][0]["terms"][0]["text"];
+            info = String(info).replace(/\\x/g, "\\u00");
+            // info = info.replace('\\', '\\\\');
+            try {
+                datum = JSON.parse(info);
+                if (datum["primaries"][0]["type"] == "headword") {
+                    return datum["primaries"][0]["terms"][0]["text"];
+                }
+            } catch (e) {
+                let errMsg = (e as Error).message.replace("<", "").replace(">", "");
+                console.error(errMsg);
+                return "";
             }
         }
         return "";

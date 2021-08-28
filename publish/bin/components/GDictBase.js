@@ -109,7 +109,7 @@ var GDictBase = /** @class */ (function (_super) {
     };
     GDictBase.prototype.query_word = function (word) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileName, datum, ret, wordFile, jsonURL, strDatum, dictDatum, info, obj, tabAlign, html, e_1;
+            var fileName, datum, ret, wordFile, jsonURL, strDatum, dictDatum, info, obj, tabAlign, html, e_1, errMsg;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -123,15 +123,13 @@ var GDictBase = /** @class */ (function (_super) {
                         if (!this.dictZip.bFileIn(fileName)) return [3 /*break*/, 3];
                         return [4 /*yield*/, this.dictZip.readFileAsync(fileName)];
                     case 2:
-                        // [ret, datum] = this.dictZip.readFile(fileName);
                         _a = _b.sent(), ret = _a[0], datum = _a[1];
                         if (!ret) {
-                            return [2 /*return*/, Promise.reject([-1, "Fail to read " + word + " in " + this.dictArchive])];
+                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.dictArchive])];
                         }
                         return [3 /*break*/, 4];
                     case 3:
                         if (this.bWritable) {
-                            // wordFile = path.join(this.tempDictDir, word + ".json").replace(/\\/g, '/');
                             wordFile = path.join(this.tempDictDir, word + ".json");
                             jsonURL = "http://dictionary.so8848.com/ajax_search?q=" + word;
                             jsonURL = jsonURL.replace(" ", "%20");
@@ -146,8 +144,7 @@ var GDictBase = /** @class */ (function (_super) {
                         dictDatum = JSON.parse(strDatum);
                         if (dictDatum["ok"]) {
                             info = dictDatum["info"];
-                            // console.log(info);
-                            info = String(info).replace(/\\x/g, "%");
+                            info = String(info).replace(/\\x/g, "\\u00");
                             obj = JSON.parse(info);
                             tabAlign = '\t\t\t\t\t\t\t';
                             html = '\r\n' + Json2Html_1.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
@@ -155,19 +152,16 @@ var GDictBase = /** @class */ (function (_super) {
                             return [2 /*return*/, Promise.resolve([1, html])];
                         }
                         else {
-                            // return [false, "Fail to read: " + word];
-                            return [2 /*return*/, Promise.reject([-1, "Fail to read: " + word])];
+                            return [2 /*return*/, Promise.resolve([-1, "Fail to read: " + word])];
                         }
                         return [3 /*break*/, 6];
                     case 5:
                         e_1 = _b.sent();
-                        // print("fail to query dict of " + word)
-                        // GetApp().log("error", "fail to query dict of " + word);
                         if (fs.existsSync(wordFile)) {
                             fs.unlinkSync(wordFile);
                         }
-                        // return [false, (e as Error).message.replace("<", "").replace(">", "")];
-                        return [2 /*return*/, Promise.reject([-1, e_1.message.replace("<", "").replace(">", "")])];
+                        errMsg = e_1.message.replace("<", "").replace(">", "");
+                        return [2 /*return*/, Promise.resolve([-1, errMsg])];
                     case 6: return [2 /*return*/];
                 }
             });
@@ -222,11 +216,18 @@ var GDictBase = /** @class */ (function (_super) {
         var datum = JSON.parse(dict);
         if (datum["ok"]) {
             var info = datum["info"];
-            info = String(info).replace(/\\x/g, "%");
-            info = info.replace('\\', '\\\\');
-            datum = JSON.parse(info);
-            if (datum["primaries"][0]["type"] == "headword") {
-                return datum["primaries"][0]["terms"][0]["text"];
+            info = String(info).replace(/\\x/g, "\\u00");
+            // info = info.replace('\\', '\\\\');
+            try {
+                datum = JSON.parse(info);
+                if (datum["primaries"][0]["type"] == "headword") {
+                    return datum["primaries"][0]["terms"][0]["text"];
+                }
+            }
+            catch (e) {
+                var errMsg = e.message.replace("<", "").replace(">", "");
+                console.error(errMsg);
+                return "";
             }
         }
         return "";
