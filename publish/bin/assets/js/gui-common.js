@@ -51,7 +51,7 @@ function modifyAttr(id, attr, attrVal) {
     var ele = document.getElementById(id);
     if (ele != null) {
         ele.setAttribute(attr, attrVal);
-        console.log(id + ': ' + attr + ' => ' + attrVal);
+        // console.log(id + ': ' + attr + ' => ' + attrVal);
     }
 }
 function removeAttr(id, attr) {
@@ -75,7 +75,7 @@ function DisaOrEnaBtn(id, set) {
     }
 }
 function appendOpt(id, val, txt) {
-    console.log("append " + val + " to " + id);
+    // console.log(`append ${val} to ${id}`);
     var ele = document.getElementById(id);
     if (ele != null) {
         var sel = ele;
@@ -116,7 +116,7 @@ function selIndex(id, index) {
         var selEle = ele;
         selEle.options[index].setAttribute("selected", "selected");
         var selIndex_2 = selEle.selectedIndex;
-        console.log(selIndex_2);
+        // console.log(selIndex);
         // selIndex = index;
     }
 }

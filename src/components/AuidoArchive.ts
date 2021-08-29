@@ -7,7 +7,7 @@ import { ZipArchive } from "./ZipArchive";
 import { globalVar } from "../utils/globalInterface";
 
 export class AuidoArchive {
-    private bWritable: boolean = true;
+    private bWritable: boolean = false;
     private audioArchive: string;
     private audioZip: ZipArchive;
     private tempAudioDir: string;
@@ -43,44 +43,40 @@ export class AuidoArchive {
     }
 
     public async query_audio(word: string): Promise<[number, string]> {
-        // fileName = word + ".mp3"
         let fileName = word[0] + "/" + word + ".mp3";
         let audioFile: string = path.join(this.tempAudioDir, word + ".mp3");
         let ret: boolean = false;
         let audio: Buffer;
-        // let gApp = globalVar.app;
         try {
             if (fs.existsSync(audioFile) == true) {
                 return Promise.resolve([1, audioFile]);
             }
             else if (this.audioZip.bFileIn(fileName)) {
-                // [ret, audio] = this.audioZip.readFile(fileName);
                 [ret, audio] = await this.audioZip.readFileAsync(fileName);
                 if (ret) {
                     try {
                         fs.writeFileSync(audioFile, audio);
                     } catch (e) {
-                        return Promise.reject([-1, (e as Error).message]);
+                        return Promise.resolve([-1, (e as Error).message]);
                     }
                     return Promise.resolve([1, audioFile]);
                 }
                 else {
-                    return Promise.reject([-1, `Fail to read ${word} in ${this.audioArchive}!`]);
+                    return Promise.resolve([-1, `Fail to read ${word} in ${this.audioArchive}!`]);
                 }
             }
             else if (this.bWritable) {
-                let audioURL = "https://ssl.gstatic.com/dictionary/static/sounds/oxford/" + word + "--_us_1.mp3"
-                // download_file(gApp.GetWindow(), audioURL, audioFile, this, this.notify);
+                let audioURL = `https://ssl.gstatic.com/dictionary/static/sounds/oxford/${word}--_us_1.mp3`
                 globalVar.dQueue.AddQueue(audioURL, audioFile, this, this.notify);
                 audioFile = `audio of ${word} is downloading.`;
                 return Promise.resolve([0, audioFile]);
             }
             else {
-                return Promise.reject([-1, "no audio in " + this.audioArchive]);
+                return Promise.resolve([-1, `no audio of ${word} in ${this.audioArchive}`]);
             }
         }
         catch (e) {
-            return Promise.reject([-1, (e as Error).message]);
+            return Promise.resolve([-1, (e as Error).message]);
         }
     }
 

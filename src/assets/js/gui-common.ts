@@ -53,7 +53,7 @@ function modifyAttr(id: string, attr: string, attrVal: string) {
     let ele = document.getElementById(id);
     if (ele != null) {
         ele.setAttribute(attr, attrVal);
-        console.log(id + ': ' + attr + ' => ' + attrVal);
+        // console.log(id + ': ' + attr + ' => ' + attrVal);
     }
 }
 
@@ -79,7 +79,7 @@ function DisaOrEnaBtn(id: string, set = "true") {
 }
 
 function appendOpt(id: string, val: string, txt?: string) {
-    console.log(`append ${val} to ${id}`);
+    // console.log(`append ${val} to ${id}`);
     let ele = document.getElementById(id);
     if (ele != null) {
         let sel = <HTMLSelectElement>ele;
@@ -123,7 +123,7 @@ function selIndex(id: string, index: number) {
         let selEle = <HTMLSelectElement>ele;
         selEle.options[index].setAttribute("selected", "selected");
         let selIndex = selEle.selectedIndex;
-        console.log(selIndex);
+        // console.log(selIndex);
         // selIndex = index;
     }
 }

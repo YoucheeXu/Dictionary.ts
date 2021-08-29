@@ -256,14 +256,14 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Study_Next = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var len, word, lastDate, data, familiar, lastDate_1, nextDate, msg;
+            var len, lastDate, data, familiar, lastDate_1, nextDate, msg;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         len = this.CurLearnLst.length;
                         if (!(len > 0)) return [3 /*break*/, 2];
-                        word = this.CurLearnLst[this.CurLearnPos];
-                        return [4 /*yield*/, this.usrProgress.GetLastDate(word)];
+                        this.curWord = this.CurLearnLst[this.CurLearnPos];
+                        return [4 /*yield*/, this.usrProgress.GetLastDate(this.curWord)];
                     case 1:
                         lastDate = _a.sent();
                         if (lastDate == null) {
@@ -272,17 +272,17 @@ var ReciteWordsApp = /** @class */ (function () {
                         else {
                             this.win.webContents.send("gui", "modifyValue", "score", "");
                         }
-                        data = this.WordsDict.get(word);
+                        data = this.WordsDict.get(this.curWord);
                         if (data != undefined) {
                             familiar = data[0];
                             lastDate_1 = data[1];
                             nextDate = data[2];
                             msg = "Familiar: " + familiar + ", LastDate: " + utils_1.formatDate(lastDate_1) + ", NextDate: " + utils_1.formatDate(nextDate);
-                            console.log("LearnWord: " + word + ", " + msg);
+                            console.log("LearnWord: " + this.curWord + ", " + msg);
                             this.win.webContents.send("gui", "modifyValue", "info", msg);
                         }
-                        this.Show_Content(word, true);
-                        this.Play_MP3(word);
+                        this.Show_Content(this.curWord, true);
+                        this.PlayAudio();
                         this.win.webContents.send("gui", "modifyValue", "numOfWords", this.CurLearnPos + 1 + " of " + len);
                         _a.label = 2;
                     case 2: return [2 /*return*/];
@@ -333,27 +333,25 @@ var ReciteWordsApp = /** @class */ (function () {
         }
     };
     ReciteWordsApp.prototype.Test_Next = function () {
-        var word = this.CurTestLst[this.CurTestPos];
-        var data = this.WordsDict.get(word);
+        this.curWord = this.CurTestLst[this.CurTestPos];
+        var data = this.WordsDict.get(this.curWord);
         if (data != undefined) {
             var familiar = data[0];
             var lastDate = data[1];
             var nextDate = data[2];
             var msg = "Familiar: " + familiar + ", LastDate: " + utils_1.formatDate(lastDate) + ", NextDate: " + utils_1.formatDate(nextDate);
-            console.log("TestWord: " + word + ", " + msg);
+            console.log("TestWord: " + this.curWord + ", " + msg);
             this.win.webContents.send("gui", "modifyValue", "info", msg);
         }
         this.win.webContents.send("gui", "modifyValue", "word", "");
-        this.Play_MP3(word);
         if (this.lastWord != "") {
             this.Show_Content(this.lastWord);
         }
+        this.PlayAudio();
         this.win.webContents.send("gui", "modifyValue", "numOfWords", this.CurTestPos + 1 + " of " + this.CurTestLst.length);
-        // this.CurTestPos += 1;
     };
     ReciteWordsApp.prototype.Check_Input = function (input_word) {
         if (this.Mode == "Study Mode") {
-            this.lastWord = this.CurLearnLst[this.CurLearnPos];
             this.CurLearnPos++;
             if (this.CurLearnPos < this.CurLearnLst.length) {
                 this.Study_Next();
@@ -368,16 +366,14 @@ var ReciteWordsApp = /** @class */ (function () {
             }
         }
         else {
-            // let input_word = this.win.webContents.send("gui", "getValue", "score");
-            var word = this.CurTestLst[this.CurTestPos];
-            if (input_word != word) {
+            if (input_word != this.curWord) {
                 this.ErrCount += 1;
                 this.win.webContents.send("gui", "modifyValue", "score", "Wrong " + this.ErrCount + "!");
                 console.log("ErrCount: " + this.ErrCount);
-                console.log("Right word: " + word + ", Wrong word: " + input_word + ".");
-                var data = this.WordsDict.get(word);
+                console.log("Right word: " + this.curWord + ", Wrong word: " + input_word + ".");
+                var data = this.WordsDict.get(this.curWord);
                 if (data === undefined) {
-                    throw new Error("${word} is not in WordsDict!");
+                    throw new Error(this.curWord + " is not in WordsDict!");
                 }
                 var familiar = data[0];
                 var lastDate = data[1];
@@ -388,16 +384,16 @@ var ReciteWordsApp = /** @class */ (function () {
                 }
                 else if (this.ErrCount < 3) {
                     // this.CurTestPos -= 1;
-                    this.WordsDict.set(word, [familiar - 1, lastDate, nextDate]);
+                    this.WordsDict.set(this.curWord, [familiar - 1, lastDate, nextDate]);
                 }
                 else {
-                    this.Play_MP3(word);
                     this.win.webContents.send("gui", "modifyValue", "word", "");
-                    this.Show_Content(word, true);
+                    this.Show_Content(this.curWord, true);
+                    this.PlayAudio();
                     this.win.webContents.send("gui", "modifyValue", "score", "Go on!");
-                    this.WordsDict.set(word, [familiar - 4, lastDate, nextDate]);
-                    this.LearnLst.push(word);
-                    console.log(word + " has been added in learn list.");
+                    this.WordsDict.set(this.curWord, [familiar - 4, lastDate, nextDate]);
+                    this.LearnLst.push(this.curWord);
+                    console.log(this.curWord + " has been added in learn list.");
                     this.ErrCount = 0;
                     this.win.webContents.send("gui", "modifyValue", "numOfLearn", this.LearnLst.length + " words to Learn!");
                     return;
@@ -406,7 +402,7 @@ var ReciteWordsApp = /** @class */ (function () {
             else {
                 this.win.webContents.send("gui", "modifyValue", "score", "OK!");
                 this.ErrCount = 0;
-                this.lastWord = word;
+                this.lastWord = this.curWord;
                 this.CurTestPos++;
             }
             if (this.CurTestPos < this.CurTestLst.length) {
@@ -421,45 +417,45 @@ var ReciteWordsApp = /** @class */ (function () {
         }
     };
     ReciteWordsApp.prototype.Chop = function () {
-        var word = "";
+        for (var i = 0; i < this.CurLearnLst.length; i++) {
+            if (this.CurLearnLst[i] == this.curWord) {
+                this.CurLearnLst.splice(i, 1);
+                i--;
+            }
+        }
+        for (var i = 0; i < this.LearnLst.length; i++) {
+            if (this.LearnLst[i] == this.curWord) {
+                this.LearnLst.splice(i, 1);
+                i--;
+            }
+        }
+        for (var i = 0; i < this.CurTestLst.length; i++) {
+            if (this.CurTestLst[i] == this.curWord) {
+                this.CurTestLst.splice(i, 1);
+                i--;
+            }
+        }
+        for (var i = 0; i < this.TestLst.length; i++) {
+            if (this.TestLst[i] == this.curWord) {
+                this.TestLst.splice(i, 1);
+                i--;
+            }
+        }
+        var data = this.WordsDict.get(this.curWord);
+        if (data != undefined) {
+            var lastDate = this.today;
+            var nextDate = data[2];
+            this.WordsDict.set(this.curWord, [10, lastDate, nextDate]);
+        }
+        console.log(this.curWord + " has been chopped!");
+        this.win.webContents.send("gui", "modifyValue", "numOfTest", this.TestLst.length + " words to Test!");
         if (this.Mode == "Study Mode") {
-            word = this.CurLearnLst[this.CurLearnPos];
-            for (var i = 0; i < this.CurLearnLst.length; i++) {
-                if (this.CurLearnLst[i] == word) {
-                    this.CurLearnLst.splice(i, 1);
-                    i--;
-                }
-            }
-            for (var i = 0; i < this.LearnLst.length; i++) {
-                if (this.LearnLst[i] == word) {
-                    this.LearnLst.splice(i, 1);
-                    i--;
-                }
-            }
-            for (var i = 0; i < this.CurTestLst.length; i++) {
-                if (this.CurTestLst[i] == word) {
-                    this.CurTestLst.splice(i, 1);
-                    i--;
-                }
-            }
-            for (var i = 0; i < this.TestLst.length; i++) {
-                if (this.TestLst[i] == word) {
-                    this.TestLst.splice(i, 1);
-                    i--;
-                }
-            }
-            var data = this.WordsDict.get(word);
-            if (data != undefined) {
-                var lastDate = this.today;
-                var nextDate = data[2];
-                this.WordsDict.set(word, [10, lastDate, nextDate]);
-            }
-            console.log(word + " has been chopped!");
-            this.win.webContents.send("gui", "modifyValue", "numOfTest", this.TestLst.length + " words to Test!");
-            this.lastWord = this.CurLearnLst[this.CurLearnPos - 1];
-            // this.CurLearnPos++;
+            this.lastWord = this.curWord;
             if (this.CurLearnPos < this.CurLearnLst.length) {
                 this.Study_Next();
+            }
+            else if (this.LearnLst.length > 0) {
+                this.GoStudyMode();
             }
             else {
                 this.CurCount = 1;
@@ -472,41 +468,8 @@ var ReciteWordsApp = /** @class */ (function () {
             }
         }
         else {
-            word = this.CurTestLst[this.CurTestPos];
-            for (var i = 0; i < this.CurLearnLst.length; i++) {
-                if (this.CurLearnLst[i] == word) {
-                    this.CurLearnLst.splice(i, 1);
-                    i--;
-                }
-            }
-            for (var i = 0; i < this.LearnLst.length; i++) {
-                if (this.LearnLst[i] == word) {
-                    this.LearnLst.splice(i, 1);
-                    i--;
-                }
-            }
-            for (var i = 0; i < this.CurTestLst.length; i++) {
-                if (this.CurTestLst[i] == word) {
-                    this.CurTestLst.splice(i, 1);
-                    i--;
-                }
-            }
-            for (var i = 0; i < this.TestLst.length; i++) {
-                if (this.TestLst[i] == word) {
-                    this.TestLst.splice(i, 1);
-                    i--;
-                }
-            }
-            var data = this.WordsDict.get(word);
-            if (data != undefined) {
-                var lastDate = this.today;
-                var nextDate = data[2];
-                this.WordsDict.set(word, [10, lastDate, nextDate]);
-            }
-            console.log(word + " has been chopped!");
-            this.win.webContents.send("gui", "modifyValue", "numOfTest", this.TestLst.length + " words to Test!");
-            this.lastWord = this.CurTestLst[this.CurTestPos - 1];
-            // this.CurTestPos++;
+            // this.lastWord = this.CurTestLst[this.CurTestPos - 1];
+            this.lastWord = this.curWord;
             if (this.CurTestPos < this.CurTestLst.length) {
                 this.Test_Next();
             }
@@ -518,35 +481,35 @@ var ReciteWordsApp = /** @class */ (function () {
         }
     };
     ReciteWordsApp.prototype.Forgoten = function () {
-        var word = "";
+        // let word = "";
         if (this.Mode == "Test Mode") {
             this.ErrCount = 0;
-            word = this.CurTestLst[this.CurTestPos];
+            // word = this.CurTestLst[this.CurTestPos];
             for (var i = 0; i < this.CurTestLst.length; i++) {
-                if (this.CurTestLst[i] == word) {
+                if (this.CurTestLst[i] == this.curWord) {
                     this.CurTestLst.splice(i, 1);
                     i--;
                 }
             }
             for (var i = 0; i < this.TestLst.length; i++) {
-                if (this.TestLst[i] == word) {
+                if (this.TestLst[i] == this.curWord) {
                     this.TestLst.splice(i, 1);
                     i--;
                 }
             }
-            var data = this.WordsDict.get(word);
+            var data = this.WordsDict.get(this.curWord);
             if (data != undefined) {
                 var familiar = data[0];
                 var lastDate = this.today;
                 var nextDate = new Date();
                 // nextDate.setDate(this.today.getDate() - Number(this.timeDayLst[0]));
-                this.WordsDict.set(word, [familiar - 5, lastDate, nextDate]);
+                this.WordsDict.set(this.curWord, [familiar - 5, lastDate, nextDate]);
             }
-            this.LearnLst.push(word);
-            console.log(word + " has been added in learn list.");
+            this.LearnLst.push(this.curWord);
+            console.log(this.curWord + " has been added in learn list.");
             this.win.webContents.send("gui", "modifyValue", "numOfLearn", this.LearnLst.length + " words to Learn!");
-            console.log(word + " is forgotten!");
-            this.lastWord = this.CurTestLst[this.CurTestPos - 1];
+            console.log(this.curWord + " is forgotten!");
+            this.lastWord = this.curWord;
             if (this.CurTestPos < this.CurTestLst.length) {
                 this.Test_Next();
             }
@@ -556,52 +519,44 @@ var ReciteWordsApp = /** @class */ (function () {
                 this.GoTestMode();
             }
         }
-        return word;
+        return this.curWord;
     };
     ReciteWordsApp.prototype.Clear_Content = function () {
         this.win.webContents.send("gui", "modifyValue", "word", "");
         this.win.webContents.send("gui", "modifyValue", "symbol", "");
         this.win.webContents.send("gui", "modifyValue", "txtArea", "");
     };
-    ReciteWordsApp.prototype.Play_Again = function () {
-        /*let word = "";
-        if (this.Mode == "Study Mode") {
-            word = this.CurLearnLst[this.CurLearnPos];
-        }
-        else {
-            word = this.CurTestLst[this.CurTestPos];
-        }
-        this.Play_MP3(word);*/
-        this.win.webContents.send("gui", "playAudio");
-    };
     // To-Do
-    ReciteWordsApp.prototype.Play_MP3 = function (word) {
+    ReciteWordsApp.prototype.PlayAudio = function () {
         return __awaiter(this, void 0, void 0, function () {
             var retAudio, audioFile;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        if (!(word == this.lastWord)) return [3 /*break*/, 1];
+                        if (!(this.curWord == this.lastWord)) return [3 /*break*/, 1];
                         this.win.webContents.send("gui", "playAudio");
-                        return [2 /*return*/, true];
+                        return [2 /*return*/, Promise.resolve(true)];
                     case 1:
                         retAudio = -1;
                         audioFile = "";
-                        return [4 /*yield*/, this.audioBase.query_audio(word)];
+                        return [4 /*yield*/, this.audioBase.query_audio(this.curWord)];
                     case 2:
                         _a = _b.sent(), retAudio = _a[0], audioFile = _a[1];
                         if (retAudio <= 0) {
                             this.logger.error(audioFile);
                             audioFile = path.join(this.startPath, "audio", "WrongHint.mp3");
+                            console.log(audioFile);
                             this.win.webContents.send("gui", "loadAndPlayAudio", audioFile.replace(/\\/g, '/'));
-                            this.curWord = word;
-                            return [2 /*return*/, false];
+                            return [2 /*return*/, Promise.resolve(false)];
                         }
                         else {
                             this.win.webContents.send("gui", "loadAndPlayAudio", audioFile.replace(/\\/g, '/'));
+                            if (this.Mode == "Study Mode") {
+                                this.lastWord = this.curWord;
+                            }
                         }
-                        return [2 /*return*/, true];
+                        return [2 /*return*/, Promise.resolve(true)];
                 }
             });
         });
@@ -848,7 +803,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         globalShortcut.register('Enter', () => {
                         });*/
                         electron_1.globalShortcut.register('F5', function () {
-                            _this_1.Play_Again();
+                            _this_1.PlayAudio();
                         });
                         electron_1.globalShortcut.register('F6', function () {
                             _this_1.Forgoten();

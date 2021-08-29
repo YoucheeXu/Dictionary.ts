@@ -28,7 +28,7 @@ export class ReciteWordsApp {
     private audioBase: AuidoArchive;
     private usrProgress: UsrProgress;
 
-	private dictBase: SDictBase;
+    private dictBase: SDictBase;
 
     private win: BrowserWindow;
 
@@ -191,7 +191,7 @@ export class ReciteWordsApp {
     private initDict() {
         try {
             let dictCfg = this.cfg["DictBase"]["DictBase"];
-			let dict = dictCfg["Dict"];
+            let dict = dictCfg["Dict"];
             let dictFile = path.join(this.startPath, dict).replace(/\\/g, '/');
             console.log(`dict: ${dictFile}`);
             this.dictBase = new SDictBase(dictFile);
@@ -242,9 +242,9 @@ export class ReciteWordsApp {
     private async Study_Next() {
         let len = this.CurLearnLst.length;
         if (len > 0) {
-            let word = this.CurLearnLst[this.CurLearnPos];
+            this.curWord = this.CurLearnLst[this.CurLearnPos];
 
-            let lastDate = await this.usrProgress.GetLastDate(word);
+            let lastDate = await this.usrProgress.GetLastDate(this.curWord);
 
             if (lastDate == null) {
                 this.win.webContents.send("gui", "modifyValue", "score", "New!");
@@ -253,18 +253,18 @@ export class ReciteWordsApp {
                 this.win.webContents.send("gui", "modifyValue", "score", "");
             }
 
-            let data = this.WordsDict.get(word);
+            let data = this.WordsDict.get(this.curWord);
             if (data != undefined) {
                 let familiar = data[0];
                 let lastDate = data[1];
                 let nextDate = data[2];
                 let msg = `Familiar: ${familiar}, LastDate: ${formatDate(lastDate)}, NextDate: ${formatDate(nextDate)}`;
-                console.log(`LearnWord: ${word}, ${msg}`);
+                console.log(`LearnWord: ${this.curWord}, ${msg}`);
                 this.win.webContents.send("gui", "modifyValue", "info", msg);
             }
 
-            this.Show_Content(word, true);
-            this.Play_MP3(word);
+            this.Show_Content(this.curWord, true);
+            this.PlayAudio();
 
             this.win.webContents.send("gui", "modifyValue", "numOfWords", `${this.CurLearnPos + 1} of ${len}`);
 
@@ -317,33 +317,30 @@ export class ReciteWordsApp {
     }
 
     private Test_Next() {
-        let word = this.CurTestLst[this.CurTestPos];
+        this.curWord = this.CurTestLst[this.CurTestPos];
 
-        let data = this.WordsDict.get(word);
+        let data = this.WordsDict.get(this.curWord);
         if (data != undefined) {
             let familiar = data[0];
             let lastDate = data[1];
             let nextDate = data[2];
             let msg = `Familiar: ${familiar}, LastDate: ${formatDate(lastDate)}, NextDate: ${formatDate(nextDate)}`;
-            console.log(`TestWord: ${word}, ${msg}`);
+            console.log(`TestWord: ${this.curWord}, ${msg}`);
             this.win.webContents.send("gui", "modifyValue", "info", msg);
         }
 
         this.win.webContents.send("gui", "modifyValue", "word", "");
-        this.Play_MP3(word);
 
         if (this.lastWord != "") {
             this.Show_Content(this.lastWord);
         }
+        this.PlayAudio();
 
         this.win.webContents.send("gui", "modifyValue", "numOfWords", `${this.CurTestPos + 1} of ${this.CurTestLst.length}`);
-
-        // this.CurTestPos += 1;
     }
 
     private Check_Input(input_word: string) {
         if (this.Mode == "Study Mode") {
-            this.lastWord = this.CurLearnLst[this.CurLearnPos];
             this.CurLearnPos++;
             if (this.CurLearnPos < this.CurLearnLst.length) {
                 this.Study_Next();
@@ -358,17 +355,15 @@ export class ReciteWordsApp {
             }
         }
         else {
-            // let input_word = this.win.webContents.send("gui", "getValue", "score");
-            let word = this.CurTestLst[this.CurTestPos];
-            if (input_word != word) {
+            if (input_word != this.curWord) {
                 this.ErrCount += 1;
                 this.win.webContents.send("gui", "modifyValue", "score", `Wrong ${this.ErrCount}!`);
                 console.log(`ErrCount: ${this.ErrCount}`);
-                console.log(`Right word: ${word}, Wrong word: ${input_word}.`);
+                console.log(`Right word: ${this.curWord}, Wrong word: ${input_word}.`);
 
-                let data = this.WordsDict.get(word);
+                let data = this.WordsDict.get(this.curWord);
                 if (data === undefined) {
-                    throw new Error("${word} is not in WordsDict!");
+                    throw new Error(`${this.curWord} is not in WordsDict!`);
                 }
                 let familiar = data[0];
                 let lastDate = data[1];
@@ -380,17 +375,17 @@ export class ReciteWordsApp {
                 }
                 else if (this.ErrCount < 3) {
                     // this.CurTestPos -= 1;
-                    this.WordsDict.set(word, [familiar - 1, lastDate, nextDate]);
+                    this.WordsDict.set(this.curWord, [familiar - 1, lastDate, nextDate]);
                 }
                 else {
-                    this.Play_MP3(word);
                     this.win.webContents.send("gui", "modifyValue", "word", "");
-                    this.Show_Content(word, true);
+                    this.Show_Content(this.curWord, true);
+                    this.PlayAudio();
 
                     this.win.webContents.send("gui", "modifyValue", "score", "Go on!");
-                    this.WordsDict.set(word, [familiar - 4, lastDate, nextDate]);
-                    this.LearnLst.push(word);
-                    console.log(word + " has been added in learn list.");
+                    this.WordsDict.set(this.curWord, [familiar - 4, lastDate, nextDate]);
+                    this.LearnLst.push(this.curWord);
+                    console.log(this.curWord + " has been added in learn list.");
                     this.ErrCount = 0;
                     this.win.webContents.send("gui", "modifyValue", "numOfLearn", `${this.LearnLst.length} words to Learn!`);
                     return;
@@ -399,7 +394,7 @@ export class ReciteWordsApp {
             else {
                 this.win.webContents.send("gui", "modifyValue", "score", "OK!");
                 this.ErrCount = 0;
-                this.lastWord = word;
+                this.lastWord = this.curWord;
                 this.CurTestPos++;
             }
 
@@ -416,53 +411,51 @@ export class ReciteWordsApp {
     }
 
     private Chop() {
-        let word = "";
+        for (var i = 0; i < this.CurLearnLst.length; i++) {
+            if (this.CurLearnLst[i] == this.curWord) {
+                this.CurLearnLst.splice(i, 1);
+                i--;
+            }
+        }
+
+        for (var i = 0; i < this.LearnLst.length; i++) {
+            if (this.LearnLst[i] == this.curWord) {
+                this.LearnLst.splice(i, 1);
+                i--;
+            }
+        }
+
+        for (var i = 0; i < this.CurTestLst.length; i++) {
+            if (this.CurTestLst[i] == this.curWord) {
+                this.CurTestLst.splice(i, 1);
+                i--;
+            }
+        }
+
+        for (var i = 0; i < this.TestLst.length; i++) {
+            if (this.TestLst[i] == this.curWord) {
+                this.TestLst.splice(i, 1);
+                i--;
+            }
+        }
+
+        let data = this.WordsDict.get(this.curWord);
+        if (data != undefined) {
+            let lastDate = this.today;
+            let nextDate = data[2];
+            this.WordsDict.set(this.curWord, [10, lastDate, nextDate]);
+        }
+        console.log(`${this.curWord} has been chopped!`);
+        this.win.webContents.send("gui", "modifyValue", "numOfTest", `${this.TestLst.length} words to Test!`);
+
         if (this.Mode == "Study Mode") {
-            word = this.CurLearnLst[this.CurLearnPos];
+            this.lastWord = this.curWord;
 
-            for (var i = 0; i < this.CurLearnLst.length; i++) {
-                if (this.CurLearnLst[i] == word) {
-                    this.CurLearnLst.splice(i, 1);
-                    i--;
-                }
-            }
-
-            for (var i = 0; i < this.LearnLst.length; i++) {
-                if (this.LearnLst[i] == word) {
-                    this.LearnLst.splice(i, 1);
-                    i--;
-                }
-            }
-
-            for (var i = 0; i < this.CurTestLst.length; i++) {
-                if (this.CurTestLst[i] == word) {
-                    this.CurTestLst.splice(i, 1);
-                    i--;
-                }
-            }
-
-            for (var i = 0; i < this.TestLst.length; i++) {
-                if (this.TestLst[i] == word) {
-                    this.TestLst.splice(i, 1);
-                    i--;
-                }
-            }
-
-            let data = this.WordsDict.get(word);
-            if (data != undefined) {
-                let lastDate = this.today;
-                let nextDate = data[2];
-                this.WordsDict.set(word, [10, lastDate, nextDate]);
-            }
-
-            console.log(`${word} has been chopped!`);
-            this.win.webContents.send("gui", "modifyValue", "numOfTest", `${this.TestLst.length} words to Test!`);
-
-            this.lastWord = this.CurLearnLst[this.CurLearnPos - 1];
-
-            // this.CurLearnPos++;
             if (this.CurLearnPos < this.CurLearnLst.length) {
                 this.Study_Next();
+            }
+            else if (this.LearnLst.length > 0) {
+                this.GoStudyMode();
             }
             else {
                 this.CurCount = 1;
@@ -475,48 +468,9 @@ export class ReciteWordsApp {
             }
         }
         else {
-            word = this.CurTestLst[this.CurTestPos];
+            // this.lastWord = this.CurTestLst[this.CurTestPos - 1];
+            this.lastWord = this.curWord;
 
-            for (var i = 0; i < this.CurLearnLst.length; i++) {
-                if (this.CurLearnLst[i] == word) {
-                    this.CurLearnLst.splice(i, 1);
-                    i--;
-                }
-            }
-
-            for (var i = 0; i < this.LearnLst.length; i++) {
-                if (this.LearnLst[i] == word) {
-                    this.LearnLst.splice(i, 1);
-                    i--;
-                }
-            }
-
-            for (var i = 0; i < this.CurTestLst.length; i++) {
-                if (this.CurTestLst[i] == word) {
-                    this.CurTestLst.splice(i, 1);
-                    i--;
-                }
-            }
-
-            for (var i = 0; i < this.TestLst.length; i++) {
-                if (this.TestLst[i] == word) {
-                    this.TestLst.splice(i, 1);
-                    i--;
-                }
-            }
-
-            let data = this.WordsDict.get(word);
-            if (data != undefined) {
-                let lastDate = this.today;
-                let nextDate = data[2];
-                this.WordsDict.set(word, [10, lastDate, nextDate]);
-            }
-            console.log(`${word} has been chopped!`);
-            this.win.webContents.send("gui", "modifyValue", "numOfTest", `${this.TestLst.length} words to Test!`);
-
-            this.lastWord = this.CurTestLst[this.CurTestPos - 1];
-
-            // this.CurTestPos++;
             if (this.CurTestPos < this.CurTestLst.length) {
                 this.Test_Next();
             }
@@ -529,44 +483,44 @@ export class ReciteWordsApp {
     }
 
     private Forgoten() {
-        let word = "";
+        // let word = "";
 
         if (this.Mode == "Test Mode") {
 
             this.ErrCount = 0;
 
-            word = this.CurTestLst[this.CurTestPos];
+            // word = this.CurTestLst[this.CurTestPos];
 
             for (var i = 0; i < this.CurTestLst.length; i++) {
-                if (this.CurTestLst[i] == word) {
+                if (this.CurTestLst[i] == this.curWord) {
                     this.CurTestLst.splice(i, 1);
                     i--;
                 }
             }
 
             for (var i = 0; i < this.TestLst.length; i++) {
-                if (this.TestLst[i] == word) {
+                if (this.TestLst[i] == this.curWord) {
                     this.TestLst.splice(i, 1);
                     i--;
                 }
             }
 
-            let data = this.WordsDict.get(word);
+            let data = this.WordsDict.get(this.curWord);
             if (data != undefined) {
                 let familiar = data[0];
                 let lastDate = this.today;
                 let nextDate = new Date();
                 // nextDate.setDate(this.today.getDate() - Number(this.timeDayLst[0]));
-                this.WordsDict.set(word, [familiar - 5, lastDate, nextDate]);
+                this.WordsDict.set(this.curWord, [familiar - 5, lastDate, nextDate]);
             }
 
-            this.LearnLst.push(word);
-            console.log(word + " has been added in learn list.");
+            this.LearnLst.push(this.curWord);
+            console.log(this.curWord + " has been added in learn list.");
             this.win.webContents.send("gui", "modifyValue", "numOfLearn", `${this.LearnLst.length} words to Learn!`);
 
-            console.log(word + " is forgotten!");
+            console.log(this.curWord + " is forgotten!");
 
-            this.lastWord = this.CurTestLst[this.CurTestPos - 1];
+            this.lastWord = this.curWord;
 
             if (this.CurTestPos < this.CurTestLst.length) {
                 this.Test_Next();
@@ -577,7 +531,7 @@ export class ReciteWordsApp {
                 this.GoTestMode();
             }
         }
-        return word;
+        return this.curWord;
     }
 
     private Clear_Content() {
@@ -586,39 +540,30 @@ export class ReciteWordsApp {
         this.win.webContents.send("gui", "modifyValue", "txtArea", "");
     }
 
-    private Play_Again() {
-        /*let word = "";
-        if (this.Mode == "Study Mode") {
-            word = this.CurLearnLst[this.CurLearnPos];
-        }
-        else {
-            word = this.CurTestLst[this.CurTestPos];
-        }
-        this.Play_MP3(word);*/
-        this.win.webContents.send("gui", "playAudio");
-    }
-
     // To-Do
-    private async Play_MP3(word: string): Promise<boolean> {
-        if (word == this.lastWord) {
+    private async PlayAudio(): Promise<boolean> {
+        if (this.curWord == this.lastWord) {
             this.win.webContents.send("gui", "playAudio");
-            return true;
+            return Promise.resolve(true);
         }
         else {
             let retAudio = -1;
             let audioFile = "";
-            [retAudio, audioFile] = await this.audioBase.query_audio(word);
+            [retAudio, audioFile] = await this.audioBase.query_audio(this.curWord);
             if (retAudio <= 0) {
                 this.logger.error(audioFile);
                 audioFile = path.join(this.startPath, "audio", "WrongHint.mp3");
+                console.log(audioFile);
                 this.win.webContents.send("gui", "loadAndPlayAudio", audioFile.replace(/\\/g, '/'));
-                this.curWord = word;
-                return false;
+                return Promise.resolve(false);
             }
             else {
                 this.win.webContents.send("gui", "loadAndPlayAudio", audioFile.replace(/\\/g, '/'));
+                if (this.Mode == "Study Mode") {
+                    this.lastWord = this.curWord;
+                }
             }
-            return true;
+            return Promise.resolve(true);
         }
     }
 
@@ -685,16 +630,16 @@ export class ReciteWordsApp {
                     this.usrProgress.NewTable(level);
                 }
 
-				let wordsCfg = this.cfg["DictBase"]["WordsDict"];
-				let words = wordsCfg["Dict"];
-				let wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
-				console.log(`words: ${wordsFile}`);
-				let wordsDict = new WordsDict();
-				wordsDict.Open(wordsFile);
+                let wordsCfg = this.cfg["DictBase"]["WordsDict"];
+                let words = wordsCfg["Dict"];
+                let wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
+                console.log(`words: ${wordsFile}`);
+                let wordsDict = new WordsDict();
+                wordsDict.Open(wordsFile);
 
                 let lvlWordsLst: string[] = new Array();
                 let ret = await wordsDict.GetWordsLst(lvlWordsLst, level);
-				wordsDict.Close();
+                wordsDict.Close();
                 if (ret) {
                     for (let word of lvlWordsLst) {
                         // console.log("Going to insert: " + word);
@@ -798,7 +743,7 @@ export class ReciteWordsApp {
         globalShortcut.register('Enter', () => {
         });*/
         globalShortcut.register('F5', () => {
-            this.Play_Again();
+            this.PlayAudio();
         });
         globalShortcut.register('F6', () => {
             this.Forgoten();

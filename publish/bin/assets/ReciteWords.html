@@ -406,7 +406,7 @@
                 }
 
                 let command = `${fun}(${parasStr})`;
-                console.log('command: ' + command);
+                // console.log('command: ' + command);
                 eval(command);
 
                 event.returnValue = 'true';
@@ -576,7 +576,7 @@
 
         let againBtn = document.getElementById('againBtn');
         againBtn.onclick = function () {
-            ipcRenderer.send('ReciteWordsApp', 'Play_Again');
+            ipcRenderer.send('ReciteWordsApp', 'PlayAudio');
         }
         let forgetBtn = document.getElementById('forgetBtn');
         forgetBtn.onclick = function () {
@@ -636,11 +636,11 @@
         function modifyValue(id, valueStr) {
             let ele = document.getElementById(id);
             if (ele.value === undefined) {
-                console.log(`innerHTML of ${id}: ${ele.innerHTML}`);
+                // console.log(`innerHTML of ${id}: ${ele.innerHTML}`);
                 ele.innerHTML = valueStr;
             }
             else {
-                console.log(`value of ${id}: ${ele.value} to ${valueStr}.`);
+                // console.log(`value of ${id}: ${ele.value} to ${valueStr}.`);
                 ele.value = valueStr;
             }
         }

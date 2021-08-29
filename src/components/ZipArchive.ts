@@ -118,16 +118,11 @@ export class ZipArchive {
         return wdMatchLst.length;
     }
 
-    public readFileSync(fileName: string): [boolean, string | null] {
+    public readFileSync(fileName: string): [boolean, string] {
         if (this.bFileIn(fileName) == false) {
-            return [false, null];
+            return [false, `%{fileName} desn't exist.`];
         }
-
         try {
-            // with ZipFile(self.__zip, 'a', ZIP_DEFLATED, compresslevel = 2) as zipf:
-            // 	file = zipf.read(fileName)
-
-            // this.zip.file(fileName)!.async("string").then(
             this.zip.file(fileName)!.async("blob").then(
                 (content) => {
                     return [true, content];

@@ -180,12 +180,9 @@ var ZipArchive = /** @class */ (function () {
     };
     ZipArchive.prototype.readFileSync = function (fileName) {
         if (this.bFileIn(fileName) == false) {
-            return [false, null];
+            return [false, "%{fileName} desn't exist."];
         }
         try {
-            // with ZipFile(self.__zip, 'a', ZIP_DEFLATED, compresslevel = 2) as zipf:
-            // 	file = zipf.read(fileName)
-            // this.zip.file(fileName)!.async("string").then(
             this.zip.file(fileName).async("blob").then(function (content) {
                 return [true, content];
             });

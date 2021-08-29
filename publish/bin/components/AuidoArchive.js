@@ -68,7 +68,7 @@ var AuidoArchive = /** @class */ (function () {
         this.audioSrc = audioSrc;
         this.compression = compression;
         this.compresslevel = compresslevel;
-        this.bWritable = true;
+        this.bWritable = false;
         this.audioArchive = path.basename(audioSrc);
         // console.log(this.audioArchive);
         var filePath = path.dirname(audioSrc);
@@ -114,37 +114,35 @@ var AuidoArchive = /** @class */ (function () {
                         if (!this.audioZip.bFileIn(fileName)) return [3 /*break*/, 4];
                         return [4 /*yield*/, this.audioZip.readFileAsync(fileName)];
                     case 3:
-                        // [ret, audio] = this.audioZip.readFile(fileName);
                         _a = _b.sent(), ret = _a[0], audio = _a[1];
                         if (ret) {
                             try {
                                 fs.writeFileSync(audioFile, audio);
                             }
                             catch (e) {
-                                return [2 /*return*/, Promise.reject([-1, e.message])];
+                                return [2 /*return*/, Promise.resolve([-1, e.message])];
                             }
                             return [2 /*return*/, Promise.resolve([1, audioFile])];
                         }
                         else {
-                            return [2 /*return*/, Promise.reject([-1, "Fail to read " + word + " in " + this.audioArchive + "!"])];
+                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.audioArchive + "!"])];
                         }
                         return [3 /*break*/, 5];
                     case 4:
                         if (this.bWritable) {
                             audioURL = "https://ssl.gstatic.com/dictionary/static/sounds/oxford/" + word + "--_us_1.mp3";
-                            // download_file(gApp.GetWindow(), audioURL, audioFile, this, this.notify);
                             globalInterface_1.globalVar.dQueue.AddQueue(audioURL, audioFile, this, this.notify);
                             audioFile = "audio of " + word + " is downloading.";
                             return [2 /*return*/, Promise.resolve([0, audioFile])];
                         }
                         else {
-                            return [2 /*return*/, Promise.reject([-1, "no audio in " + this.audioArchive])];
+                            return [2 /*return*/, Promise.resolve([-1, "no audio of " + word + " in " + this.audioArchive])];
                         }
                         _b.label = 5;
                     case 5: return [3 /*break*/, 7];
                     case 6:
                         e_1 = _b.sent();
-                        return [2 /*return*/, Promise.reject([-1, e_1.message])];
+                        return [2 /*return*/, Promise.resolve([-1, e_1.message])];
                     case 7: return [2 /*return*/];
                 }
             });
