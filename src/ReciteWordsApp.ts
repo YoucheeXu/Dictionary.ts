@@ -857,12 +857,32 @@ export class ReciteWordsApp {
         this.logger.info(`got ${this.WordsDict.size - numOfWords} due words.`);
         numOfWords = this.WordsDict.size;
 
+		// get forgotten words
+		console.log("starting to get forgotten words");
+        wdsLst.length = 0;
+		await this.usrProgress.GetForgottenWordsLst(wdsLst)
+		for (let wd of wdsLst) {
+			this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+			console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+			// this.LearnLst.push(wd.Word);
+		}
+		this.logger.info(`got ${this.WordsDict.size - numOfWords} extra forgotten words.`);
+		numOfWords = this.WordsDict.size;
+
         // get new words
         console.log("starting to get new words");
-        wdsLst.length = 0;
-        limit = Math.min(allLimit - this.WordsDict.size, newWdsLimit);
+		let forgottenNum = 0
+		this.WordsDict.forEach(([familiar, lastDate, nextDate], word) => {
+            if (familiar < 0) {
+                forgottenNum++;
+				this.LearnLst.push(word);
+            }
+        });
+
+        limit = newWdsLimit - forgottenNum;
 
         if (limit > 0) {
+			wdsLst.length = 0;
             if (await this.usrProgress.GetNewWordsLst(wdsLst, limit)) {
                 for (let wd of wdsLst) {
                     this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
@@ -870,22 +890,17 @@ export class ReciteWordsApp {
                     this.LearnLst.push(wd.Word);
                 }
             }
+			this.logger.info(`got ${wdsLst.length} new words.`);
         }
-        this.logger.info(`got ${this.WordsDict.size - numOfWords} new words.`);
 
-        // complement learn list
-        this.WordsDict.forEach(([familiar, lastDate, nextDate], word) => {
-            if (familiar < 0) {
-                this.LearnLst.push(word);
-            }
-        });
+        // random learn list
         randomArray2(this.LearnLst);
         this.logger.info(`len of LearnList: ${this.LearnLst.length}.`);
 
+		// complement test list
         for (let word of Array.from(this.WordsDict.keys())) {
             this.TestLst.push(word);
         }
-
         // random test list
         this.TestLst = randomArray(this.TestLst);
         this.logger.info(`len of TestList: ${this.TestLst.length}.`);
@@ -984,18 +999,15 @@ export class ReciteWordsApp {
             let [word, [familiar, lastDate, nextDate]] = r.value;
             familiar += 1.0;
 
-            if (familiar > 10) {
+            if (familiar >= 10) {
                 familiar = 10.0;
+				nFnshd++;
             }
             else if (familiar < -10) {
                 familiar = -10.0;
             }
 
             familiar = Number(familiar.toFixed(1));
-
-            if (familiar >= 10) {
-                nFnshd++;
-            }
 
             // calc next date
             if (lastDate != null && nextDate != null) {
@@ -1010,11 +1022,11 @@ export class ReciteWordsApp {
                     index = this.timeDayLst.indexOf(interval)
                     if (index != -1) {
                         index++;
-                        if (index >= this.timeDayLst.length) {
+                        if (index >= this.timeDayLst.length) {	// next round
                             index = 0;
                         }
                     }
-                    else {
+                    else {	// error
                         index = 0;
                     }
                 }
@@ -1022,9 +1034,14 @@ export class ReciteWordsApp {
                     index = 0;
                 }
             }
-            else {
+            else {	// new word
                 index = 0;
             }
+
+			if (familiar < 0){	// forgotten word
+				index = 0;
+			}
+
             nextInterval = this.timeDayLst[index];
             nextDate = new Date();
             // Object.assign(nextDate, this.today);

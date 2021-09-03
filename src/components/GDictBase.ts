@@ -128,7 +128,7 @@ export class GDictBase extends DictBase {
                 }
             }
             else {
-                return gApp.info(-1, 1, word, "No word in dictionary.");
+                return gApp.info(-1, 1, word, `No dict of ${word} in ${this.dictArchive}.`);
             }
         }
         else {

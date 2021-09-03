@@ -366,18 +366,21 @@ var UsrProgress = /** @class */ (function () {
             });
         });
     };
-    UsrProgress.prototype.GetForgottenWordsLst = function (wdsLst, today) {
+    UsrProgress.prototype.GetForgottenWordsLst = function (wdsLst) {
         return __awaiter(this, void 0, void 0, function () {
-            var familiar, sql;
+            var familiar, sql, e_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         familiar = 0;
                         sql = "select * from " + this.level + " where cast (Familiar as real) < " + String(familiar);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
                         return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
                                 wdsLst.push(row);
                             })];
-                    case 1:
+                    case 2:
                         _a.sent();
                         if (wdsLst.length >= 1) {
                             return [2 /*return*/, true];
@@ -385,7 +388,12 @@ var UsrProgress = /** @class */ (function () {
                         else {
                             return [2 /*return*/, false];
                         }
-                        return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        e_2 = _a.sent();
+                        console.error(e_2);
+                        return [2 /*return*/, false];
+                    case 4: return [2 /*return*/];
                 }
             });
         });

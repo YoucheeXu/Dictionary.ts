@@ -204,7 +204,7 @@ var GDictBase = /** @class */ (function (_super) {
                 }
             }
             else {
-                return gApp.info(-1, 1, word, "No word in dictionary.");
+                return gApp.info(-1, 1, word, "No dict of " + word + " in " + this.dictArchive + ".");
             }
         }
         else {

@@ -242,22 +242,27 @@ export class UsrProgress {
     }
 
 
-    public async GetForgottenWordsLst(wdsLst: string[], today: string) {
+    public async GetForgottenWordsLst(wdsLst: string[]) {
 
         let familiar = 0;
 
         let sql = `select * from ${this.level} where cast (Familiar as real) < ${String(familiar)}`;
 
-        await this.dataBase.each(sql, [], (row: any) => {
-            wdsLst.push(row);
-        });
+		try{
+			await this.dataBase.each(sql, [], (row: any) => {
+				wdsLst.push(row);
+			});
 
-        if (wdsLst.length >= 1) {
-            return true;
-        }
-        else {
-            return false;
-        }
+			if (wdsLst.length >= 1) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		} catch(e){
+			console.error(e);
+			return false;
+		}
     }
 
     public async GetOvrDueWordsLst(wdsLst: string[], today: string) {
