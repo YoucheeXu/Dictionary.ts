@@ -219,14 +219,9 @@ export class ReciteWordsApp {
 
         this.CurLearnPos = 0;
         let len = this.LearnLst.length;
-        if (len > 10) {
-            // this.CurLearnLst = this.LearnLst.slice(0, 10);
-            this.CurLearnLst = this.LearnLst.splice(0, 10);
-        }
-        else if (len > 0) {
-            // this.CurLearnLst = (this.LearnLst || []).concat();
-            // this.LearnLst = [];
-            this.CurLearnLst = this.LearnLst.splice(0, len);
+        if (len > 0) {
+            let limit = Math.min(10, len);
+            this.CurLearnLst = this.LearnLst.splice(0, limit);
         }
         else {
             this.CurLearnLst.length = 0;
@@ -290,16 +285,9 @@ export class ReciteWordsApp {
             this.win.webContents.send("gui", "DisaOrEnaBtn", "forgetBtn");
             this.GoStudyMode();
         }
-        else if (len > 10) {
-            this.CurTestLst = this.TestLst.splice(0, 10);
-            this.win.webContents.send("gui", "modifyValue", "numOfTest", `${this.TestLst.length} words to Test!`);
-            this.CurTestPos = 0;
-            this.CurCount = 1;
-            this.win.webContents.send("gui", "modifyValue", "count", `Count: ${this.CurCount} of ${this.TestCount}`);
-            this.Test_Next();
-        }
         else if (len > 0) {
-            this.CurTestLst = this.TestLst.splice(0, len);
+            let limit = Math.min(10, len);
+            this.CurTestLst = this.TestLst.splice(0, limit);
             this.win.webContents.send("gui", "modifyValue", "numOfTest", `${this.TestLst.length} words to Test!`);
             this.CurTestPos = 0;
             this.CurCount = 1;
