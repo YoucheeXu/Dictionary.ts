@@ -454,13 +454,12 @@ var ReciteWordsApp = /** @class */ (function () {
             if (this.CurLearnPos < this.CurLearnLst.length) {
                 this.Study_Next();
             }
-            else if (this.LearnLst.length > 0) {
+            else if (this.LearnLst.length > 0 && this.CurLearnLst.length == 0) {
                 this.GoStudyMode();
             }
             else {
                 this.CurCount = 1;
                 console.log("curCount: " + this.CurCount);
-                // this.GoStudyMode();
                 this.CurTestLst = (this.CurLearnLst || []).concat();
                 // this.win.webContents.send("gui", "modifyAttr", "forgetBtn", "disabled", false);
                 this.win.webContents.send("gui", "DisaOrEnaBtn", "forgetBtn", false);

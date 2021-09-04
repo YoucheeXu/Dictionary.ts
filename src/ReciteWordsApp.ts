@@ -244,6 +244,7 @@ export class ReciteWordsApp {
         if (len > 0) {
             this.curWord = this.CurLearnLst[this.CurLearnPos];
 
+            // TODO: get 'lastDate' from 'this.WordsDict'
             let lastDate = await this.usrProgress.GetLastDate(this.curWord);
 
             if (lastDate == null) {
@@ -454,13 +455,12 @@ export class ReciteWordsApp {
             if (this.CurLearnPos < this.CurLearnLst.length) {
                 this.Study_Next();
             }
-            else if (this.LearnLst.length > 0) {
+            else if (this.LearnLst.length > 0 && this.CurLearnLst.length == 0) {
                 this.GoStudyMode();
             }
             else {
                 this.CurCount = 1;
                 console.log(`curCount: ${this.CurCount}`);
-                // this.GoStudyMode();
                 this.CurTestLst = (this.CurLearnLst || []).concat();
                 // this.win.webContents.send("gui", "modifyAttr", "forgetBtn", "disabled", false);
                 this.win.webContents.send("gui", "DisaOrEnaBtn", "forgetBtn", false);
@@ -857,32 +857,32 @@ export class ReciteWordsApp {
         this.logger.info(`got ${this.WordsDict.size - numOfWords} due words.`);
         numOfWords = this.WordsDict.size;
 
-		// get forgotten words
-		console.log("starting to get forgotten words");
+        // get forgotten words
+        console.log("starting to get forgotten words");
         wdsLst.length = 0;
-		await this.usrProgress.GetForgottenWordsLst(wdsLst)
-		for (let wd of wdsLst) {
-			this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-			console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-			// this.LearnLst.push(wd.Word);
-		}
-		this.logger.info(`got ${this.WordsDict.size - numOfWords} extra forgotten words.`);
-		numOfWords = this.WordsDict.size;
+        await this.usrProgress.GetForgottenWordsLst(wdsLst)
+        for (let wd of wdsLst) {
+            this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+            console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+            // this.LearnLst.push(wd.Word);
+        }
+        this.logger.info(`got ${this.WordsDict.size - numOfWords} extra forgotten words.`);
+        numOfWords = this.WordsDict.size;
 
         // get new words
         console.log("starting to get new words");
-		let forgottenNum = 0
-		this.WordsDict.forEach(([familiar, lastDate, nextDate], word) => {
+        let forgottenNum = 0
+        this.WordsDict.forEach(([familiar, lastDate, nextDate], word) => {
             if (familiar < 0) {
                 forgottenNum++;
-				this.LearnLst.push(word);
+                this.LearnLst.push(word);
             }
         });
 
         limit = newWdsLimit - forgottenNum;
 
         if (limit > 0) {
-			wdsLst.length = 0;
+            wdsLst.length = 0;
             if (await this.usrProgress.GetNewWordsLst(wdsLst, limit)) {
                 for (let wd of wdsLst) {
                     this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
@@ -890,14 +890,14 @@ export class ReciteWordsApp {
                     this.LearnLst.push(wd.Word);
                 }
             }
-			this.logger.info(`got ${wdsLst.length} new words.`);
+            this.logger.info(`got ${wdsLst.length} new words.`);
         }
 
         // random learn list
         randomArray2(this.LearnLst);
         this.logger.info(`len of LearnList: ${this.LearnLst.length}.`);
 
-		// complement test list
+        // complement test list
         for (let word of Array.from(this.WordsDict.keys())) {
             this.TestLst.push(word);
         }
@@ -1001,7 +1001,7 @@ export class ReciteWordsApp {
 
             if (familiar >= 10) {
                 familiar = 10.0;
-				nFnshd++;
+                nFnshd++;
             }
             else if (familiar < -10) {
                 familiar = -10.0;
@@ -1038,9 +1038,9 @@ export class ReciteWordsApp {
                 index = 0;
             }
 
-			if (familiar < 0){	// forgotten word
-				index = 0;
-			}
+            if (familiar < 0) {	// forgotten word
+                index = 0;
+            }
 
             nextInterval = this.timeDayLst[index];
             nextDate = new Date();
