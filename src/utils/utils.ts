@@ -141,10 +141,16 @@ Date.prototype.toLocaleDateString = function () {   // 重写日期函数格式�
 Date.prototype.toLocaleTimeString = function () {   // 重写日期函数格式化日期
     return `${this.getHours() >= 10 ? this.getHours() : '0' + this.getHours()}:${this.getMinutes() >= 10 ? this.getMinutes() : '0' + this.getMinutes()}:${this.getSeconds() >= 10 ? this.getSeconds() : '0' + this.getSeconds()}`;
 };
-console.info(now.toLocaleString()); //2020-11-14 14:00:46
-console.info(now.toLocaleDateString()); //2020-11-14
-console.info(now.toLocaleTimeString()); //14:00:46
+console.info(now.toLocaleString()); // 2020-11-14 14:00:46
+console.info(now.toLocaleDateString()); // 2020-11-14
+console.info(now.toLocaleTimeString()); // 14:00:46
 */
+// 2021-09-04
 export function formatDate(data: Date): string {
     return `${data.getFullYear()}-${data.getMonth() + 1 >= 10 ? (data.getMonth() + 1) : '0' + (data.getMonth() + 1)}-${data.getDate() >= 10 ? data.getDate() : '0' + data.getDate()}`;
+}
+
+// 2021-09-04 15:49:54
+export function formatTime(data: Date): string {
+    return `${data.getFullYear()}-${data.getMonth() + 1 >= 10 ? (data.getMonth() + 1) : '0' + (data.getMonth() + 1)}-${data.getDate() >= 10 ? data.getDate() : '0' + data.getDate()} ${data.getHours() >= 10 ? data.getHours() : '0' + data.getHours()}:${data.getMinutes() >= 10 ? data.getMinutes() : '0' + data.getMinutes()}:${data.getSeconds() >= 10 ? data.getSeconds() : '0' + data.getSeconds()}`;
 }

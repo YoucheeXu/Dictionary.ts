@@ -3,7 +3,7 @@ import * as path from "path";
 import * as log4js from "log4js";
 import { BrowserWindow, app, globalShortcut, dialog } from 'electron';
 
-import { formatDate, randomArray, randomArray2 } from "./utils/utils";
+import { formatTime, formatDate, randomArray, randomArray2 } from "./utils/utils";
 
 import { DownloardQueue } from "./utils/DownloardQueue";
 import { globalVar } from "./utils/globalInterface";
@@ -25,6 +25,8 @@ export class ReciteWordsApp {
 
     private usrsDict = new Map();
 
+    private personalProgressFile = "";
+
     private audioBase: AuidoArchive;
     private usrProgress: UsrProgress;
 
@@ -32,7 +34,7 @@ export class ReciteWordsApp {
 
     private win: BrowserWindow;
 
-    private readonly today = new Date();
+    private today: Date;
     private timeDayLst: number[] = new Array();
 
     private Mode = "Study Mode";
@@ -121,7 +123,7 @@ export class ReciteWordsApp {
                             type: 'pattern',
                             pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
                         }
-                    },
+                    }
                 },
                 categories: {
                     default: {
@@ -456,7 +458,6 @@ export class ReciteWordsApp {
             }
         }
         else {
-            // this.lastWord = this.CurTestLst[this.CurTestPos - 1];
             this.lastWord = this.curWord;
 
             if (this.CurTestPos < this.CurTestLst.length) {
@@ -744,7 +745,6 @@ export class ReciteWordsApp {
 
         for (let usrCfg of this.cfg.Users) {
             if (usrName == usrCfg.Name) {
-                this.logger.info(`selectUser: ${usrName}, Level: ${level}`);
                 let progress = usrCfg.Progress;
                 let progressFile = path.join(this.startPath, progress).replace(/\\/g, '/');
                 this.logger.info("progress: ", progressFile);
@@ -757,12 +757,9 @@ export class ReciteWordsApp {
             }
         }
 
-        // let level = usrCfg.Target;
-
-        // 
-        // await this.usrProgress.UpdateProgress('cord', 5, '2020-12-31');
-        // await this.usrProgress.Close();
-        // console.log('Done');
+        this.today = new Date();
+        this.personalProgressFile = path.join(this.startPath, 'log', `${usrName}_${level}.log`);
+        this.LogProgress(`Select User: ${usrName}, Level: ${level}`);
 
         // update info;
         this.win.webContents.send("gui", "modifyValue", "studyLearnBtn", `正在学习`);
@@ -774,22 +771,22 @@ export class ReciteWordsApp {
         // where = "level = '" + level + "'";
         let allCount = await this.usrProgress.GetAllCount(level);
         this.win.webContents.send("gui", "modifyValue", "allCount", `All words: ${allCount}`);
-        this.logger.info(`All words: ${allCount}`);
+        this.LogProgress(`All words: ${allCount}`);
 
         // where = "level = '" + level + "' and LastDate is null ";
         let newCount = await this.usrProgress.GetNewCount(level);
         this.win.webContents.send("gui", "modifyValue", "newCount", `New words to learn: ${newCount}`);
-        this.logger.info(`New words to learn: ${newCount}`);
+        this.LogProgress(`New words to learn: ${newCount}`);
 
         // where = "level = '" + level + "' and familiar = 10";
         let finishCount = await this.usrProgress.GetFnshedCount(level);
         this.win.webContents.send("gui", "modifyValue", "finishCount", `Words has recited: ${finishCount}`);
-        this.logger.info(`Words has recited: ${finishCount}`);
+        this.LogProgress(`Words has recited: ${finishCount}`);
 
         // where = "level = '" + level + "' and familiar > 0";
         let InProgressCount = await this.usrProgress.GetInProgressCount(level);
         this.win.webContents.send("gui", "modifyValue", "InProgressCount", `Words in learning: ${InProgressCount}`);
-        this.logger.info(`Words in learning: ${InProgressCount}`);
+        this.LogProgress(`Words in learning: ${InProgressCount}`);
 
         // read configuration
         let timeArray = this.cfg["TimeInterval"];
@@ -823,7 +820,7 @@ export class ReciteWordsApp {
                 }
             }
         }
-        this.logger.info(`got ${this.WordsDict.size - numOfWords} over due words.`);
+        this.LogProgress(`Got ${this.WordsDict.size - numOfWords} over due words.`);
         numOfWords = this.WordsDict.size;
 
         // get due words
@@ -842,7 +839,7 @@ export class ReciteWordsApp {
                 }
             }
         }
-        this.logger.info(`got ${this.WordsDict.size - numOfWords} due words.`);
+        this.LogProgress(`Got ${this.WordsDict.size - numOfWords} due words.`);
         numOfWords = this.WordsDict.size;
 
         // get forgotten words
@@ -854,7 +851,7 @@ export class ReciteWordsApp {
             console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
             // this.LearnLst.push(wd.Word);
         }
-        this.logger.info(`got ${this.WordsDict.size - numOfWords} extra forgotten words.`);
+        this.LogProgress(`Got ${this.WordsDict.size - numOfWords} extra forgotten words.`);
         numOfWords = this.WordsDict.size;
 
         // get new words
@@ -878,12 +875,12 @@ export class ReciteWordsApp {
                     this.LearnLst.push(wd.Word);
                 }
             }
-            this.logger.info(`got ${wdsLst.length} new words.`);
+            this.LogProgress(`Got ${wdsLst.length} new words.`);
         }
 
         // random learn list
         randomArray2(this.LearnLst);
-        this.logger.info(`len of LearnList: ${this.LearnLst.length}.`);
+        this.LogProgress(`Length of LearnList: ${this.LearnLst.length}.`);
 
         // complement test list
         for (let word of Array.from(this.WordsDict.keys())) {
@@ -891,7 +888,7 @@ export class ReciteWordsApp {
         }
         // random test list
         this.TestLst = randomArray(this.TestLst);
-        this.logger.info(`len of TestList: ${this.TestLst.length}.`);
+        this.LogProgress(`Length of TestList: ${this.TestLst.length}.`);
 
         //this.wordInput['state'] = 'readonly';
 
@@ -906,6 +903,20 @@ export class ReciteWordsApp {
             this.win.webContents.send("gui", "DisaOrEnaBtn", "forgetBtn", false);
             this.GoTestMode();
         }
+    }
+
+    private async LogProgress(info: string) {
+        // 2021-08-25 19:59:01 it cost 0 hours, 50 minutes, 18 seconds.
+        let now = new Date();
+        let nowStr = formatTime(now);
+        let something = `${nowStr} ${info}\n`;
+        fs.writeFile(this.personalProgressFile, something, { 'flag': 'a' }, (err: any) => {
+            if (err) {
+                this.logger.error(`Fail to log ${something} in ${this.personalProgressFile}!`);
+            } else {
+                console.log(`Success to log ${something} in ${this.personalProgressFile}!`);
+            }
+        })
     }
 
     private async Save_Progress() {
@@ -954,7 +965,7 @@ export class ReciteWordsApp {
         }
 
         let allLen = this.WordsDict.size;
-        this.logger.info(`number of words' familiar will be changed: ${allLen}`);
+        this.LogProgress(`Number of words' familiar will be changed: ${allLen}`);
 
         let lastDateStr = "", nexDateStr = "";
         let mapStr = "{";
@@ -1050,7 +1061,7 @@ export class ReciteWordsApp {
             }
         }
 
-        this.logger.info(`finish to receite number of words: ${nFnshd}`);
+        this.LogProgress(`Finish to receite number of words: ${nFnshd}`);
         // console.log("OK to save progress.");
         this.win.webContents.send("gui", "modifyValue", "info", `OK to save progress.`);
     }
@@ -1104,7 +1115,7 @@ export class ReciteWordsApp {
             hour--;
         }
 
-        this.logger.info(`it cost ${hour} hours, ${min} minutes, ${sec} seconds.`);
+        this.LogProgress(`It cost ${hour} hours, ${min} minutes, ${sec} seconds.\n`);
 
         app.quit();
     }

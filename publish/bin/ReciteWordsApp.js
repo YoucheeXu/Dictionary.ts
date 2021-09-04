@@ -72,7 +72,7 @@ var ReciteWordsApp = /** @class */ (function () {
         this.bDebug = false;
         this.bCfgModfied = false;
         this.usrsDict = new Map();
-        this.today = new Date();
+        this.personalProgressFile = "";
         this.timeDayLst = new Array();
         this.Mode = "Study Mode";
         this.WordsDict = new Map();
@@ -146,7 +146,7 @@ var ReciteWordsApp = /** @class */ (function () {
                             type: 'pattern',
                             pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
                         }
-                    },
+                    }
                 },
                 categories: {
                     default: {
@@ -455,7 +455,6 @@ var ReciteWordsApp = /** @class */ (function () {
             }
         }
         else {
-            // this.lastWord = this.CurTestLst[this.CurTestPos - 1];
             this.lastWord = this.curWord;
             if (this.CurTestPos < this.CurTestLst.length) {
                 this.Test_Next();
@@ -804,7 +803,6 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (!(_i < _a.length)) return [3 /*break*/, 4];
                         usrCfg = _a[_i];
                         if (!(usrName == usrCfg.Name)) return [3 /*break*/, 3];
-                        this.logger.info("selectUser: " + usrName + ", Level: " + level);
                         progress = usrCfg.Progress;
                         progressFile = path.join(this.startPath, progress).replace(/\\/g, '/');
                         this.logger.info("progress: ", progressFile);
@@ -821,11 +819,9 @@ var ReciteWordsApp = /** @class */ (function () {
                         _i++;
                         return [3 /*break*/, 1];
                     case 4:
-                        // let level = usrCfg.Target;
-                        // 
-                        // await this.usrProgress.UpdateProgress('cord', 5, '2020-12-31');
-                        // await this.usrProgress.Close();
-                        // console.log('Done');
+                        this.today = new Date();
+                        this.personalProgressFile = path.join(this.startPath, 'log', usrName + "_" + level + ".log");
+                        this.LogProgress("Select User: " + usrName + ", Level: " + level);
                         // update info;
                         this.win.webContents.send("gui", "modifyValue", "studyLearnBtn", "\u6B63\u5728\u5B66\u4E60");
                         this.win.webContents.send("gui", "modifyValue", "usr", "" + usrName);
@@ -834,22 +830,22 @@ var ReciteWordsApp = /** @class */ (function () {
                     case 5:
                         allCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "allCount", "All words: " + allCount);
-                        this.logger.info("All words: " + allCount);
+                        this.LogProgress("All words: " + allCount);
                         return [4 /*yield*/, this.usrProgress.GetNewCount(level)];
                     case 6:
                         newCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "newCount", "New words to learn: " + newCount);
-                        this.logger.info("New words to learn: " + newCount);
+                        this.LogProgress("New words to learn: " + newCount);
                         return [4 /*yield*/, this.usrProgress.GetFnshedCount(level)];
                     case 7:
                         finishCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "finishCount", "Words has recited: " + finishCount);
-                        this.logger.info("Words has recited: " + finishCount);
+                        this.LogProgress("Words has recited: " + finishCount);
                         return [4 /*yield*/, this.usrProgress.GetInProgressCount(level)];
                     case 8:
                         InProgressCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "InProgressCount", "Words in learning: " + InProgressCount);
-                        this.logger.info("Words in learning: " + InProgressCount);
+                        this.LogProgress("Words in learning: " + InProgressCount);
                         timeArray = this.cfg["TimeInterval"];
                         for (_b = 0, timeArray_1 = timeArray; _b < timeArray_1.length; _b++) {
                             timeGroup = timeArray_1[_b];
@@ -880,7 +876,7 @@ var ReciteWordsApp = /** @class */ (function () {
                                 }
                             }
                         }
-                        this.logger.info("got " + (this.WordsDict.size - numOfWords) + " over due words.");
+                        this.LogProgress("Got " + (this.WordsDict.size - numOfWords) + " over due words.");
                         numOfWords = this.WordsDict.size;
                         // get due words
                         console.log("starting to get due words");
@@ -901,7 +897,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         }
                         _j.label = 11;
                     case 11:
-                        this.logger.info("got " + (this.WordsDict.size - numOfWords) + " due words.");
+                        this.LogProgress("Got " + (this.WordsDict.size - numOfWords) + " due words.");
                         numOfWords = this.WordsDict.size;
                         // get forgotten words
                         console.log("starting to get forgotten words");
@@ -915,7 +911,7 @@ var ReciteWordsApp = /** @class */ (function () {
                             console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
                             // this.LearnLst.push(wd.Word);
                         }
-                        this.logger.info("got " + (this.WordsDict.size - numOfWords) + " extra forgotten words.");
+                        this.LogProgress("Got " + (this.WordsDict.size - numOfWords) + " extra forgotten words.");
                         numOfWords = this.WordsDict.size;
                         // get new words
                         console.log("starting to get new words");
@@ -940,12 +936,12 @@ var ReciteWordsApp = /** @class */ (function () {
                                 this.LearnLst.push(wd.Word);
                             }
                         }
-                        this.logger.info("got " + wdsLst.length + " new words.");
+                        this.LogProgress("Got " + wdsLst.length + " new words.");
                         _j.label = 14;
                     case 14:
                         // random learn list
                         utils_1.randomArray2(this.LearnLst);
-                        this.logger.info("len of LearnList: " + this.LearnLst.length + ".");
+                        this.LogProgress("Length of LearnList: " + this.LearnLst.length + ".");
                         // complement test list
                         for (_g = 0, _h = Array.from(this.WordsDict.keys()); _g < _h.length; _g++) {
                             word = _h[_g];
@@ -953,7 +949,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         }
                         // random test list
                         this.TestLst = utils_1.randomArray(this.TestLst);
-                        this.logger.info("len of TestList: " + this.TestLst.length + ".");
+                        this.LogProgress("Length of TestList: " + this.TestLst.length + ".");
                         //this.wordInput['state'] = 'readonly';
                         this.win.webContents.send("gui", "modifyValue", "numOfLearn", this.LearnLst.length + " words to Learn!");
                         this.win.webContents.send("gui", "modifyValue", "numOfTest", this.TestLst.length + " words to Test!");
@@ -967,6 +963,26 @@ var ReciteWordsApp = /** @class */ (function () {
                         }
                         return [2 /*return*/];
                 }
+            });
+        });
+    };
+    ReciteWordsApp.prototype.LogProgress = function (info) {
+        return __awaiter(this, void 0, void 0, function () {
+            var now, nowStr, something;
+            var _this_1 = this;
+            return __generator(this, function (_a) {
+                now = new Date();
+                nowStr = utils_1.formatTime(now);
+                something = nowStr + " " + info + "\n";
+                fs.writeFile(this.personalProgressFile, something, { 'flag': 'a' }, function (err) {
+                    if (err) {
+                        _this_1.logger.error("Fail to log " + something + " in " + _this_1.personalProgressFile + "!");
+                    }
+                    else {
+                        console.log("Success to log " + something + " in " + _this_1.personalProgressFile + "!");
+                    }
+                });
+                return [2 /*return*/];
             });
         });
     };
@@ -1021,7 +1037,7 @@ var ReciteWordsApp = /** @class */ (function () {
                             }
                         }
                         allLen = this.WordsDict.size;
-                        this.logger.info("number of words' familiar will be changed: " + allLen);
+                        this.LogProgress("Number of words' familiar will be changed: " + allLen);
                         lastDateStr = "", nexDateStr = "";
                         mapStr = "{";
                         this.WordsDict.forEach(function (_a, word) {
@@ -1115,7 +1131,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         return [3 /*break*/, 5];
                     case 5: return [3 /*break*/, 1];
                     case 6:
-                        this.logger.info("finish to receite number of words: " + nFnshd);
+                        this.LogProgress("Finish to receite number of words: " + nFnshd);
                         // console.log("OK to save progress.");
                         this.win.webContents.send("gui", "modifyValue", "info", "OK to save progress.");
                         return [2 /*return*/];
@@ -1187,7 +1203,7 @@ var ReciteWordsApp = /** @class */ (function () {
                             min += 60;
                             hour--;
                         }
-                        this.logger.info("it cost " + hour + " hours, " + min + " minutes, " + sec + " seconds.");
+                        this.LogProgress("It cost " + hour + " hours, " + min + " minutes, " + sec + " seconds.\n");
                         electron_1.app.quit();
                         return [2 /*return*/];
                 }
