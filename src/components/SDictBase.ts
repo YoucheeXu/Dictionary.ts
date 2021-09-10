@@ -26,7 +26,7 @@ export class SDictBase extends DictBase {
     }
 
     // [symbol, meaning, sentences]
-    // To-Do: to html
+    // TODO: to html
     public async query_word(word: string): Promise<[number, string]> {
         let sql = "select * from Words where word=?";
         let r: any = await this.dict.get(sql, [word]);

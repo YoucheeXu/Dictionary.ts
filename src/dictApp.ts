@@ -49,12 +49,11 @@ export class dictApp {
         };
 
         this.cfg = JSON.parse(fs.readFileSync(this.cfgFile).toString());
-        // console.log(this.cfg);
 
-        let common = JSON.parse(JSON.stringify(this.cfg.common));
+        let common = JSON.parse(JSON.stringify(this.cfg.Dictionary.common));
         console.log('ver: ' + common.ver);
 
-        let debugCfg = JSON.parse(JSON.stringify(this.cfg.Debug));
+        let debugCfg = JSON.parse(JSON.stringify(this.cfg.Dictionary.Debug));
 
         this.bDebug = debugCfg.bEnable;
 
@@ -99,34 +98,38 @@ export class dictApp {
         this.dictAgent.push({ name: '', ip: '', program: '' });
         this.ActiveAgent(activeAgent);
 
-        for (let tabGroup of JSON.parse(JSON.stringify(this.cfg['Tabs']))) {
-            let dictSrc = path.join(startPath, tabGroup.Dict);
-            this.AddDictBase(tabGroup.Name, dictSrc, JSON.parse(JSON.stringify(tabGroup['Format'])));
+        let dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
+        for (let tab of JSON.parse(JSON.stringify(this.cfg.Dictionary.cfg.Tabs))) {
+            for (let dictBaseCfg of dictBasesCfg) {
+                if (tab.Dict == dictBaseCfg.Name) {
+                    let dictSrc = path.join(startPath, dictBaseCfg.Dict);
+                    this.AddDictBase(tab.Name, dictSrc, JSON.parse(JSON.stringify(dictBaseCfg.Format)));
+                    break;
+                }
+            }
         }
 
-		let dictSrc = path.join(startPath, 'dict/words.dict');
-		this.wordsDict = new WordsDict();
-		await this.wordsDict.Open(dictSrc);
+        let wordsDictCfg = this.cfg.WordsDict;
+        let dictSrc = path.join(startPath, wordsDictCfg.Dict);
+        this.wordsDict = new WordsDict();
+        await this.wordsDict.Open(dictSrc);
 
-        let audioCfg = JSON.parse(JSON.stringify(this.cfg['Audio']))[0];
+        let audioCfg = JSON.parse(JSON.stringify(this.cfg['AudioBases']))[0];
         let audioFile = path.join(startPath, audioCfg.Audio);
         let audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
         if (audioFormatCfg.Type == 'ZIP') {
-            this.audioPackage = new AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.Compress_Level);
-            // this.AddAudio(name, audioPackage);
+            this.audioPackage = new AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
         }
 
         let usrCfg = JSON.parse(JSON.stringify(this.cfg['Users']))[0];
         let progressFile = path.join(startPath, usrCfg.Progress).replace(/\\/g, '/');
-
         this.usrProgress = new UsrProgress();
         await this.usrProgress.Open(progressFile, "New");
-
         if (await this.usrProgress.ExistTable("New") == false) {
             this.usrProgress.NewTable("New");
         }
 
-        let missCfg = JSON.parse(JSON.stringify(this.cfg['Miss']));
+        let missCfg = JSON.parse(JSON.stringify(this.cfg.Dictionary.Miss));
         this.miss_dict = path.join(startPath, missCfg.miss_dict);
         this.miss_audio = path.join(startPath, missCfg.miss_audio);
 
@@ -543,7 +546,7 @@ export class dictApp {
 
         let level = await this.wordsDict.GetLevel(word);
         let nStars = await this.wordsDict.GetStar(word);
-		
+
         this.win.webContents.send("QueryWord", this.dictParseFun, word, this.dictId, dict, audio, bNew, level, nStars);
 
         // this.lastWord = word;

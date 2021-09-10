@@ -65,7 +65,7 @@ export class ReciteWordsApp {
 
     public ReadAndConfigure(): boolean {
 
-        this.cfgFile = path.join(this.startPath, 'ReciteWords.json').replace(/\\/g, '/');
+        this.cfgFile = path.join(this.startPath, 'Dictionary.json').replace(/\\/g, '/');
 
         let _this = this;
         if (fs.existsSync(_this.cfgFile) == false) {
@@ -75,10 +75,10 @@ export class ReciteWordsApp {
 
         this.cfg = JSON.parse(fs.readFileSync(_this.cfgFile).toString());
 
-        let common = JSON.parse(JSON.stringify(this.cfg.common));
+        let common = JSON.parse(JSON.stringify(this.cfg.ReciteWords.common));
         console.log('ver: ' + common.ver);
 
-        let debugCfg = JSON.parse(JSON.stringify(this.cfg.Debug));
+        let debugCfg = JSON.parse(JSON.stringify(this.cfg.ReciteWords.Debug));
 
         this.bDebug = debugCfg.bEnable;
 
@@ -192,19 +192,29 @@ export class ReciteWordsApp {
 
     private initDict() {
         try {
-            let dictCfg = this.cfg["DictBase"]["DictBase"];
-            let dict = dictCfg["Dict"];
-            let dictFile = path.join(this.startPath, dict).replace(/\\/g, '/');
-            console.log(`dict: ${dictFile}`);
-            this.dictBase = new SDictBase(dictFile);
+            let dictBase = this.cfg.ReciteWords.DictBase;
+            let dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
+            for (let dictBaseCfg of dictBasesCfg) {
+                if (dictBase == dictBaseCfg.Name) {
+                    let dictFile = path.join(this.startPath, dictBaseCfg.Dict).replace(/\\/g, '/');
+                    console.log(`dict: ${dictFile}`);
+                    this.dictBase = new SDictBase(dictFile);
+                    break;
+                }
+            }
 
-            let audioCfg = this.cfg["DictBase"]["AudioBase"];
-            let audio = audioCfg["Audio"];
-            let audioFile = path.join(this.startPath, audio).replace(/\\/g, '/');
-            console.log(`audio: ${audioFile}`);
-            let compression = audioCfg["Format"]["Compression"];
-            let compressLevel = audioCfg["Format"]["Compress Level"];
-            this.audioBase = new AuidoArchive(audioFile, compression, compressLevel);
+            let audioBase = this.cfg.ReciteWords.AudioBase;
+            let audioBasesCfg = JSON.parse(JSON.stringify(this.cfg.AudioBases));
+            for (let audioBaseCfg of audioBasesCfg) {
+                if (audioBase == audioBaseCfg.Name) {
+                    let audioFile = path.join(this.startPath, audioBaseCfg.Audio).replace(/\\/g, '/');
+                    console.log(`audio: ${audioFile}`);
+                    let compression = audioBaseCfg["Format"]["Compression"];
+                    let compressLevel = audioBaseCfg["Format"]["Compress Level"];
+                    this.audioBase = new AuidoArchive(audioFile, compression, compressLevel);
+                    break;
+                }
+            }
         }
         catch (e) {
             this.logger.error((e as Error).message);
@@ -602,10 +612,9 @@ export class ReciteWordsApp {
     }
 
     public readAllLvls() {
-        return this.cfg["DictBase"]["WordsDict"]["allLvls"];
+        return this.cfg["WordsDict"]["allLvls"];
     }
 
-    // TODO: 
     public async newLevel(usrName: string, level: string) {
         console.log(`usr: ${usrName}, new level: ${level}`);
         for (let usrCfg of this.cfg.Users) {
@@ -619,8 +628,8 @@ export class ReciteWordsApp {
                     this.usrProgress.NewTable(level);
                 }
 
-                let wordsCfg = this.cfg["DictBase"]["WordsDict"];
-                let words = wordsCfg["Dict"];
+                let wordsDictCfg = this.cfg["WordsDict"];
+                let words = wordsDictCfg["Dict"];
                 let wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
                 console.log(`words: ${wordsFile}`);
                 let wordsDict = new WordsDict();
@@ -658,7 +667,7 @@ export class ReciteWordsApp {
         let progressFile = path.join(this.startPath, "dict", "usrName" + ".progress").replace(/\\/g, '/');
         await this.usrProgress.New(progressFile, level);
 
-        let wordsCfg = this.cfg["DictBase"]["WordsDict"];
+        let wordsCfg = this.cfg["WordsDict"];
         let words = wordsCfg["Dict"];
         let wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
         console.log(`words: ${wordsFile}`);
@@ -682,10 +691,9 @@ export class ReciteWordsApp {
     public async isLevelDone(usrName: string, level: string): Promise<boolean | string> {
         for (let usrCfg of this.cfg.Users) {
             if (usrName == usrCfg.Name) {
-                // this.logger.info(`selectUser: ${usrName}, Level: ${level}`);
                 let progress = usrCfg.Progress;
                 let progressFile = path.join(this.startPath, progress).replace(/\\/g, '/');
-                // this.logger.info("progress: ", progressFile);
+                this.logger.info("progress: ", progressFile);
                 if (this.usrProgress === undefined) {
                     this.usrProgress = new UsrProgress();
                 }
@@ -789,15 +797,15 @@ export class ReciteWordsApp {
         this.LogProgress(`Words in learning: ${InProgressCount}`);
 
         // read configuration
-        let timeArray = this.cfg["TimeInterval"];
+        let timeArray = this.cfg["ReciteWords"]["TimeInterval"];
         for (let timeGroup of timeArray) {
             if (timeGroup["Unit"] == "d") {
                 this.timeDayLst.push(timeGroup["Interval"]);
             }
         }
-        let allLimit = this.cfg.General.Limit;
-        let newWdsLimit = this.cfg.StudyMode.Limit;
-        this.TestCount = this.cfg.TestMode.Times;
+        let allLimit = this.cfg.ReciteWords.General.Limit;
+        let newWdsLimit = this.cfg.ReciteWords.StudyMode.Limit;
+        this.TestCount = this.cfg.ReciteWords.TestMode.Times;
         let limit = 0;
 
         // start get words to recite
@@ -910,6 +918,7 @@ export class ReciteWordsApp {
         let now = new Date();
         let nowStr = formatTime(now);
         let something = `${nowStr} ${info}\n`;
+        console.log(something);
         fs.writeFile(this.personalProgressFile, something, { 'flag': 'a' }, (err: any) => {
             if (err) {
                 this.logger.error(`Fail to log ${something} in ${this.personalProgressFile}!`);
@@ -1099,7 +1108,6 @@ export class ReciteWordsApp {
 
     public async quit() {
         await this.Save_Progress();
-        this.Close();
 
         let now = new Date();
         let sec = now.getSeconds() - this.today.getSeconds();
@@ -1116,6 +1124,8 @@ export class ReciteWordsApp {
         }
 
         this.LogProgress(`It cost ${hour} hours, ${min} minutes, ${sec} seconds.\n`);
+
+        this.Close();
 
         app.quit();
     }

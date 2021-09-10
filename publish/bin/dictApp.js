@@ -77,9 +77,9 @@ var dictApp = /** @class */ (function () {
     }
     dictApp.prototype.ReadAndConfigure = function (startPath) {
         return __awaiter(this, void 0, void 0, function () {
-            var _this, common, debugCfg, debugLvl, logFile, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, _a, _b, tabGroup, dictSrc_1, dictSrc, audioCfg, audioFile, audioFormatCfg, usrCfg, progressFile, missCfg;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var _this, common, debugCfg, debugLvl, logFile, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, dictBasesCfg, _a, _b, tab, _c, dictBasesCfg_1, dictBaseCfg, dictSrc_1, wordsDictCfg, dictSrc, audioCfg, audioFile, audioFormatCfg, usrCfg, progressFile, missCfg;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
                         this.cfgFile = path.join(startPath, 'Dictionary.json').replace(/\\/g, '/');
                         _this = this;
@@ -89,9 +89,9 @@ var dictApp = /** @class */ (function () {
                         }
                         ;
                         this.cfg = JSON.parse(fs.readFileSync(this.cfgFile).toString());
-                        common = JSON.parse(JSON.stringify(this.cfg.common));
+                        common = JSON.parse(JSON.stringify(this.cfg.Dictionary.common));
                         console.log('ver: ' + common.ver);
-                        debugCfg = JSON.parse(JSON.stringify(this.cfg.Debug));
+                        debugCfg = JSON.parse(JSON.stringify(this.cfg.Dictionary.Debug));
                         this.bDebug = debugCfg.bEnable;
                         debugLvl = 'INFO';
                         if (this.bDebug == true) {
@@ -131,35 +131,42 @@ var dictApp = /** @class */ (function () {
                         }
                         this.dictAgent.push({ name: '', ip: '', program: '' });
                         this.ActiveAgent(activeAgent);
-                        for (_a = 0, _b = JSON.parse(JSON.stringify(this.cfg['Tabs'])); _a < _b.length; _a++) {
-                            tabGroup = _b[_a];
-                            dictSrc_1 = path.join(startPath, tabGroup.Dict);
-                            this.AddDictBase(tabGroup.Name, dictSrc_1, JSON.parse(JSON.stringify(tabGroup['Format'])));
+                        dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
+                        for (_a = 0, _b = JSON.parse(JSON.stringify(this.cfg.Dictionary.cfg.Tabs)); _a < _b.length; _a++) {
+                            tab = _b[_a];
+                            for (_c = 0, dictBasesCfg_1 = dictBasesCfg; _c < dictBasesCfg_1.length; _c++) {
+                                dictBaseCfg = dictBasesCfg_1[_c];
+                                if (tab.Dict == dictBaseCfg.Name) {
+                                    dictSrc_1 = path.join(startPath, dictBaseCfg.Dict);
+                                    this.AddDictBase(tab.Name, dictSrc_1, JSON.parse(JSON.stringify(dictBaseCfg.Format)));
+                                    break;
+                                }
+                            }
                         }
-                        dictSrc = path.join(startPath, 'dict/words.dict');
+                        wordsDictCfg = this.cfg.WordsDict;
+                        dictSrc = path.join(startPath, wordsDictCfg.Dict);
                         this.wordsDict = new WordsDict_1.WordsDict();
                         return [4 /*yield*/, this.wordsDict.Open(dictSrc)];
                     case 1:
-                        _c.sent();
-                        audioCfg = JSON.parse(JSON.stringify(this.cfg['Audio']))[0];
+                        _d.sent();
+                        audioCfg = JSON.parse(JSON.stringify(this.cfg['AudioBases']))[0];
                         audioFile = path.join(startPath, audioCfg.Audio);
                         audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
                         if (audioFormatCfg.Type == 'ZIP') {
-                            this.audioPackage = new AuidoArchive_1.AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.Compress_Level);
-                            // this.AddAudio(name, audioPackage);
+                            this.audioPackage = new AuidoArchive_1.AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
                         }
                         usrCfg = JSON.parse(JSON.stringify(this.cfg['Users']))[0];
                         progressFile = path.join(startPath, usrCfg.Progress).replace(/\\/g, '/');
                         this.usrProgress = new UsrProgress_1.UsrProgress();
                         return [4 /*yield*/, this.usrProgress.Open(progressFile, "New")];
                     case 2:
-                        _c.sent();
+                        _d.sent();
                         return [4 /*yield*/, this.usrProgress.ExistTable("New")];
                     case 3:
-                        if ((_c.sent()) == false) {
+                        if ((_d.sent()) == false) {
                             this.usrProgress.NewTable("New");
                         }
-                        missCfg = JSON.parse(JSON.stringify(this.cfg['Miss']));
+                        missCfg = JSON.parse(JSON.stringify(this.cfg.Dictionary.Miss));
                         this.miss_dict = path.join(startPath, missCfg.miss_dict);
                         this.miss_audio = path.join(startPath, missCfg.miss_audio);
                         return [2 /*return*/, true];

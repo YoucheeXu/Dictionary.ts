@@ -78,7 +78,7 @@ var SDictBase = /** @class */ (function (_super) {
         return "dictHtml";
     };
     // [symbol, meaning, sentences]
-    // To-Do: to html
+    // TODO: to html
     SDictBase.prototype.query_word = function (word) {
         return __awaiter(this, void 0, void 0, function () {
             var sql, r;

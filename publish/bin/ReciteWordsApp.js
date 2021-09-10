@@ -94,7 +94,7 @@ var ReciteWordsApp = /** @class */ (function () {
         console.clear();
     }
     ReciteWordsApp.prototype.ReadAndConfigure = function () {
-        this.cfgFile = path.join(this.startPath, 'ReciteWords.json').replace(/\\/g, '/');
+        this.cfgFile = path.join(this.startPath, 'Dictionary.json').replace(/\\/g, '/');
         var _this = this;
         if (fs.existsSync(_this.cfgFile) == false) {
             console.log(_this.cfgFile + " doesn't exist");
@@ -102,9 +102,9 @@ var ReciteWordsApp = /** @class */ (function () {
         }
         ;
         this.cfg = JSON.parse(fs.readFileSync(_this.cfgFile).toString());
-        var common = JSON.parse(JSON.stringify(this.cfg.common));
+        var common = JSON.parse(JSON.stringify(this.cfg.ReciteWords.common));
         console.log('ver: ' + common.ver);
-        var debugCfg = JSON.parse(JSON.stringify(this.cfg.Debug));
+        var debugCfg = JSON.parse(JSON.stringify(this.cfg.ReciteWords.Debug));
         this.bDebug = debugCfg.bEnable;
         var debugLvl = 'INFO';
         if (this.bDebug == true) {
@@ -211,18 +211,30 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.initDict = function () {
         try {
-            var dictCfg = this.cfg["DictBase"]["DictBase"];
-            var dict = dictCfg["Dict"];
-            var dictFile = path.join(this.startPath, dict).replace(/\\/g, '/');
-            console.log("dict: " + dictFile);
-            this.dictBase = new SDictBase_1.SDictBase(dictFile);
-            var audioCfg = this.cfg["DictBase"]["AudioBase"];
-            var audio = audioCfg["Audio"];
-            var audioFile = path.join(this.startPath, audio).replace(/\\/g, '/');
-            console.log("audio: " + audioFile);
-            var compression = audioCfg["Format"]["Compression"];
-            var compressLevel = audioCfg["Format"]["Compress Level"];
-            this.audioBase = new AuidoArchive_1.AuidoArchive(audioFile, compression, compressLevel);
+            var dictBase = this.cfg.ReciteWords.DictBase;
+            var dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
+            for (var _i = 0, dictBasesCfg_1 = dictBasesCfg; _i < dictBasesCfg_1.length; _i++) {
+                var dictBaseCfg = dictBasesCfg_1[_i];
+                if (dictBase == dictBaseCfg.Name) {
+                    var dictFile = path.join(this.startPath, dictBaseCfg.Dict).replace(/\\/g, '/');
+                    console.log("dict: " + dictFile);
+                    this.dictBase = new SDictBase_1.SDictBase(dictFile);
+                    break;
+                }
+            }
+            var audioBase = this.cfg.ReciteWords.AudioBase;
+            var audioBasesCfg = JSON.parse(JSON.stringify(this.cfg.AudioBases));
+            for (var _a = 0, audioBasesCfg_1 = audioBasesCfg; _a < audioBasesCfg_1.length; _a++) {
+                var audioBaseCfg = audioBasesCfg_1[_a];
+                if (audioBase == audioBaseCfg.Name) {
+                    var audioFile = path.join(this.startPath, audioBaseCfg.Audio).replace(/\\/g, '/');
+                    console.log("audio: " + audioFile);
+                    var compression = audioBaseCfg["Format"]["Compression"];
+                    var compressLevel = audioBaseCfg["Format"]["Compress Level"];
+                    this.audioBase = new AuidoArchive_1.AuidoArchive(audioFile, compression, compressLevel);
+                    break;
+                }
+            }
         }
         catch (e) {
             this.logger.error(e.message);
@@ -601,12 +613,11 @@ var ReciteWordsApp = /** @class */ (function () {
         return this.usrsDict;
     };
     ReciteWordsApp.prototype.readAllLvls = function () {
-        return this.cfg["DictBase"]["WordsDict"]["allLvls"];
+        return this.cfg["WordsDict"]["allLvls"];
     };
-    // TODO: 
     ReciteWordsApp.prototype.newLevel = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progressFile, wordsCfg, words, wordsFile, wordsDict, lvlWordsLst, ret, _b, lvlWordsLst_1, word, target;
+            var _i, _a, usrCfg, progressFile, wordsDictCfg, words, wordsFile, wordsDict, lvlWordsLst, ret, _b, lvlWordsLst_1, word, target;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -629,8 +640,8 @@ var ReciteWordsApp = /** @class */ (function () {
                         if ((_c.sent()) == false) {
                             this.usrProgress.NewTable(level);
                         }
-                        wordsCfg = this.cfg["DictBase"]["WordsDict"];
-                        words = wordsCfg["Dict"];
+                        wordsDictCfg = this.cfg["WordsDict"];
+                        words = wordsDictCfg["Dict"];
                         wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
                         console.log("words: " + wordsFile);
                         wordsDict = new WordsDict_1.WordsDict();
@@ -683,7 +694,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         return [4 /*yield*/, this.usrProgress.New(progressFile, level)];
                     case 1:
                         _a.sent();
-                        wordsCfg = this.cfg["DictBase"]["WordsDict"];
+                        wordsCfg = this.cfg["WordsDict"];
                         words = wordsCfg["Dict"];
                         wordsFile = path.join(this.startPath, words).replace(/\\/g, '/');
                         console.log("words: " + wordsFile);
@@ -730,7 +741,7 @@ var ReciteWordsApp = /** @class */ (function () {
                         if (!(usrName == usrCfg.Name)) return [3 /*break*/, 13];
                         progress = usrCfg.Progress;
                         progressFile = path.join(this.startPath, progress).replace(/\\/g, '/');
-                        // this.logger.info("progress: ", progressFile);
+                        this.logger.info("progress: ", progressFile);
                         if (this.usrProgress === undefined) {
                             this.usrProgress = new UsrProgress_1.UsrProgress();
                         }
@@ -846,16 +857,16 @@ var ReciteWordsApp = /** @class */ (function () {
                         InProgressCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "InProgressCount", "Words in learning: " + InProgressCount);
                         this.LogProgress("Words in learning: " + InProgressCount);
-                        timeArray = this.cfg["TimeInterval"];
+                        timeArray = this.cfg["ReciteWords"]["TimeInterval"];
                         for (_b = 0, timeArray_1 = timeArray; _b < timeArray_1.length; _b++) {
                             timeGroup = timeArray_1[_b];
                             if (timeGroup["Unit"] == "d") {
                                 this.timeDayLst.push(timeGroup["Interval"]);
                             }
                         }
-                        allLimit = this.cfg.General.Limit;
-                        newWdsLimit = this.cfg.StudyMode.Limit;
-                        this.TestCount = this.cfg.TestMode.Times;
+                        allLimit = this.cfg.ReciteWords.General.Limit;
+                        newWdsLimit = this.cfg.ReciteWords.StudyMode.Limit;
+                        this.TestCount = this.cfg.ReciteWords.TestMode.Times;
                         limit = 0;
                         wdsLst = new Array();
                         numOfWords = 0;
@@ -974,6 +985,7 @@ var ReciteWordsApp = /** @class */ (function () {
                 now = new Date();
                 nowStr = utils_1.formatTime(now);
                 something = nowStr + " " + info + "\n";
+                console.log(something);
                 fs.writeFile(this.personalProgressFile, something, { 'flag': 'a' }, function (err) {
                     if (err) {
                         _this_1.logger.error("Fail to log " + something + " in " + _this_1.personalProgressFile + "!");
@@ -1190,7 +1202,6 @@ var ReciteWordsApp = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.Save_Progress()];
                     case 1:
                         _a.sent();
-                        this.Close();
                         now = new Date();
                         sec = now.getSeconds() - this.today.getSeconds();
                         min = now.getMinutes() - this.today.getMinutes();
@@ -1204,6 +1215,7 @@ var ReciteWordsApp = /** @class */ (function () {
                             hour--;
                         }
                         this.LogProgress("It cost " + hour + " hours, " + min + " minutes, " + sec + " seconds.\n");
+                        this.Close();
                         electron_1.app.quit();
                         return [2 /*return*/];
                 }

@@ -1,5 +1,6 @@
 {
-    "editor.wordWrap": "on",        //是否自动换行
+    "editor.bracketPairColorization.enabled": true,
+	"editor.wordWrap": "on",        //是否自动换行
     "editor.detectIndentation": false,		 // vscode默认启用了根据文件类型自动设置tabsize的选项
     "editor.tabSize": 4,            // tab几个缩进
     "files.exclude": {
@@ -50,13 +51,8 @@
     "prettier.tabWidth": 4,
 
     "code-runner.runInTerminal": true,
-    "python.pythonPath": "C:\\Users\\Youchee\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe",
     "code-runner.clearPreviousOutput": true,
-    "code-runner.saveFileBeforeRun": true,
-    "code-runner.executorMap": {
-        "python": "python -u $fullFileName"
-    },
-    "python.languageServer": "Pylance",
+    "code-runner.saveFileBeforeRun": true
     // "terminal.integrated.shellArgs.windows": ["-NoExit", "/c", "chcp 65001"]
     // "terminal.integrated.shellArgs.windows": ["/K chcp 65001 >nul"]
 }
