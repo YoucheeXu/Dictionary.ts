@@ -99,7 +99,7 @@ export class dictApp {
         this.ActiveAgent(activeAgent);
 
         let dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
-        for (let tab of JSON.parse(JSON.stringify(this.cfg.Dictionary.cfg.Tabs))) {
+        for (let tab of JSON.parse(JSON.stringify(this.cfg.Dictionary.Tabs))) {
             for (let dictBaseCfg of dictBasesCfg) {
                 if (tab.Dict == dictBaseCfg.Name) {
                     let dictSrc = path.join(startPath, dictBaseCfg.Dict);
@@ -300,7 +300,7 @@ export class dictApp {
         let showWiRatio = float(this.cfgDict["GUI"]["ShowWiRatio"]);
         */
         // let gui = JSON.parse(JSON.stringify(this.//dictCfg["GUI"]));
-        let gui = JSON.parse(JSON.stringify(this.cfg['GUI']));
+        let gui = JSON.parse(JSON.stringify(this.cfg["Dictionary"]['GUI']));
         size.h = gui.Height;
         size.w = gui.Width;
         // size.showHiRatio = gui.ShowHiRatio;

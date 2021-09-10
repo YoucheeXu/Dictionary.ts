@@ -132,7 +132,7 @@ var dictApp = /** @class */ (function () {
                         this.dictAgent.push({ name: '', ip: '', program: '' });
                         this.ActiveAgent(activeAgent);
                         dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
-                        for (_a = 0, _b = JSON.parse(JSON.stringify(this.cfg.Dictionary.cfg.Tabs)); _a < _b.length; _a++) {
+                        for (_a = 0, _b = JSON.parse(JSON.stringify(this.cfg.Dictionary.Tabs)); _a < _b.length; _a++) {
                             tab = _b[_a];
                             for (_c = 0, dictBasesCfg_1 = dictBasesCfg; _c < dictBasesCfg_1.length; _c++) {
                                 dictBaseCfg = dictBasesCfg_1[_c];
@@ -349,7 +349,7 @@ var dictApp = /** @class */ (function () {
         let showWiRatio = float(this.cfgDict["GUI"]["ShowWiRatio"]);
         */
         // let gui = JSON.parse(JSON.stringify(this.//dictCfg["GUI"]));
-        var gui = JSON.parse(JSON.stringify(this.cfg['GUI']));
+        var gui = JSON.parse(JSON.stringify(this.cfg["Dictionary"]['GUI']));
         size.h = gui.Height;
         size.w = gui.Width;
         // size.showHiRatio = gui.ShowHiRatio;
