@@ -872,7 +872,7 @@ export class ReciteWordsApp {
             }
         });
 
-        limit = newWdsLimit - forgottenNum;
+        limit = Math.min(newWdsLimit - forgottenNum, allLimit - numOfWords);
 
         if (limit > 0) {
             wdsLst.length = 0;

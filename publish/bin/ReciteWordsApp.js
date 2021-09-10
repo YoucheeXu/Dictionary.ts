@@ -934,7 +934,7 @@ var ReciteWordsApp = /** @class */ (function () {
                                 _this_1.LearnLst.push(word);
                             }
                         });
-                        limit = newWdsLimit - forgottenNum;
+                        limit = Math.min(newWdsLimit - forgottenNum, allLimit - numOfWords);
                         if (!(limit > 0)) return [3 /*break*/, 14];
                         wdsLst.length = 0;
                         return [4 /*yield*/, this.usrProgress.GetNewWordsLst(wdsLst, limit)];
