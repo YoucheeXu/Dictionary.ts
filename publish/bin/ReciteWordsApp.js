@@ -729,16 +729,16 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.isLevelDone = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progress, progressFile, numOfUnrecitedWord, ret, e_1;
+            var _i, _a, usrCfg, progress, progressFile, numOfUnrecitedWord1, numOfUnrecitedWord2, ret, e_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _i = 0, _a = this.cfg.Users;
                         _b.label = 1;
                     case 1:
-                        if (!(_i < _a.length)) return [3 /*break*/, 14];
+                        if (!(_i < _a.length)) return [3 /*break*/, 15];
                         usrCfg = _a[_i];
-                        if (!(usrName == usrCfg.Name)) return [3 /*break*/, 13];
+                        if (!(usrName == usrCfg.Name)) return [3 /*break*/, 14];
                         progress = usrCfg.Progress;
                         progressFile = path.join(this.startPath, progress).replace(/\\/g, '/');
                         this.logger.info("progress: ", progressFile);
@@ -747,43 +747,46 @@ var ReciteWordsApp = /** @class */ (function () {
                         }
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 11, , 12]);
+                        _b.trys.push([2, 12, , 13]);
                         return [4 /*yield*/, this.usrProgress.Open(progressFile, level)];
                     case 3:
                         _b.sent();
                         return [4 /*yield*/, this.usrProgress.GetInProgressCount(level)];
                     case 4:
-                        numOfUnrecitedWord = _b.sent();
-                        if (!(numOfUnrecitedWord == 0)) return [3 /*break*/, 9];
+                        numOfUnrecitedWord1 = _b.sent();
+                        return [4 /*yield*/, this.usrProgress.GetNewCount(level)];
+                    case 5:
+                        numOfUnrecitedWord2 = _b.sent();
+                        if (!(numOfUnrecitedWord1 + numOfUnrecitedWord2 == 0)) return [3 /*break*/, 10];
                         return [4 /*yield*/, electron_1.dialog.showMessageBox({
                                 type: "info",
                                 message: usrName + "'s " + level + " is done! Do you want to reset?",
                                 buttons: ["Yes", "No"]
                             })];
-                    case 5:
+                    case 6:
                         ret = _b.sent();
-                        if (!(ret.response == 0)) return [3 /*break*/, 7];
+                        if (!(ret.response == 0)) return [3 /*break*/, 8];
                         return [4 /*yield*/, electron_1.dialog.showMessageBox({
                                 type: "info",
                                 message: "Reset function is not implemented!",
                                 buttons: ["Confirm"]
                             })];
-                    case 6:
+                    case 7:
                         ret = _b.sent();
                         return [2 /*return*/, Promise.resolve(true)];
-                    case 7: return [2 /*return*/, Promise.resolve(true)];
-                    case 8: return [3 /*break*/, 10];
-                    case 9: return [2 /*return*/, Promise.resolve(false)];
-                    case 10: return [3 /*break*/, 12];
-                    case 11:
+                    case 8: return [2 /*return*/, Promise.resolve(true)];
+                    case 9: return [3 /*break*/, 11];
+                    case 10: return [2 /*return*/, Promise.resolve(false)];
+                    case 11: return [3 /*break*/, 13];
+                    case 12:
                         e_1 = _b.sent();
                         this.logger.error(e_1);
                         return [2 /*return*/, Promise.reject(e_1)];
-                    case 12: return [3 /*break*/, 14];
-                    case 13:
+                    case 13: return [3 /*break*/, 15];
+                    case 14:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 14: return [2 /*return*/, Promise.reject("Usr doesn't exist!")];
+                    case 15: return [2 /*return*/, Promise.reject("Usr doesn't exist!")];
                 }
             });
         });

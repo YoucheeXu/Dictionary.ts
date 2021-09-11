@@ -139,7 +139,7 @@ export class UsrProgress {
     public GetInProgressCount(level: string): Promise<number> {
         // let where = "level = '" + level + "' and familiar > 0";
         // let where = "LastDate is not null and cast (Familiar as real) < 10";
-        let where = "cast (Familiar as real) < 10";
+        let where = "cast (Familiar as real) < 10 and LastDate is not null";
         return this.GetCount(level, where);
     }
     public GetNewCount(level: string): Promise<number> {
@@ -248,21 +248,21 @@ export class UsrProgress {
 
         let sql = `select * from ${this.level} where cast (Familiar as real) < ${String(familiar)}`;
 
-		try{
-			await this.dataBase.each(sql, [], (row: any) => {
-				wdsLst.push(row);
-			});
+        try {
+            await this.dataBase.each(sql, [], (row: any) => {
+                wdsLst.push(row);
+            });
 
-			if (wdsLst.length >= 1) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		} catch(e){
-			console.error(e);
-			return false;
-		}
+            if (wdsLst.length >= 1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
     }
 
     public async GetOvrDueWordsLst(wdsLst: string[], today: string) {

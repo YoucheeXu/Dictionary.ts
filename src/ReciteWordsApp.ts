@@ -699,8 +699,9 @@ export class ReciteWordsApp {
                 }
                 try {
                     await this.usrProgress.Open(progressFile, level);
-                    let numOfUnrecitedWord = await this.usrProgress.GetInProgressCount(level);
-                    if (numOfUnrecitedWord == 0) {
+                    let numOfUnrecitedWord1 = await this.usrProgress.GetInProgressCount(level);
+                    let numOfUnrecitedWord2 = await this.usrProgress.GetNewCount(level);
+                    if (numOfUnrecitedWord1 + numOfUnrecitedWord2 == 0) {
                         let ret = await dialog.showMessageBox({
                             type: "info",
                             message: `${usrName}'s ${level} is done! Do you want to reset?`,

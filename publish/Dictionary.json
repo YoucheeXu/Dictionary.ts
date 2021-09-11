@@ -63,7 +63,7 @@
 			{
 				"Name": "XX-Net",
 				"IP": "http://127.0.0.1:8087",
-				"Program": "D:\\Green2\\XX-Net\\start.bat"
+				"Program": "D:\\Green\\XX-Net\\start.bat"
 			},
 			{
 				"Name": "v2rayN",
@@ -102,12 +102,12 @@
 		"Audio": "Google",
 		"User": "anonymous",
 		"Miss": {
-			"miss_dict": "log/miss.txt",
-			"miss_audio": "log/miss.txt"
+			"miss_dict": "miss.txt",
+			"miss_audio": "miss.txt"
 		},
 		"Debug": {
 			"bEnable": true,
-			"file": "log/Dictionary.log"
+			"file": "Dictionary.log"
 		}
 	},
 	"ReciteWords":{
@@ -167,7 +167,7 @@
 		],
 		"Debug": {
 			"bEnable": true,
-			"file": "log/ReciteWords.log"
+			"file": "ReciteWords.log"
 		},
 		"DictBase": "15000",
 		"WordsDict": "Words",
