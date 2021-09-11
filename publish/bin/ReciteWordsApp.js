@@ -1197,12 +1197,15 @@ var ReciteWordsApp = /** @class */ (function () {
             });
         });
     };
-    ReciteWordsApp.prototype.quit = function () {
+    ReciteWordsApp.prototype.quit = function (bStrted) {
+        if (bStrted === void 0) { bStrted = true; }
         return __awaiter(this, void 0, void 0, function () {
             var now, sec, min, hour;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.Save_Progress()];
+                    case 0:
+                        if (!(bStrted == true)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.Save_Progress()];
                     case 1:
                         _a.sent();
                         now = new Date();
@@ -1218,6 +1221,8 @@ var ReciteWordsApp = /** @class */ (function () {
                             hour--;
                         }
                         this.LogProgress("It cost " + hour + " hours, " + min + " minutes, " + sec + " seconds.\n");
+                        _a.label = 2;
+                    case 2:
                         this.Close();
                         electron_1.app.quit();
                         return [2 /*return*/];

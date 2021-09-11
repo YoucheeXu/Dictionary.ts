@@ -1107,24 +1107,26 @@ export class ReciteWordsApp {
         }
     }
 
-    public async quit() {
-        await this.Save_Progress();
+    public async quit(bStrted: boolean = true) {
+        if (bStrted == true) {
+            await this.Save_Progress();
 
-        let now = new Date();
-        let sec = now.getSeconds() - this.today.getSeconds();
-        let min = now.getMinutes() - this.today.getMinutes();
-        let hour = now.getHours() - this.today.getHours();
+            let now = new Date();
+            let sec = now.getSeconds() - this.today.getSeconds();
+            let min = now.getMinutes() - this.today.getMinutes();
+            let hour = now.getHours() - this.today.getHours();
 
-        if (sec < 0) {
-            sec += 60;
-            min--;
+            if (sec < 0) {
+                sec += 60;
+                min--;
+            }
+            if (min < 0) {
+                min += 60;
+                hour--;
+            }
+
+            this.LogProgress(`It cost ${hour} hours, ${min} minutes, ${sec} seconds.\n`);
         }
-        if (min < 0) {
-            min += 60;
-            hour--;
-        }
-
-        this.LogProgress(`It cost ${hour} hours, ${min} minutes, ${sec} seconds.\n`);
 
         this.Close();
 

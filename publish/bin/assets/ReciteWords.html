@@ -492,7 +492,7 @@
             let test_value = confirm("你确定要退出吗？");
             if (test_value == true) {
                 // ipc.send('close-main-window');
-                ipcRenderer.send('ReciteWordsApp', 'quit');
+                ipcRenderer.send('ReciteWordsApp', 'quit', 'false');
             }
         }
 
