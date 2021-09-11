@@ -380,17 +380,29 @@ var SQLiteDict = /** @class */ (function () {
     };
     SQLiteDict.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var ret, e_10;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.dataBase.close()];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.dataBase.Close()];
                     case 1:
-                        _a.sent();
-                        return [2 /*return*/];
+                        ret = _a.sent();
+                        if (ret) {
+                            return [2 /*return*/, [true, ""]];
+                        }
+                        else {
+                            return [2 /*return*/, [false, "Unkown reason"]];
+                        }
+                        return [3 /*break*/, 3];
+                    case 2:
+                        e_10 = _a.sent();
+                        return [2 /*return*/, [false, e_10.message]];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
     };
-    ;
     return SQLiteDict;
 }());
 exports.SQLiteDict = SQLiteDict;

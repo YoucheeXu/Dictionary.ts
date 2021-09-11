@@ -65,14 +65,36 @@ CREATE TABLE [Words](
 var SDictBase = /** @class */ (function (_super) {
     __extends(SDictBase, _super);
     function SDictBase(dictSrc) {
-        var _this = _super.call(this) || this;
+        var _this = _super.call(this, dictSrc) || this;
         _this.bWritable = false;
         _this.dict = new SQLite_1.SQLite();
         _this.dict.Open(dictSrc);
         return _this;
     }
-    SDictBase.prototype.close = function () {
-        this.dict.close();
+    SDictBase.prototype.Close = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var ret, e_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.dict.Close()];
+                    case 1:
+                        ret = _a.sent();
+                        if (ret) {
+                            return [2 /*return*/, [true, ""]];
+                        }
+                        else {
+                            return [2 /*return*/, [false, "Unkown reason"]];
+                        }
+                        return [3 /*break*/, 3];
+                    case 2:
+                        e_1 = _a.sent();
+                        return [2 /*return*/, [false, e_1.message]];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
     };
     SDictBase.prototype.get_parseFun = function () {
         return "dictHtml";

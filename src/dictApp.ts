@@ -11,6 +11,7 @@ import { globalVar } from "./utils/globalInterface";
 
 import { UsrProgress } from "./components/UsrProgress";
 import { WordsDict } from "./components/WordsDict";
+import { timeStamp } from "console";
 
 export class dictApp {
     private cfg: any;
@@ -195,18 +196,26 @@ export class dictApp {
         return this.win;
     }
 
-    public Close(): void {
-        // only work in target >= es6
-        // for (let value of this.dictBaseDict.values()) {
-        // 	console.log("Close " + value["name"]);
-        // 	this.logger.info("Close " + value["name"]);
-        // 	value["dictBase"]?.close();
-        // }
-        this.dictBaseDict.forEach((value: any, key: string) => {
+    public async Close() {
+        this.dictBaseDict.forEach(async (value: any, key: string) => {
             console.log("Start to close " + value["name"]);
-            value["dictBase"]?.close();
+            let dictBase = value["dictBase"];
+            let [ret, msg] = await dictBase.Close();
+            let name = dictBase.GetName();
+            if (ret) {
+                this.logger.info(`Ok to close ${name}${msg}`);
+            } else {
+                this.logger.error(`Fail to close ${name}, because of ${msg}`);
+            }
         });
-        this.audioPackage.close();
+
+        let [ret, msg] = this.audioPackage.Close();
+        let name = this.audioPackage.GetName();
+        if (ret) {
+            this.logger.info(`Ok to close ${name}${msg}`);
+        } else {
+            this.logger.error(`Fail to close ${name}, because of ${msg}`);
+        }
 
         if (this.bCfgModfied) {
             this.SaveConfigure()
@@ -279,14 +288,14 @@ export class dictApp {
             dictBase = new SDictBase(dictSrc);
         } else if (format.Type == 'mdx') {
             // dictBase = new MDictBase(dictSrc);
+            this.logger.error(`not support mdx dict: ${name}`);
+            return;
         }
         else {
             throw new Error(`Unknown dict's type: ${format.Type}!`);
         }
 
         let dictId = 'dict' + String(this.dictBaseDict.size + 1);
-        // this.dictBaseDict.push({dictId: { 'name': name, 'dictBase': dictBase } });
-        // this.dictBaseDict[dictId] = { 'name': name, 'dictBase': dictBase };
         this.dictBaseDict.set(dictId, { 'name': name, 'dictBase': dictBase });
     }
 
@@ -307,13 +316,13 @@ export class dictApp {
         // size.showWiRatio = gui.ShowWiRatio;
     }
 
-    public OnButtonClicked(id: string): void {
+    public async OnButtonClicked(id: string) {
         switch (id) {
             case "btn_close":
                 // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
                 // ...
                 // safeExit = true;
-                this.Close();
+                await this.Close();
                 app.quit(); // 退出程序
                 break;
             case "btn_min":

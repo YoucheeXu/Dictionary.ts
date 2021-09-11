@@ -8,13 +8,13 @@ import { globalVar } from "../utils/globalInterface";
 
 export class AuidoArchive {
     private bWritable: boolean = false;
-    private audioArchive: string;
+    private szAudioArchive: string;
     private audioZip: ZipArchive;
     private tempAudioDir: string;
 
     constructor(readonly audioSrc: string, readonly compression: string, readonly compresslevel: string) {
-        this.audioArchive = path.basename(audioSrc);
-        // console.log(this.audioArchive);
+        this.szAudioArchive = path.basename(audioSrc);
+        // console.log(this.szAudioArchive);
         let filePath = path.dirname(audioSrc);
         let fileName = path.basename(audioSrc, ".zip");
         // console.log(fileName);
@@ -35,10 +35,16 @@ export class AuidoArchive {
         this.audioZip = new ZipArchive(audioSrc, compression, compresslevel);
     }
 
-    public close(): void {
+    public GetName():string{
+        return this.szAudioArchive;
+    }
+
+    public Close(): [boolean, string] {
         RemoveDir(this.tempAudioDir);
         if (fs.existsSync(this.tempAudioDir) == false) {
-            console.log("OK to remove " + this.tempAudioDir);
+            return [true, `; OK to remove ${this.tempAudioDir}`];
+        }else{
+            return [false, `; Fail to remove ${this.tempAudioDir}`]
         }
     }
 
@@ -62,7 +68,7 @@ export class AuidoArchive {
                     return Promise.resolve([1, audioFile]);
                 }
                 else {
-                    return Promise.resolve([-1, `Fail to read ${word} in ${this.audioArchive}!`]);
+                    return Promise.resolve([-1, `Fail to read ${word} in ${this.szAudioArchive}!`]);
                 }
             }
             else if (this.bWritable) {
@@ -72,7 +78,7 @@ export class AuidoArchive {
                 return Promise.resolve([0, audioFile]);
             }
             else {
-                return Promise.resolve([-1, `no audio of ${word} in ${this.audioArchive}`]);
+                return Promise.resolve([-1, `no audio of ${word} in ${this.szAudioArchive}`]);
             }
         }
         catch (e) {

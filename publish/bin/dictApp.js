@@ -246,21 +246,45 @@ var dictApp = /** @class */ (function () {
         return this.win;
     };
     dictApp.prototype.Close = function () {
-        // only work in target >= es6
-        // for (let value of this.dictBaseDict.values()) {
-        // 	console.log("Close " + value["name"]);
-        // 	this.logger.info("Close " + value["name"]);
-        // 	value["dictBase"]?.close();
-        // }
-        this.dictBaseDict.forEach(function (value, key) {
-            var _a;
-            console.log("Start to close " + value["name"]);
-            (_a = value["dictBase"]) === null || _a === void 0 ? void 0 : _a.close();
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, ret, msg, name;
+            var _this_1 = this;
+            return __generator(this, function (_b) {
+                this.dictBaseDict.forEach(function (value, key) { return __awaiter(_this_1, void 0, void 0, function () {
+                    var dictBase, _a, ret, msg, name;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                console.log("Start to close " + value["name"]);
+                                dictBase = value["dictBase"];
+                                return [4 /*yield*/, dictBase.Close()];
+                            case 1:
+                                _a = _b.sent(), ret = _a[0], msg = _a[1];
+                                name = dictBase.GetName();
+                                if (ret) {
+                                    this.logger.info("Ok to close " + name + msg);
+                                }
+                                else {
+                                    this.logger.error("Fail to close " + name + ", because of " + msg);
+                                }
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                _a = this.audioPackage.Close(), ret = _a[0], msg = _a[1];
+                name = this.audioPackage.GetName();
+                if (ret) {
+                    this.logger.info("Ok to close " + name + msg);
+                }
+                else {
+                    this.logger.error("Fail to close " + name + ", because of " + msg);
+                }
+                if (this.bCfgModfied) {
+                    this.SaveConfigure();
+                }
+                return [2 /*return*/];
+            });
         });
-        this.audioPackage.close();
-        if (this.bCfgModfied) {
-            this.SaveConfigure();
-        }
     };
     dictApp.prototype.Record2File = function (file, something) {
         var _this_1 = this;
@@ -330,13 +354,13 @@ var dictApp = /** @class */ (function () {
         }
         else if (format.Type == 'mdx') {
             // dictBase = new MDictBase(dictSrc);
+            this.logger.error("not support mdx dict: " + name);
+            return;
         }
         else {
             throw new Error("Unknown dict's type: " + format.Type + "!");
         }
         var dictId = 'dict' + String(this.dictBaseDict.size + 1);
-        // this.dictBaseDict.push({dictId: { 'name': name, 'dictBase': dictBase } });
-        // this.dictBaseDict[dictId] = { 'name': name, 'dictBase': dictBase };
         this.dictBaseDict.set(dictId, { 'name': name, 'dictBase': dictBase });
     };
     dictApp.prototype.getWinSize = function (size) {
@@ -356,26 +380,47 @@ var dictApp = /** @class */ (function () {
         // size.showWiRatio = gui.ShowWiRatio;
     };
     dictApp.prototype.OnButtonClicked = function (id) {
-        switch (id) {
-            case "btn_close":
-                // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
-                // ...
-                // safeExit = true;
-                this.Close();
-                electron_1.app.quit(); // 退出程序
-                break;
-            case "btn_min":
-                this.win.minimize();
-                break;
-            case 'btn_prev':
-                this.QueryPrev();
-                break;
-            case 'btn_next':
-                this.QueryNext();
-                break;
-            default:
-                this.logger.info(id);
-        }
+        return __awaiter(this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = id;
+                        switch (_a) {
+                            case "btn_close": return [3 /*break*/, 1];
+                            case "btn_min": return [3 /*break*/, 3];
+                            case 'btn_prev': return [3 /*break*/, 4];
+                            case 'btn_next': return [3 /*break*/, 5];
+                        }
+                        return [3 /*break*/, 6];
+                    case 1: 
+                    // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
+                    // ...
+                    // safeExit = true;
+                    return [4 /*yield*/, this.Close()];
+                    case 2:
+                        // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
+                        // ...
+                        // safeExit = true;
+                        _b.sent();
+                        electron_1.app.quit(); // 退出程序
+                        return [3 /*break*/, 7];
+                    case 3:
+                        this.win.minimize();
+                        return [3 /*break*/, 7];
+                    case 4:
+                        this.QueryPrev();
+                        return [3 /*break*/, 7];
+                    case 5:
+                        this.QueryNext();
+                        return [3 /*break*/, 7];
+                    case 6:
+                        this.logger.info(id);
+                        _b.label = 7;
+                    case 7: return [2 /*return*/];
+                }
+            });
+        });
     };
     dictApp.prototype.QueryNext = function () {
         throw new Error('QueryNext not implemented.');

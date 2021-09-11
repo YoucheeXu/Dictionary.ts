@@ -69,8 +69,8 @@ var AuidoArchive = /** @class */ (function () {
         this.compression = compression;
         this.compresslevel = compresslevel;
         this.bWritable = false;
-        this.audioArchive = path.basename(audioSrc);
-        // console.log(this.audioArchive);
+        this.szAudioArchive = path.basename(audioSrc);
+        // console.log(this.szAudioArchive);
         var filePath = path.dirname(audioSrc);
         var fileName = path.basename(audioSrc, ".zip");
         // console.log(fileName);
@@ -89,10 +89,16 @@ var AuidoArchive = /** @class */ (function () {
         // gLogger.info("tempAudioDir: " + this.tempAudioDir);
         this.audioZip = new ZipArchive_1.ZipArchive(audioSrc, compression, compresslevel);
     }
-    AuidoArchive.prototype.close = function () {
+    AuidoArchive.prototype.GetName = function () {
+        return this.szAudioArchive;
+    };
+    AuidoArchive.prototype.Close = function () {
         utils_1.RemoveDir(this.tempAudioDir);
         if (fs.existsSync(this.tempAudioDir) == false) {
-            console.log("OK to remove " + this.tempAudioDir);
+            return [true, "; OK to remove " + this.tempAudioDir];
+        }
+        else {
+            return [false, "; Fail to remove " + this.tempAudioDir];
         }
     };
     AuidoArchive.prototype.query_audio = function (word) {
@@ -125,7 +131,7 @@ var AuidoArchive = /** @class */ (function () {
                             return [2 /*return*/, Promise.resolve([1, audioFile])];
                         }
                         else {
-                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.audioArchive + "!"])];
+                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.szAudioArchive + "!"])];
                         }
                         return [3 /*break*/, 5];
                     case 4:
@@ -136,7 +142,7 @@ var AuidoArchive = /** @class */ (function () {
                             return [2 /*return*/, Promise.resolve([0, audioFile])];
                         }
                         else {
-                            return [2 /*return*/, Promise.resolve([-1, "no audio of " + word + " in " + this.audioArchive])];
+                            return [2 /*return*/, Promise.resolve([-1, "no audio of " + word + " in " + this.szAudioArchive])];
                         }
                         _b.label = 5;
                     case 5: return [3 /*break*/, 7];

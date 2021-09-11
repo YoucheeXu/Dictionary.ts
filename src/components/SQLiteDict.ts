@@ -213,7 +213,18 @@ export class SQLiteDict {
         }
     }
 
-    public async Close() {
-        await this.dataBase.close();
-    };
+    public async Close(): Promise<[boolean, string]> {
+        try {
+            let ret = await this.dataBase.Close();
+            if (ret) {
+                return [true, ""];
+            }
+            else {
+                return [false, "Unkown reason"];
+            }
+        }
+        catch (e) {
+            return [false, (e as Error).message];
+        }
+    }
 };

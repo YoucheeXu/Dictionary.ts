@@ -1093,13 +1093,31 @@ export class ReciteWordsApp {
 
     public async Close() {
         if (this.dictBase) {
-            this.dictBase.close();
+            let [ret, msg] = await this.dictBase.Close();
+            let name = this.dictBase.GetName();
+            if (ret) {
+                this.logger.info(`Ok to close ${name}${msg}`);
+            } else {
+                this.logger.error(`Fail to close ${name}, because of ${msg}`);
+            }
         }
         if (this.audioBase) {
-            this.audioBase.close();
+            let [ret, msg] = this.audioBase.Close();
+            let name = this.audioBase.GetName();
+            if (ret) {
+                this.logger.info(`Ok to close ${name}${msg}`);
+            } else {
+                this.logger.error(`Fail to close ${name}, because of ${msg}`);
+            }
         }
         if (this.usrProgress) {
-            await this.usrProgress.Close();
+            let [ret, msg] = await this.usrProgress.Close();
+            let name = this.usrProgress.GetName();
+            if (ret) {
+                this.logger.info(`Ok to close ${name}${msg}`);
+            } else {
+                this.logger.error(`Fail to close ${name}, because of ${msg}`);
+            }
         }
 
         if (this.bCfgModfied) {

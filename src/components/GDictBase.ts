@@ -13,8 +13,8 @@ export class GDictBase extends DictBase {
     private dictZip: ZipArchive;
     private tempDictDir: string;
 
-    constructor(readonly dictSrc: string, readonly compression: string, readonly compresslevel: string) {
-        super();
+    constructor(dictSrc: string, readonly compression: string, readonly compresslevel: string) {
+        super(dictSrc);
         this.dictZip = new ZipArchive(dictSrc, compression, compresslevel);
         // this.tempDictDir = tempfile.gettempdir();
         this.dictArchive = path.basename(dictSrc);
@@ -24,12 +24,13 @@ export class GDictBase extends DictBase {
         this.tempDictDir = path.join(filePath, fileName);
     }
 
-    public close(): void {
+    public async Close(): Promise<[boolean, string]> {
         RemoveDir(this.tempDictDir);
         if (fs.existsSync(this.tempDictDir) == false) {
-            console.log("OK to remove " + this.tempDictDir);
+            return [true, `; OK to remove ${this.tempDictDir}`];
+        } else {
+            return [false, `; Fail to remove ${this.tempDictDir}`];
         }
-        console.log(`OK to close ${this.dictArchive}.`);
     }
 
     public get_parseFun(): string {

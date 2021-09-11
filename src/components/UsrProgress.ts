@@ -1,24 +1,31 @@
 import { assert } from "console";
 import { SQLite } from "./SQLite";
 
+// TODO: support create new dict and initialize it; support to reset level
 /*
-To-Do{
-* support create new dict and initialize it
+CREATE TABLE ${Level}(
+    Word text NOT NULL PRIMARY KEY,
+    Familiar REAL,
+    LastDate DATE,
+    NextDate DATE
+);
 */
-
-// Words: word, symbol, meaning, sentences, level, familiar, lastdate
-// Words: word, level, familiar, lastdate
-
 export class UsrProgress {
     private dataBase: SQLite;
     private level: string;
+    private dictSrc: string;
 
     public async Open(dictSrc: string, lvl: string) {
+        this.dictSrc = dictSrc;
         this.dataBase = new SQLite();
         await this.dataBase.Open(dictSrc);
         this.level = lvl;
         // print("progress of " + dictSrc + "is OK to open!");
     };
+
+    public GetName(): string {
+        return this.dictSrc;
+    }
 
     public async New(dictSrc: string, lvl: string) {
         this.dataBase = new SQLite();
@@ -328,7 +335,18 @@ export class UsrProgress {
         return await this.dataBase.run(sql);
     }
 
-    public async Close() {
-        await this.dataBase.close();
-    };
+    public async Close(): Promise<[boolean, string]> {
+        try {
+            let ret = await this.dataBase.Close();
+            if (ret) {
+                return [true, ""];
+            }
+            else {
+                return [false, "Unkown reason"];
+            }
+        }
+        catch (e) {
+            return [false, (e as Error).message];
+        }
+    }
 };

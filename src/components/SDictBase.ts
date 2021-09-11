@@ -15,12 +15,25 @@ export class SDictBase extends DictBase {
     private dict: SQLite = new SQLite();
 
     constructor(dictSrc: string) {
-        super();
+        super(dictSrc);
         this.dict.Open(dictSrc);
     }
-    public close() {
-        this.dict.close();
+
+    public async Close(): Promise<[boolean, string]> {
+        try {
+            let ret = await this.dict.Close();
+            if (ret) {
+                return [true, ""];
+            }
+            else {
+                return [false, "Unkown reason"];
+            }
+        }
+        catch (e) {
+            return [false, (e as Error).message];
+        }
     }
+
     public get_parseFun() {
         return "dictHtml";
     }

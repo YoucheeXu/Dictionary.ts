@@ -38,12 +38,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsrProgress = void 0;
 var SQLite_1 = require("./SQLite");
+// TODO: support create new dict and initialize it; support to reset level
 /*
-To-Do{
-* support create new dict and initialize it
+CREATE TABLE ${Level}(
+    Word text NOT NULL PRIMARY KEY,
+    Familiar REAL,
+    LastDate DATE,
+    NextDate DATE
+);
 */
-// Words: word, symbol, meaning, sentences, level, familiar, lastdate
-// Words: word, level, familiar, lastdate
 var UsrProgress = /** @class */ (function () {
     function UsrProgress() {
     }
@@ -52,6 +55,7 @@ var UsrProgress = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        this.dictSrc = dictSrc;
                         this.dataBase = new SQLite_1.SQLite();
                         return [4 /*yield*/, this.dataBase.Open(dictSrc)];
                     case 1:
@@ -63,6 +67,9 @@ var UsrProgress = /** @class */ (function () {
         });
     };
     ;
+    UsrProgress.prototype.GetName = function () {
+        return this.dictSrc;
+    };
     UsrProgress.prototype.New = function (dictSrc, lvl) {
         return __awaiter(this, void 0, void 0, function () {
             var r;
@@ -488,17 +495,29 @@ var UsrProgress = /** @class */ (function () {
     };
     UsrProgress.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var ret, e_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.dataBase.close()];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.dataBase.Close()];
                     case 1:
-                        _a.sent();
-                        return [2 /*return*/];
+                        ret = _a.sent();
+                        if (ret) {
+                            return [2 /*return*/, [true, ""]];
+                        }
+                        else {
+                            return [2 /*return*/, [false, "Unkown reason"]];
+                        }
+                        return [3 /*break*/, 3];
+                    case 2:
+                        e_3 = _a.sent();
+                        return [2 /*return*/, [false, e_3.message]];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
     };
-    ;
     return UsrProgress;
 }());
 exports.UsrProgress = UsrProgress;

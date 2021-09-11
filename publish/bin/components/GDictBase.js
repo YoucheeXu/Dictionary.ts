@@ -82,8 +82,7 @@ var globalInterface_1 = require("../utils/globalInterface");
 var GDictBase = /** @class */ (function (_super) {
     __extends(GDictBase, _super);
     function GDictBase(dictSrc, compression, compresslevel) {
-        var _this_1 = _super.call(this) || this;
-        _this_1.dictSrc = dictSrc;
+        var _this_1 = _super.call(this, dictSrc) || this;
         _this_1.compression = compression;
         _this_1.compresslevel = compresslevel;
         _this_1.bWritable = true;
@@ -96,12 +95,19 @@ var GDictBase = /** @class */ (function (_super) {
         _this_1.tempDictDir = path.join(filePath, fileName);
         return _this_1;
     }
-    GDictBase.prototype.close = function () {
-        utils_1.RemoveDir(this.tempDictDir);
-        if (fs.existsSync(this.tempDictDir) == false) {
-            console.log("OK to remove " + this.tempDictDir);
-        }
-        console.log("OK to close " + this.dictArchive + ".");
+    GDictBase.prototype.Close = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                utils_1.RemoveDir(this.tempDictDir);
+                if (fs.existsSync(this.tempDictDir) == false) {
+                    return [2 /*return*/, [true, "; OK to remove " + this.tempDictDir]];
+                }
+                else {
+                    return [2 /*return*/, [false, "; Fail to remove " + this.tempDictDir]];
+                }
+                return [2 /*return*/];
+            });
+        });
     };
     GDictBase.prototype.get_parseFun = function () {
         // return "dictJson";

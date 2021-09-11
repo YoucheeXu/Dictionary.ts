@@ -111,7 +111,7 @@ var SQLite = /** @class */ (function () {
             });
         });
     };
-    SQLite.prototype.close = function () {
+    SQLite.prototype.Close = function () {
         var db = this.db;
         return new Promise(function (resolve, reject) {
             db.close(function (err) {

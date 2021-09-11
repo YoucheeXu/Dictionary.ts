@@ -1,9 +1,13 @@
 export abstract class DictBase {
-    // abstract get_parseFun(fun: string): void;
+    private dictSrc: string;
+    constructor(dictSrc: string) {
+        this.dictSrc = dictSrc;
+    }
+    GetName(): string {
+        return this.dictSrc;
+    }
     abstract get_parseFun(): string;
 
-    // abstract query_word(word: string, datum: string): boolean;
-    // abstract query_word(word: string): [boolean, string];
     abstract query_word(word: string): Promise<[number, string]>
 
     abstract get_wordsLst(word: string, wdMatchLst: string[]): any;
@@ -12,5 +16,5 @@ export abstract class DictBase {
 
     abstract del_word(word: string): boolean;
 
-    abstract close(): void;
+    abstract Close(): Promise<[boolean, string]>;
 };

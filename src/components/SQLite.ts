@@ -98,7 +98,7 @@ export class SQLite {
         })
     }
 
-    public close(): Promise<boolean> {
+    public Close(): Promise<any> {
         let db = this.db;
         return new Promise((resolve, reject) => {
             db.close((err: Error | null) => {

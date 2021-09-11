@@ -1172,27 +1172,52 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, ret, msg, name_2, _b, ret, msg, name_3, _c, ret, msg, name_4;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        if (this.dictBase) {
-                            this.dictBase.close();
-                        }
-                        if (this.audioBase) {
-                            this.audioBase.close();
-                        }
-                        if (!this.usrProgress) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.usrProgress.Close()];
+                        if (!this.dictBase) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.dictBase.Close()];
                     case 1:
-                        _a.sent();
-                        _a.label = 2;
+                        _a = _d.sent(), ret = _a[0], msg = _a[1];
+                        name_2 = this.dictBase.GetName();
+                        if (ret) {
+                            this.logger.info("Ok to close " + name_2 + msg);
+                        }
+                        else {
+                            this.logger.error("Fail to close " + name_2 + ", because of " + msg);
+                        }
+                        _d.label = 2;
                     case 2:
-                        if (!this.bCfgModfied) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.SaveConfigure()];
+                        if (this.audioBase) {
+                            _b = this.audioBase.Close(), ret = _b[0], msg = _b[1];
+                            name_3 = this.audioBase.GetName();
+                            if (ret) {
+                                this.logger.info("Ok to close " + name_3 + msg);
+                            }
+                            else {
+                                this.logger.error("Fail to close " + name_3 + ", because of " + msg);
+                            }
+                        }
+                        if (!this.usrProgress) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.usrProgress.Close()];
                     case 3:
-                        _a.sent();
-                        _a.label = 4;
-                    case 4: return [2 /*return*/];
+                        _c = _d.sent(), ret = _c[0], msg = _c[1];
+                        name_4 = this.usrProgress.GetName();
+                        if (ret) {
+                            this.logger.info("Ok to close " + name_4 + msg);
+                        }
+                        else {
+                            this.logger.error("Fail to close " + name_4 + ", because of " + msg);
+                        }
+                        _d.label = 4;
+                    case 4:
+                        if (!this.bCfgModfied) return [3 /*break*/, 6];
+                        return [4 /*yield*/, this.SaveConfigure()];
+                    case 5:
+                        _d.sent();
+                        _d.label = 6;
+                    case 6: return [2 /*return*/];
                 }
             });
         });
