@@ -989,15 +989,18 @@ var ReciteWordsApp = /** @class */ (function () {
                 nowStr = utils_1.formatTime(now);
                 something = nowStr + " " + info + "\n";
                 console.log(something);
-                fs.writeFile(this.personalProgressFile, something, { 'flag': 'a' }, function (err) {
-                    if (err) {
-                        _this_1.logger.error("Fail to log " + something + " in " + _this_1.personalProgressFile + "!");
-                    }
-                    else {
-                        console.log("Success to log " + something + " in " + _this_1.personalProgressFile + "!");
-                    }
-                });
-                return [2 /*return*/];
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        fs.writeFile(_this_1.personalProgressFile, something, { 'flag': 'a' }, function (err) {
+                            if (err) {
+                                _this_1.logger.error("Fail to log " + something + " in " + _this_1.personalProgressFile + "! Because of " + err);
+                                resolve(false);
+                            }
+                            else {
+                                console.log("Success to log " + something + " in " + _this_1.personalProgressFile + "!");
+                                resolve(true);
+                            }
+                        });
+                    })];
             });
         });
     };
@@ -1229,10 +1232,7 @@ var ReciteWordsApp = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(bStrted == true)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.Save_Progress()];
-                    case 1:
-                        _a.sent();
+                        if (!(bStrted == true)) return [3 /*break*/, 3];
                         now = new Date();
                         sec = now.getSeconds() - this.today.getSeconds();
                         min = now.getMinutes() - this.today.getMinutes();
@@ -1245,9 +1245,14 @@ var ReciteWordsApp = /** @class */ (function () {
                             min += 60;
                             hour--;
                         }
-                        this.LogProgress("It cost " + hour + " hours, " + min + " minutes, " + sec + " seconds.\n");
-                        _a.label = 2;
+                        return [4 /*yield*/, this.Save_Progress()];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.LogProgress("It cost " + hour + " hours, " + min + " minutes, " + sec + " seconds.\n")];
                     case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
                         this.Close();
                         electron_1.app.quit();
                         return [2 /*return*/];

@@ -914,19 +914,24 @@ export class ReciteWordsApp {
         }
     }
 
-    private async LogProgress(info: string) {
+    private async LogProgress(info: string): Promise<boolean> {
         // 2021-08-25 19:59:01 it cost 0 hours, 50 minutes, 18 seconds.
         let now = new Date();
         let nowStr = formatTime(now);
         let something = `${nowStr} ${info}\n`;
         console.log(something);
-        fs.writeFile(this.personalProgressFile, something, { 'flag': 'a' }, (err: any) => {
-            if (err) {
-                this.logger.error(`Fail to log ${something} in ${this.personalProgressFile}!`);
-            } else {
-                console.log(`Success to log ${something} in ${this.personalProgressFile}!`);
-            }
-        })
+
+        return new Promise((resolve, reject) => {
+            fs.writeFile(this.personalProgressFile, something, { 'flag': 'a' }, (err: any) => {
+                if (err) {
+                    this.logger.error(`Fail to log ${something} in ${this.personalProgressFile}! Because of ${err}`);
+                    resolve(false);
+                } else {
+                    console.log(`Success to log ${something} in ${this.personalProgressFile}!`);
+                    resolve(true);
+                }
+            })
+        });
     }
 
     private async Save_Progress() {
@@ -1127,7 +1132,6 @@ export class ReciteWordsApp {
 
     public async quit(bStrted: boolean = true) {
         if (bStrted == true) {
-            await this.Save_Progress();
 
             let now = new Date();
             let sec = now.getSeconds() - this.today.getSeconds();
@@ -1143,11 +1147,11 @@ export class ReciteWordsApp {
                 hour--;
             }
 
-            this.LogProgress(`It cost ${hour} hours, ${min} minutes, ${sec} seconds.\n`);
+            await this.Save_Progress();
+            await this.LogProgress(`It cost ${hour} hours, ${min} minutes, ${sec} seconds.\n`);
         }
 
         this.Close();
-
         app.quit();
     }
 
