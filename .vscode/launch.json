@@ -20,8 +20,8 @@
             "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
             "program": "${workspaceFolder}/publish/bin/main.js", // 这里要写编译后的js文件, 即electron入口
             "args": [
-                "--type c",
-                "--q acrimonious acrimony acting action active activity actual acumen acute adage adapt adaptable adaptation addict addicted additional additive address adept adequate adhere adherent adhesive adjacent adjoin",
+                "--type r",
+                // "--q acrimonious acrimony acting action active activity actual acumen acute adage adapt adaptable adaptation addict addicted additional additive address adept adequate adhere adherent adhesive adjacent adjoin",
                 "--dev"
             ],
             "outFiles": [

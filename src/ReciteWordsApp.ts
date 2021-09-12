@@ -1081,16 +1081,14 @@ export class ReciteWordsApp {
         this.win.webContents.send("gui", "modifyValue", "info", `OK to save progress.`);
     }
 
-    private SaveConfigure(): Promise<string | boolean> {
+    private SaveConfigure(): Promise<string> {
         return new Promise((resolve, reject) => {
             // Indent by 4 spaces
             fs.writeFile(this.cfgFile, JSON.stringify(this.cfg, null, 4), { 'flag': 'w' }, (err: any) => {
                 if (err) {
-                    this.logger.error("Fail to SaveConfigure!");
                     reject("Fail to SaveConfigure!");
                 } else {
-                    console.log("Success to SaveConfigure");
-                    resolve(true);
+                    resolve("Success to SaveConfigure");
                 }
             })
         })
@@ -1126,7 +1124,13 @@ export class ReciteWordsApp {
         }
 
         if (this.bCfgModfied) {
-            await this.SaveConfigure()
+            try {
+                let ret = await this.SaveConfigure()
+                this.logger.info(ret);
+            }
+            catch (e) {
+                this.logger.error(e);
+            }
         }
     }
 
@@ -1151,7 +1155,7 @@ export class ReciteWordsApp {
             await this.LogProgress(`It cost ${hour} hours, ${min} minutes, ${sec} seconds.\n`);
         }
 
-        this.Close();
+        await this.Close();
         app.quit();
     }
 

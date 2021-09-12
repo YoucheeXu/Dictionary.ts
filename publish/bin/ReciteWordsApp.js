@@ -1185,19 +1185,17 @@ var ReciteWordsApp = /** @class */ (function () {
             // Indent by 4 spaces
             fs.writeFile(_this_1.cfgFile, JSON.stringify(_this_1.cfg, null, 4), { 'flag': 'w' }, function (err) {
                 if (err) {
-                    _this_1.logger.error("Fail to SaveConfigure!");
                     reject("Fail to SaveConfigure!");
                 }
                 else {
-                    console.log("Success to SaveConfigure");
-                    resolve(true);
+                    resolve("Success to SaveConfigure");
                 }
             });
         });
     };
     ReciteWordsApp.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, ret, msg, name_2, _b, ret, msg, name_3, _c, ret, msg, name_4;
+            var _a, ret, msg, name_2, _b, ret, msg, name_3, _c, ret, msg, name_4, ret, e_4;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
@@ -1237,12 +1235,20 @@ var ReciteWordsApp = /** @class */ (function () {
                         }
                         _d.label = 4;
                     case 4:
-                        if (!this.bCfgModfied) return [3 /*break*/, 6];
-                        return [4 /*yield*/, this.SaveConfigure()];
+                        if (!this.bCfgModfied) return [3 /*break*/, 8];
+                        _d.label = 5;
                     case 5:
-                        _d.sent();
-                        _d.label = 6;
-                    case 6: return [2 /*return*/];
+                        _d.trys.push([5, 7, , 8]);
+                        return [4 /*yield*/, this.SaveConfigure()];
+                    case 6:
+                        ret = _d.sent();
+                        this.logger.info(ret);
+                        return [3 /*break*/, 8];
+                    case 7:
+                        e_4 = _d.sent();
+                        this.logger.error(e_4);
+                        return [3 /*break*/, 8];
+                    case 8: return [2 /*return*/];
                 }
             });
         });
@@ -1274,8 +1280,9 @@ var ReciteWordsApp = /** @class */ (function () {
                     case 2:
                         _a.sent();
                         _a.label = 3;
-                    case 3:
-                        this.Close();
+                    case 3: return [4 /*yield*/, this.Close()];
+                    case 4:
+                        _a.sent();
                         electron_1.app.quit();
                         return [2 /*return*/];
                 }

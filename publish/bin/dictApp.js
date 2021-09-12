@@ -194,13 +194,16 @@ var dictApp = /** @class */ (function () {
     };
     dictApp.prototype.SaveConfigure = function () {
         var _this_1 = this;
-        fs.writeFile(this.cfgFile, JSON.stringify(this.cfg), { 'flag': 'w' }, function (err) {
-            if (err) {
-                _this_1.logger.error("Fail to SaveConfigure!");
-            }
-            else {
-                _this_1.logger.info("Success to SaveConfigure");
-            }
+        return new Promise(function (resolve, reject) {
+            // Indent by 4 spaces
+            fs.writeFile(_this_1.cfgFile, JSON.stringify(_this_1.cfg, null, 4), { 'flag': 'w' }, function (err) {
+                if (err) {
+                    reject("Fail to SaveConfigure!");
+                }
+                else {
+                    resolve("Success to SaveConfigure");
+                }
+            });
         });
     };
     dictApp.prototype.Run = function (argvs) {
@@ -347,42 +350,55 @@ var dictApp = /** @class */ (function () {
     };
     dictApp.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, ret, msg, name;
+            var _a, ret, msg, name, ret_1, e_1;
             var _this_1 = this;
             return __generator(this, function (_b) {
-                this.dictBaseDict.forEach(function (value, key) { return __awaiter(_this_1, void 0, void 0, function () {
-                    var dictBase, _a, ret, msg, name;
-                    return __generator(this, function (_b) {
-                        switch (_b.label) {
-                            case 0:
-                                console.log("Start to close " + value["name"]);
-                                dictBase = value["dictBase"];
-                                return [4 /*yield*/, dictBase.Close()];
-                            case 1:
-                                _a = _b.sent(), ret = _a[0], msg = _a[1];
-                                name = dictBase.GetName();
-                                if (ret) {
-                                    this.logger.info("Ok to close " + name + msg);
+                switch (_b.label) {
+                    case 0:
+                        this.dictBaseDict.forEach(function (value, key) { return __awaiter(_this_1, void 0, void 0, function () {
+                            var dictBase, _a, ret, msg, name;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0:
+                                        console.log("Start to close " + value["name"]);
+                                        dictBase = value["dictBase"];
+                                        return [4 /*yield*/, dictBase.Close()];
+                                    case 1:
+                                        _a = _b.sent(), ret = _a[0], msg = _a[1];
+                                        name = dictBase.GetName();
+                                        if (ret) {
+                                            this.logger.info("Ok to close " + name + msg);
+                                        }
+                                        else {
+                                            this.logger.error("Fail to close " + name + ", because of " + msg);
+                                        }
+                                        return [2 /*return*/];
                                 }
-                                else {
-                                    this.logger.error("Fail to close " + name + ", because of " + msg);
-                                }
-                                return [2 /*return*/];
+                            });
+                        }); });
+                        _a = this.audioPackage.Close(), ret = _a[0], msg = _a[1];
+                        name = this.audioPackage.GetName();
+                        if (ret) {
+                            this.logger.info("Ok to close " + name + msg);
                         }
-                    });
-                }); });
-                _a = this.audioPackage.Close(), ret = _a[0], msg = _a[1];
-                name = this.audioPackage.GetName();
-                if (ret) {
-                    this.logger.info("Ok to close " + name + msg);
+                        else {
+                            this.logger.error("Fail to close " + name + ", because of " + msg);
+                        }
+                        if (!this.bCfgModfied) return [3 /*break*/, 4];
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this.SaveConfigure()];
+                    case 2:
+                        ret_1 = _b.sent();
+                        this.logger.info(ret_1);
+                        return [3 /*break*/, 4];
+                    case 3:
+                        e_1 = _b.sent();
+                        this.logger.error(e_1);
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
                 }
-                else {
-                    this.logger.error("Fail to close " + name + ", because of " + msg);
-                }
-                if (this.bCfgModfied) {
-                    this.SaveConfigure();
-                }
-                return [2 /*return*/];
             });
         });
     };

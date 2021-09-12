@@ -139,13 +139,16 @@ export class dictApp {
         return true;
     }
 
-    private SaveConfigure(): void {
-        fs.writeFile(this.cfgFile, JSON.stringify(this.cfg), { 'flag': 'w' }, (err: any) => {
-            if (err) {
-                this.logger.error("Fail to SaveConfigure!");
-            } else {
-                this.logger.info("Success to SaveConfigure");
-            }
+    private SaveConfigure(): Promise<string> {
+        return new Promise((resolve, reject) => {
+            // Indent by 4 spaces
+            fs.writeFile(this.cfgFile, JSON.stringify(this.cfg, null, 4), { 'flag': 'w' }, (err: any) => {
+                if (err) {
+                    reject("Fail to SaveConfigure!");
+                } else {
+                    resolve("Success to SaveConfigure");
+                }
+            })
         })
     }
 
@@ -276,7 +279,13 @@ export class dictApp {
         }
 
         if (this.bCfgModfied) {
-            this.SaveConfigure()
+            try {
+                let ret = await this.SaveConfigure()
+                this.logger.info(ret);
+            }
+            catch (e) {
+                this.logger.error(e);
+            }
         }
     }
 
