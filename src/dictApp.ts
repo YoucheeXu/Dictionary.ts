@@ -12,6 +12,7 @@ import { globalVar } from "./utils/globalInterface";
 import { UsrProgress } from "./components/UsrProgress";
 import { WordsDict } from "./components/WordsDict";
 import { timeStamp } from "console";
+import { clearInterval } from "timers";
 
 export class dictApp {
     private cfg: any;
@@ -36,12 +37,12 @@ export class dictApp {
 
     private curWord: string = "";
 
-    constructor() {
+    constructor(readonly startPath: string) {
         this.bDebug = false;
     }
 
-    public async ReadAndConfigure(startPath: string): Promise<boolean> {
-        this.cfgFile = path.join(startPath, 'Dictionary.json').replace(/\\/g, '/');
+    public async ReadAndConfigure(): Promise<boolean> {
+        this.cfgFile = path.join(this.startPath, 'Dictionary.json').replace(/\\/g, '/');
 
         let _this = this;
         if (fs.existsSync(this.cfgFile) == false) {
@@ -51,9 +52,6 @@ export class dictApp {
 
         this.cfg = JSON.parse(fs.readFileSync(this.cfgFile).toString());
 
-        let common = JSON.parse(JSON.stringify(this.cfg.Dictionary.common));
-        console.log('ver: ' + common.ver);
-
         let debugCfg = JSON.parse(JSON.stringify(this.cfg.Dictionary.Debug));
 
         this.bDebug = debugCfg.bEnable;
@@ -61,7 +59,7 @@ export class dictApp {
         let debugLvl = 'INFO';
         if (this.bDebug == true) {
             debugLvl = 'DEBUG';
-            let logFile = path.join(startPath, debugCfg.file);
+            let logFile = path.join(this.startPath, debugCfg.file);
             console.log("logFile: " + logFile);
 
             log4js.configure({
@@ -89,6 +87,9 @@ export class dictApp {
 
         this.logger = log4js.getLogger('dictLogs');
 
+        let common = JSON.parse(JSON.stringify(this.cfg.Dictionary.common));
+        this.logger.info('ver: ' + common.ver);
+
         let agentCfg = JSON.parse(JSON.stringify(this.cfg['Agents']));
         let bIEAgent = agentCfg.bIEAgent;
         let activeAgent = agentCfg.activeAgent;
@@ -103,27 +104,28 @@ export class dictApp {
         for (let tab of JSON.parse(JSON.stringify(this.cfg.Dictionary.Tabs))) {
             for (let dictBaseCfg of dictBasesCfg) {
                 if (tab.Dict == dictBaseCfg.Name) {
-                    let dictSrc = path.join(startPath, dictBaseCfg.Dict);
-                    this.AddDictBase(tab.Name, dictSrc, JSON.parse(JSON.stringify(dictBaseCfg.Format)));
+                    let dictSrc = path.join(this.startPath, dictBaseCfg.Dict);
+                    await this.AddDictBase(tab.Name, dictSrc, JSON.parse(JSON.stringify(dictBaseCfg.Format)));
                     break;
                 }
             }
         }
 
         let wordsDictCfg = this.cfg.WordsDict;
-        let dictSrc = path.join(startPath, wordsDictCfg.Dict);
+        let dictSrc = path.join(this.startPath, wordsDictCfg.Dict);
         this.wordsDict = new WordsDict();
         await this.wordsDict.Open(dictSrc);
 
         let audioCfg = JSON.parse(JSON.stringify(this.cfg['AudioBases']))[0];
-        let audioFile = path.join(startPath, audioCfg.Audio);
+        let audioFile = path.join(this.startPath, audioCfg.Audio);
         let audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
         if (audioFormatCfg.Type == 'ZIP') {
             this.audioPackage = new AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
+            await this.audioPackage.Open();
         }
 
         let usrCfg = JSON.parse(JSON.stringify(this.cfg['Users']))[0];
-        let progressFile = path.join(startPath, usrCfg.Progress).replace(/\\/g, '/');
+        let progressFile = path.join(this.startPath, usrCfg.Progress).replace(/\\/g, '/');
         this.usrProgress = new UsrProgress();
         await this.usrProgress.Open(progressFile, "New");
         if (await this.usrProgress.ExistTable("New") == false) {
@@ -131,8 +133,8 @@ export class dictApp {
         }
 
         let missCfg = JSON.parse(JSON.stringify(this.cfg.Dictionary.Miss));
-        this.miss_dict = path.join(startPath, missCfg.miss_dict);
-        this.miss_audio = path.join(startPath, missCfg.miss_audio);
+        this.miss_dict = path.join(this.startPath, missCfg.miss_dict);
+        this.miss_audio = path.join(this.startPath, missCfg.miss_audio);
 
         return true;
     }
@@ -147,19 +149,39 @@ export class dictApp {
         })
     }
 
-    public async Start(bDev: boolean, startPath: string) {
+    public async Run(argvs: any) {
+        if (await this.ReadAndConfigure() == false) {
+            return;
+        }
 
-        await this.CreateWindow(bDev, startPath);
+        this.logger.info(`Query word: ${argvs.word}`);
+
+        let bShow = true;
+        if (argvs.typ == "c") {
+            bShow = false;
+        }
+
+        await this.CreateWindow(bShow, argvs.bDev);
 
         let dQueue = new DownloardQueue(this.win);
         globalVar.dQueue = dQueue;
+
+        if (argvs.typ == "c") {
+            this.dictId = "dict1";
+            this.curDictBase = this.get_curDB();
+            let wordsLst = argvs.word.split(" ");
+            for (let wd of wordsLst) {
+                await this.QueryWord2(wd);
+            }
+
+            this.WaitAsyncTasksFnshd(async () => {
+                await this.Quit();
+            })
+        }
     }
 
-    public async CreateWindow(bDev: boolean, startPath: string) {
+    public async CreateWindow(bShow: boolean, bDev: boolean) {
         let size = { w: 0, h: 0 };
-        if (await this.ReadAndConfigure(startPath) == false) {
-            return;
-        }
 
         this.getWinSize(size);
 
@@ -168,18 +190,21 @@ export class dictApp {
             icon: path.join(__dirname, 'assets/img/dictApp.ico'),
             width: size.w,
             height: size.h,
+            show: bShow,
             frame: false,
             webPreferences: {
                 nodeIntegration: true,
             },
         });
 
-        // and load the index.html of the app.
-        this.win.loadURL(`file://${__dirname}/assets/Dictionary.html`);
 
-        if (bDev) {
-            // Open the DevTools.
-            this.win.webContents.openDevTools({ mode: 'detach' });
+        if (bShow) {
+            this.win.loadURL(`file://${__dirname}/assets/Dictionary.html`);
+
+            if (bDev) {
+                // Open the DevTools.
+                this.win.webContents.openDevTools({ mode: 'detach' });
+            }
         }
 
         // let _this = this;
@@ -194,6 +219,39 @@ export class dictApp {
 
     public GetWindow(): BrowserWindow {
         return this.win;
+    }
+
+    public WaitAsyncTasksFnshd(cb: () => void) {
+        this.logger.info("Start to quit Dictionary");
+        let timerID = setInterval(async () => {
+            if (globalVar.dQueue.IsFnshd()) {
+                console.info("Finshed to download all files.");
+                clearInterval(timerID);
+                this.logger.info("Wait 2s to quit.");
+                setTimeout(() => {
+                    cb();
+                }, 2000);
+            }
+        }, 2000)
+    }
+
+    public async Quit() {
+        // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
+        // ...
+        // safeExit = true;
+
+        await this.Record2File(this.miss_audio, "");
+        await this.Close();
+
+        this.logger.info("Quit Dictionary\n");
+        log4js.shutdown((error: Error) => {
+            if (error) {
+                console.error(error.message);
+            } else {
+                console.info("Succes to shutdown log4js");
+            }
+            app.quit(); // 退出程序
+        });
     }
 
     public async Close() {
@@ -222,14 +280,18 @@ export class dictApp {
         }
     }
 
-    private Record2File(file: string, something: string) {
-        fs.writeFile(file, something, { 'flag': 'a' }, (err: any) => {
-            if (err) {
-                this.logger.error(`Fail to record ${something} in ${file}!`);
-            } else {
-                console.log(`Success to record ${something} in ${file}!`);
-            }
-        })
+    private async Record2File(file: string, something: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(file, something, { 'flag': 'a' }, (err: any) => {
+                if (err) {
+                    this.logger.error(`Fail to record ${something} in ${file}!`);
+                    resolve(false);
+                } else {
+                    console.log(`Success to record ${something} in ${file}!`);
+                    resolve(true);
+                }
+            })
+        });
     }
 
     public ActiveAgent(activeAgent: any): boolean {
@@ -280,10 +342,11 @@ export class dictApp {
         return false;
     }
 
-    private AddDictBase(name: string, dictSrc: string, format: any): void {
+    private async AddDictBase(name: string, dictSrc: string, format: any) {
         let dictBase = null;
         if (format.Type == 'ZIP') {
             dictBase = new GDictBase(dictSrc, format.Compression, format.Compress_Level);
+            await dictBase.Open();
         } else if (format.Type == 'SQLite') {
             dictBase = new SDictBase(dictSrc);
         } else if (format.Type == 'mdx') {
@@ -319,11 +382,10 @@ export class dictApp {
     public async OnButtonClicked(id: string) {
         switch (id) {
             case "btn_close":
-                // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
-                // ...
-                // safeExit = true;
-                await this.Close();
-                app.quit(); // 退出程序
+                // this.WaitAsyncTasksFnshd(async () => {
+                //     await this.Quit();
+                // })
+                await this.Quit();
                 break;
             case "btn_min":
                 this.win.minimize();
@@ -464,6 +526,34 @@ export class dictApp {
         return true;
     }
 
+    public async QueryWord2(word: string): Promise<void> {
+        this.logger.info(`word = ${word};`);
+
+        let retDict = -1;
+        let dict = "";
+        let retAudio = -1;
+        let audio = "";
+
+        [retDict, dict] = await this.curDictBase.query_word(word);
+        [retAudio, audio] = await this.audioPackage.query_audio(word);
+
+        if (retDict < 0) {
+            this.Record2File(this.miss_dict, "Dict of " + word + ": " + dict + "\n");
+        } else if (retDict == 0) {
+            this.logger.info(dict);
+        }
+
+        if (retAudio < 0) {
+            this.Record2File(this.miss_audio, "Audio of " + word + ": " + audio + "\n");
+        } else if (retAudio == 0) {
+            this.logger.info(audio);
+        }
+
+        if (retDict < 0 || retAudio < 0) {
+            this.Record2File(this.miss_audio, "\n");
+        }
+    }
+
     public async QueryWord(word: string, nDirect: number = 0): Promise<void> {
         // Not implemented
         /*
@@ -536,10 +626,10 @@ export class dictApp {
         if (retAudio <= 0) {
             this.logger.error("audio: " + audio);
             this.info(-1, 2, word, audio);
-            audio = path.join(__dirname, "audio", "WrongHint.mp3");
+            audio = path.join(this.startPath, "audio", "WrongHint.mp3");
             if (retAudio < 0) {
                 this.Record2File(this.miss_audio, "Audio of " + word + ": " + audio + "\n\n");
-                audio = path.join(__dirname, "audio", "WrongHint.mp3");
+                audio = path.join(this.startPath, "audio", "WrongHint.mp3");
             }
         }
         else if (retDict < 0) {
@@ -547,7 +637,6 @@ export class dictApp {
         }
 
         if (retAudio == 1) {
-            // this.win.webContents.send("gui", "modifyValue", "status", "");
             this.info(0, 2, "", "");
         }
 
@@ -642,6 +731,8 @@ export class dictApp {
             }
         }
 
+        // console.log("info: " + msg);
+        // this.logger.info(msg);
         this.win.webContents.send("gui", "modifyValue", "status", msg);
     }
 

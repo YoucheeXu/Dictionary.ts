@@ -37,46 +37,40 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
-// import { dictApp } from "./dictApp";
-// import { ReciteWordsApp } from "./ReciteWordsApp";
-var globalInterface_1 = require("./utils/globalInterface");
 var ElectronApp_1 = require("./ElectronApp");
-// declare global {
-//     interface Window {
-//         require: any;
-//     }
-// }
-// const globalAny: any = global;
-globalInterface_1.globalVar.argvs = process.argv;
-// console.log('params: ', globalVar.argvs)
-var typ = "";
-var typIndex = -1;
-for (var _i = 0, _a = globalInterface_1.globalVar.argvs; _i < _a.length; _i++) {
+var argvs = {};
+for (var _i = 0, _a = process.argv; _i < _a.length; _i++) {
     var argv = _a[_i];
-    typIndex = argv.indexOf("--type ");
-    if (typIndex >= 0) {
-        // console.log(argv);
-        typ = argv.substring(7);
-        break;
-    }
-    else {
-        typ = "?";
+    console.log(argv);
+    var paraStrtIndex = argv.indexOf("--");
+    if (paraStrtIndex >= 0) {
+        var paraEndtIndex = argv.indexOf(" ");
+        var para = "";
+        if (paraEndtIndex > 0) {
+            para = argv.substring(paraStrtIndex + 2, paraEndtIndex);
+        }
+        else {
+            para = argv.substring(paraStrtIndex + 2);
+        }
+        if (para == "type") {
+            argvs.typ = argv.substring(7);
+        }
+        else if (para == "q") {
+            argvs.word = argv.substring(4);
+        }
+        else if (para == "dev") {
+            argvs.bDev = true;
+        }
     }
 }
-globalInterface_1.globalVar.typ = typ;
-/*if (typ == "r") {
-    let myApp: ReciteWordsApp = new ReciteWordsApp();
-    globalVar.app = myApp;
+try {
+    var myApp = new ElectronApp_1.ElectronApp();
+    myApp.Run(argvs);
 }
-else {
-    let myApp: dictApp = new dictApp();
-    globalVar.app = myApp;
-}*/
-var bDev = (globalInterface_1.globalVar.argvs.indexOf("--dev") >= 0);
-var myApp = new ElectronApp_1.ElectronApp();
-myApp.Start(typ, bDev).catch(function (error) {
-    console.error("ElectronApp fatal error: " + error);
-});
+catch (e) {
+    console.error("ElectronApp fatal error: " + e);
+}
+;
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 //-----------------------------------------------------------------

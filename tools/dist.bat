@@ -2,7 +2,7 @@
 
 :start
 echo 1 generate dist bin
-echo 2 copy bin to Green folder
+echo 2 copy bin to Green folder and exit
 echo 3 exit
 echo which you want to choose?
 set /p a=

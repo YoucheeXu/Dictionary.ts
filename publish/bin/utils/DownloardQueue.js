@@ -27,6 +27,14 @@ var DownloardQueue = /** @class */ (function () {
         this.downloadQueue = new Array();
         this.bDownloading = false;
     }
+    DownloardQueue.prototype.IsFnshd = function () {
+        if (this.downloadQueue.length == 0 && this.bDownloading == false) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
     DownloardQueue.prototype.AddQueue = function (url, local, caller, notify) {
         for (var _i = 0, _a = this.downloadQueue; _i < _a.length; _i++) {
             var item = _a[_i];
@@ -36,24 +44,24 @@ var DownloardQueue = /** @class */ (function () {
             }
         }
         this.downloadQueue.push({ url: url, local: local, caller: caller, notify: notify });
-        this.downloadNext();
+        this.DownloadNext();
     };
-    DownloardQueue.prototype.downloadNext = function () {
+    DownloardQueue.prototype.DownloadNext = function () {
         if (!this.bDownloading) {
-            if (this.downloadQueue.length != 0) {
+            if (this.downloadQueue.length > 0) {
                 var valMap = this.downloadQueue.pop();
                 this.bDownloading = true;
                 // this.download_file(valMap.get("url"), valMap.get("local"), valMap.get("caller"), valMap.get("notify"));
-                this.download_file(valMap.url, valMap.local, valMap.caller, valMap.notify);
+                this.DownloadFile(valMap.url, valMap.local, valMap.caller, valMap.notify);
             }
         }
     };
-    DownloardQueue.prototype.download_file = function (url, local, caller, notify) {
-        var _this = this;
+    DownloardQueue.prototype.DownloadFile = function (url, local, caller, notify) {
         if (fs.existsSync(local) == true) {
             console.log("Already exists " + local);
             return;
         }
+        var _this = this;
         this.win.webContents.session.on('will-download', function (event, item, webContents) {
             item.setSavePath(local);
             item.on('updated', function (e, state) {
@@ -66,14 +74,13 @@ var DownloardQueue = /** @class */ (function () {
                             totalBytes = 0.0001;
                         }
                         var progress = item.getReceivedBytes() / totalBytes;
-                        notify.call(caller, local, progress, "ongoing");
+                        notify.call(caller, local, progress, "ongoing", state + " in updated");
                     }
                 }
                 else {
-                    console.error(state);
-                    notify.call(caller, local, -1, "fail", state);
+                    notify.call(caller, local, -1, "fail", state + " in updated");
                     _this.bDownloading = false;
-                    _this.downloadNext();
+                    _this.DownloadNext();
                 }
             });
             item.on('done', function (event, state) {
@@ -81,12 +88,12 @@ var DownloardQueue = /** @class */ (function () {
                     // 这里是主战场
                     notify.call(caller, local, 1, "done");
                     _this.bDownloading = false;
-                    _this.downloadNext();
+                    _this.DownloadNext();
                 }
                 else {
-                    console.error(state);
-                    notify.call(caller, local, -1, "fail", state);
+                    notify.call(caller, local, -1, "fail", state + " in done");
                     _this.bDownloading = false;
+                    _this.DownloadNext();
                 }
             });
             // 是否可恢复下载

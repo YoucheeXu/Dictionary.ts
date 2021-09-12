@@ -24,6 +24,10 @@ export class GDictBase extends DictBase {
         this.tempDictDir = path.join(filePath, fileName);
     }
 
+    public async Open() {
+        return this.dictZip.Open();
+    }
+
     public async Close(): Promise<[boolean, string]> {
         RemoveDir(this.tempDictDir);
         if (fs.existsSync(this.tempDictDir) == false) {
@@ -58,7 +62,7 @@ export class GDictBase extends DictBase {
                 jsonURL = jsonURL.replace(" ", "%20");
                 // download_file(gApp.GetWindow(), jsonURL, wordFile, this, this.notify);
                 globalVar.dQueue.AddQueue(jsonURL, wordFile, this, this.notify);
-                datum = `dict of ${word} is downloading.`;
+                datum = `dict of ${word} is added to download queue.`;
                 return Promise.resolve([0, datum]);
             }
 
@@ -97,7 +101,7 @@ export class GDictBase extends DictBase {
             case 'ongoing':
                 break;
             case 'fail':
-                gApp.info(-1, 1, word, "Fail to download dict of " + word);
+                gApp.info(-1, 1, word, `Fail to download dict of ${word}, because of ${why}`);
                 break;
             case 'done':
                 this.checkAndAddFile(name);
@@ -134,7 +138,7 @@ export class GDictBase extends DictBase {
         }
         else {
             console.log(wordFile + " doesn't exist");
-            return gApp.info(-1, 1, word, "Fail to download dict of " + word);
+            return gApp.info(-1, 1, word, "Doesn't exist dict of " + word);
         }
     }
 

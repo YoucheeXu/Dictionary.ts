@@ -46,7 +46,7 @@ export class ElectronApp {
         return false;
     }
 
-    public async Start(typ: string, bDev: boolean) {
+    public async Run(argvs: any) {
         // Since we are doing other async things before creating the window, we might miss
         // the "ready" event. So we use the function below to make sure that the app is ready.
         await this.waitForElectronAppReady();
@@ -55,7 +55,14 @@ export class ElectronApp {
         if (alreadyRunning) return;
 
         let sel = -1;
-        if (typ == "?") {
+        if (argvs.typ) {
+            if (argvs.typ == "r") {
+                sel = 1;
+            }
+            else if (argvs.typ == "d" || argvs.typ == "c") {
+                sel = 0;
+            }
+        } else {
             let ret = await dialog.showMessageBox({
                 type: "info",
                 message: "Select a application",
@@ -64,28 +71,10 @@ export class ElectronApp {
 
             sel = ret.response;
         }
-        else if (typ == "r") {
-            sel = 1;
-        }
-        else if (typ == "d") {
-            sel = 0;
-        }
-
-        if (sel == 1) {
-            this.myApp = new ReciteWordsApp();
-            globalVar.app = this.myApp;
-        }
-        else if (sel == 0) {
-            this.myApp = new dictApp();
-            globalVar.app = this.myApp;
-        }
-        else {
-            app.quit();
-        }
 
         let startPath = "";
         // if (process.env.NODE_ENV === 'development') {
-        if (bDev) {
+        if (argvs.bDev) {
             startPath = path.join(process.cwd(), "/publish/");
         }
         else {
@@ -94,7 +83,19 @@ export class ElectronApp {
 
         console.log(startPath);
 
-        this.myApp.Start(bDev, startPath).catch((error: any) => {
+        if (sel == 1) {
+            this.myApp = new ReciteWordsApp(startPath);
+            globalVar.app = this.myApp;
+        }
+        else if (sel == 0) {
+            this.myApp = new dictApp(startPath);
+            globalVar.app = this.myApp;
+        }
+        else {
+            app.quit();
+        }
+
+        this.myApp.Run(argvs).catch((error: any) => {
             console.error(`ElectronApp fatal error: ${error}`);
         });
 

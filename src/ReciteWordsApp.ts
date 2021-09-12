@@ -16,7 +16,6 @@ import { UsrProgress } from "./components/UsrProgress";
 import { SDictBase } from "./components/SDictBase";
 
 export class ReciteWordsApp {
-    private startPath: string;
     private cfgFile: string;
     private cfg: any;
     private bDebug: boolean = false;
@@ -55,7 +54,7 @@ export class ReciteWordsApp {
     private lastWord = "";
     private curWord = "";
 
-    constructor() {
+    constructor(readonly startPath:string) {
         /*
         this.root.bind("<Escape>", this.exit_app);
         this.root.bind("<Return>", this.check_input);
@@ -148,9 +147,8 @@ export class ReciteWordsApp {
         return true;
     }
 
-    public async Start(bDev: boolean, startPath: string) {
-        this.startPath = startPath;
-        this.CreateWindow(bDev);
+    public async Run(argvs: any) {
+        this.CreateWindow(argvs.bDev);
         this.initDict();
 
         let dQueue = new DownloardQueue(this.win);

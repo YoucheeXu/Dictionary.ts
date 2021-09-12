@@ -78,25 +78,31 @@ var ZipArchive = /** @class */ (function () {
         // this.zip = zipFile;
         this.compression = compression;
         this.compresslevel = compresslevel;
-        var _this = this;
-        new jszip_1.default.external.Promise(function (resolve, reject) {
-            fs.readFile(zipFile, function (err, data) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(data);
-                }
-            });
-        }).then(function (data) {
-            // _this.zip.loadAsync(data);
-            jszip_1.default.loadAsync(data).then(function (zip) {
-                _this.zip = zip;
-                _this.fileList = Object.keys(_this.zip.files);
-                // console.log(_this.fileList);
+    }
+    ZipArchive.prototype.Open = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this;
+            return __generator(this, function (_a) {
+                _this = this;
+                return [2 /*return*/, new jszip_1.default.external.Promise(function (resolve, reject) {
+                        fs.readFile(_this.zipFile, function (err, data) {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                resolve(data);
+                            }
+                        });
+                    }).then(function (data) {
+                        jszip_1.default.loadAsync(data).then(function (zip) {
+                            _this.zip = zip;
+                            _this.fileList = Object.keys(_this.zip.files);
+                            // console.log(_this.fileList);
+                        });
+                    })];
             });
         });
-    }
+    };
     ZipArchive.prototype.addFile = function (fileName, datum) {
         var _this_1 = this;
         try {

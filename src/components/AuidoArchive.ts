@@ -7,7 +7,7 @@ import { ZipArchive } from "./ZipArchive";
 import { globalVar } from "../utils/globalInterface";
 
 export class AuidoArchive {
-    private bWritable: boolean = false;
+    private bWritable: boolean = true;
     private szAudioArchive: string;
     private audioZip: ZipArchive;
     private tempAudioDir: string;
@@ -35,7 +35,11 @@ export class AuidoArchive {
         this.audioZip = new ZipArchive(audioSrc, compression, compresslevel);
     }
 
-    public GetName():string{
+    public async Open() {
+        return this.audioZip.Open();
+    }
+
+    public GetName(): string {
         return this.szAudioArchive;
     }
 
@@ -43,7 +47,7 @@ export class AuidoArchive {
         RemoveDir(this.tempAudioDir);
         if (fs.existsSync(this.tempAudioDir) == false) {
             return [true, `; OK to remove ${this.tempAudioDir}`];
-        }else{
+        } else {
             return [false, `; Fail to remove ${this.tempAudioDir}`]
         }
     }
@@ -72,9 +76,11 @@ export class AuidoArchive {
                 }
             }
             else if (this.bWritable) {
-                let audioURL = `https://ssl.gstatic.com/dictionary/static/sounds/oxford/${word}--_us_1.mp3`
+                // let audioURL = `https://ssl.gstatic.com/dictionary/static/sounds/oxford/${word}--_us_1.mp3`
+                // http://www.gstatic.com/dictionary/static/sounds/lf/0/x/xc/xco/xconsent%23_us_1.mp3
+                let audioURL = `http://www.gstatic.com/dictionary/static/sounds/lf/0/x/x${word.substr(0, 1)}/x${word.substr(0, 2)}/x${word}%23_us_1.mp3`;
                 globalVar.dQueue.AddQueue(audioURL, audioFile, this, this.notify);
-                audioFile = `audio of ${word} is downloading.`;
+                audioFile = `audio of ${word} is added to download queue.`;
                 return Promise.resolve([0, audioFile]);
             }
             else {
@@ -94,7 +100,7 @@ export class AuidoArchive {
             case 'ongoing':
                 break;
             case 'fail':
-                gApp.info(-1, 2, word, "Fail to download audio of " + word);
+                gApp.info(-1, 2, word, `Fail to download audio of ${word}, because of ${why}`);
                 break;
             case 'done':
                 this.checkAndAddFile(name);
@@ -116,7 +122,7 @@ export class AuidoArchive {
         }
         else {
             console.log(audioFile + " doesn't exist");
-            return gApp.info(-1, 2, word, "Fail to download audio of " + word);
+            return gApp.info(-1, 2, word, "Doesn't exist audio of " + word);
         }
     }
 

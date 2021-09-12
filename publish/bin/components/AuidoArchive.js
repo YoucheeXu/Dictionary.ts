@@ -68,7 +68,7 @@ var AuidoArchive = /** @class */ (function () {
         this.audioSrc = audioSrc;
         this.compression = compression;
         this.compresslevel = compresslevel;
-        this.bWritable = false;
+        this.bWritable = true;
         this.szAudioArchive = path.basename(audioSrc);
         // console.log(this.szAudioArchive);
         var filePath = path.dirname(audioSrc);
@@ -89,6 +89,13 @@ var AuidoArchive = /** @class */ (function () {
         // gLogger.info("tempAudioDir: " + this.tempAudioDir);
         this.audioZip = new ZipArchive_1.ZipArchive(audioSrc, compression, compresslevel);
     }
+    AuidoArchive.prototype.Open = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.audioZip.Open()];
+            });
+        });
+    };
     AuidoArchive.prototype.GetName = function () {
         return this.szAudioArchive;
     };
@@ -136,9 +143,9 @@ var AuidoArchive = /** @class */ (function () {
                         return [3 /*break*/, 5];
                     case 4:
                         if (this.bWritable) {
-                            audioURL = "https://ssl.gstatic.com/dictionary/static/sounds/oxford/" + word + "--_us_1.mp3";
+                            audioURL = "http://www.gstatic.com/dictionary/static/sounds/lf/0/x/x" + word.substr(0, 1) + "/x" + word.substr(0, 2) + "/x" + word + "%23_us_1.mp3";
                             globalInterface_1.globalVar.dQueue.AddQueue(audioURL, audioFile, this, this.notify);
-                            audioFile = "audio of " + word + " is downloading.";
+                            audioFile = "audio of " + word + " is added to download queue.";
                             return [2 /*return*/, Promise.resolve([0, audioFile])];
                         }
                         else {
@@ -162,7 +169,7 @@ var AuidoArchive = /** @class */ (function () {
             case 'ongoing':
                 break;
             case 'fail':
-                gApp.info(-1, 2, word, "Fail to download audio of " + word);
+                gApp.info(-1, 2, word, "Fail to download audio of " + word + ", because of " + why);
                 break;
             case 'done':
                 this.checkAndAddFile(name);
@@ -183,7 +190,7 @@ var AuidoArchive = /** @class */ (function () {
         }
         else {
             console.log(audioFile + " doesn't exist");
-            return gApp.info(-1, 2, word, "Fail to download audio of " + word);
+            return gApp.info(-1, 2, word, "Doesn't exist audio of " + word);
         }
     };
     AuidoArchive.prototype.getWritable = function () {

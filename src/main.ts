@@ -1,53 +1,41 @@
-import { ipcMain, dialog } from 'electron';
-// import { dictApp } from "./dictApp";
-// import { ReciteWordsApp } from "./ReciteWordsApp";
-import { globalVar } from "./utils/globalInterface";
+import { ipcMain } from 'electron';
 import { ElectronApp } from "./ElectronApp";
 
-// declare global {
-//     interface Window {
-//         require: any;
-//     }
-// }
-// const globalAny: any = global;
+interface KeyValue {
+    [key: string]: any
+}
 
-globalVar.argvs = process.argv;
-// console.log('params: ', globalVar.argvs)
+var argvs: KeyValue = {};
 
-let typ = "";
+for (let argv of process.argv) {
+    console.log(argv);
 
-let typIndex = -1;
-
-for (let argv of globalVar.argvs) {
-    typIndex = argv.indexOf("--type ");
-    if (typIndex >= 0) {
-        // console.log(argv);
-        typ = argv.substring(7);
-        break;
-    }
-    else {
-        typ = "?";
+    let paraStrtIndex = argv.indexOf("--");
+    if (paraStrtIndex >= 0) {
+        let paraEndtIndex = argv.indexOf(" ");
+        let para = "";
+        if (paraEndtIndex > 0) {
+            para = argv.substring(paraStrtIndex + 2, paraEndtIndex);
+        } else {
+            para = argv.substring(paraStrtIndex + 2);
+        }
+        if (para == "type") {
+            argvs.typ = argv.substring(7);
+        } else if (para == "q") {
+            argvs.word = argv.substring(4);
+        } else if (para == "dev") {
+            argvs.bDev = true;
+        }
     }
 }
 
-globalVar.typ = typ;
-
-/*if (typ == "r") {
-    let myApp: ReciteWordsApp = new ReciteWordsApp();
-    globalVar.app = myApp;
+try {
+    let myApp = new ElectronApp();
+    myApp.Run(argvs)
 }
-else {
-    let myApp: dictApp = new dictApp();
-    globalVar.app = myApp;
-}*/
-
-const bDev = (globalVar.argvs.indexOf("--dev") >= 0);
-
-let myApp = new ElectronApp();
-
-myApp.Start(typ, bDev).catch((error: any) => {
-    console.error(`ElectronApp fatal error: ${error}`);
-});
+catch (e) {
+    console.error(`ElectronApp fatal error: ${e}`);
+};
 
 
 // In this file you can include the rest of your app's specific main process

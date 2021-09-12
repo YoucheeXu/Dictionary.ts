@@ -68,7 +68,8 @@ var AuidoArchive_1 = require("./components/AuidoArchive");
 var UsrProgress_1 = require("./components/UsrProgress");
 var SDictBase_1 = require("./components/SDictBase");
 var ReciteWordsApp = /** @class */ (function () {
-    function ReciteWordsApp() {
+    function ReciteWordsApp(startPath) {
+        this.startPath = startPath;
         this.bDebug = false;
         this.bCfgModfied = false;
         this.usrsDict = new Map();
@@ -168,12 +169,11 @@ var ReciteWordsApp = /** @class */ (function () {
         }
         return true;
     };
-    ReciteWordsApp.prototype.Start = function (bDev, startPath) {
+    ReciteWordsApp.prototype.Run = function (argvs) {
         return __awaiter(this, void 0, void 0, function () {
             var dQueue;
             return __generator(this, function (_a) {
-                this.startPath = startPath;
-                this.CreateWindow(bDev);
+                this.CreateWindow(argvs.bDev);
                 this.initDict();
                 dQueue = new DownloardQueue_1.DownloardQueue(this.win);
                 globalInterface_1.globalVar.dQueue = dQueue;

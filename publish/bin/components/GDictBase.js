@@ -95,6 +95,13 @@ var GDictBase = /** @class */ (function (_super) {
         _this_1.tempDictDir = path.join(filePath, fileName);
         return _this_1;
     }
+    GDictBase.prototype.Open = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.dictZip.Open()];
+            });
+        });
+    };
     GDictBase.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -141,7 +148,7 @@ var GDictBase = /** @class */ (function (_super) {
                             jsonURL = jsonURL.replace(" ", "%20");
                             // download_file(gApp.GetWindow(), jsonURL, wordFile, this, this.notify);
                             globalInterface_1.globalVar.dQueue.AddQueue(jsonURL, wordFile, this, this.notify);
-                            datum = "dict of " + word + " is downloading.";
+                            datum = "dict of " + word + " is added to download queue.";
                             return [2 /*return*/, Promise.resolve([0, datum])];
                         }
                         _b.label = 4;
@@ -181,7 +188,7 @@ var GDictBase = /** @class */ (function (_super) {
             case 'ongoing':
                 break;
             case 'fail':
-                gApp.info(-1, 1, word, "Fail to download dict of " + word);
+                gApp.info(-1, 1, word, "Fail to download dict of " + word + ", because of " + why);
                 break;
             case 'done':
                 this.checkAndAddFile(name);
@@ -215,7 +222,7 @@ var GDictBase = /** @class */ (function (_super) {
         }
         else {
             console.log(wordFile + " doesn't exist");
-            return gApp.info(-1, 1, word, "Fail to download dict of " + word);
+            return gApp.info(-1, 1, word, "Doesn't exist dict of " + word);
         }
     };
     GDictBase.prototype.GetInWord = function (dict) {

@@ -17,9 +17,12 @@ export class ZipArchive {
         // this.zip = zipFile;
         this.compression = compression;
         this.compresslevel = compresslevel;
+    }
+
+    public async Open() {
         let _this = this;
-        new JSZip.external.Promise((resolve, reject) => {
-            fs.readFile(zipFile, (err, data) => {
+        return new JSZip.external.Promise((resolve, reject) => {
+            fs.readFile(_this.zipFile, (err, data) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -27,7 +30,6 @@ export class ZipArchive {
                 }
             });
         }).then(function (data: any) {
-            // _this.zip.loadAsync(data);
             JSZip.loadAsync(data).then((zip) => {
                 _this.zip = zip;
                 _this.fileList = Object.keys(_this.zip.files);

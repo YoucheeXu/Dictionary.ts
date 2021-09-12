@@ -101,7 +101,7 @@ var ElectronApp = /** @class */ (function () {
         });
         return false;
     };
-    ElectronApp.prototype.Start = function (typ, bDev) {
+    ElectronApp.prototype.Run = function (argvs) {
         return __awaiter(this, void 0, void 0, function () {
             var alreadyRunning, sel, ret, startPath;
             var _this_1 = this;
@@ -119,46 +119,45 @@ var ElectronApp = /** @class */ (function () {
                         if (alreadyRunning)
                             return [2 /*return*/];
                         sel = -1;
-                        if (!(typ == "?")) return [3 /*break*/, 3];
-                        return [4 /*yield*/, electron_1.dialog.showMessageBox({
-                                type: "info",
-                                message: "Select a application",
-                                buttons: ["Dictionary", "ReciteWords"]
-                            })];
-                    case 2:
-                        ret = _a.sent();
-                        sel = ret.response;
-                        return [3 /*break*/, 4];
-                    case 3:
-                        if (typ == "r") {
+                        if (!argvs.typ) return [3 /*break*/, 2];
+                        if (argvs.typ == "r") {
                             sel = 1;
                         }
-                        else if (typ == "d") {
+                        else if (argvs.typ == "d" || argvs.typ == "c") {
                             sel = 0;
                         }
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, electron_1.dialog.showMessageBox({
+                            type: "info",
+                            message: "Select a application",
+                            buttons: ["Dictionary", "ReciteWords"]
+                        })];
+                    case 3:
+                        ret = _a.sent();
+                        sel = ret.response;
                         _a.label = 4;
                     case 4:
-                        if (sel == 1) {
-                            this.myApp = new ReciteWordsApp_1.ReciteWordsApp();
-                            globalInterface_1.globalVar.app = this.myApp;
-                        }
-                        else if (sel == 0) {
-                            this.myApp = new dictApp_1.dictApp();
-                            globalInterface_1.globalVar.app = this.myApp;
-                        }
-                        else {
-                            electron_1.app.quit();
-                        }
                         startPath = "";
                         // if (process.env.NODE_ENV === 'development') {
-                        if (bDev) {
+                        if (argvs.bDev) {
                             startPath = path.join(process.cwd(), "/publish/");
                         }
                         else {
                             startPath = path.join(process.env.PORTABLE_EXECUTABLE_DIR || process.cwd(), "../");
                         }
                         console.log(startPath);
-                        this.myApp.Start(bDev, startPath).catch(function (error) {
+                        if (sel == 1) {
+                            this.myApp = new ReciteWordsApp_1.ReciteWordsApp(startPath);
+                            globalInterface_1.globalVar.app = this.myApp;
+                        }
+                        else if (sel == 0) {
+                            this.myApp = new dictApp_1.dictApp(startPath);
+                            globalInterface_1.globalVar.app = this.myApp;
+                        }
+                        else {
+                            electron_1.app.quit();
+                        }
+                        this.myApp.Run(argvs).catch(function (error) {
                             console.error("ElectronApp fatal error: " + error);
                         });
                         electron_1.app.on('before-quit', function () {

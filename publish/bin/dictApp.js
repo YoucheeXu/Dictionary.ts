@@ -67,21 +67,23 @@ var DownloardQueue_1 = require("./utils/DownloardQueue");
 var globalInterface_1 = require("./utils/globalInterface");
 var UsrProgress_1 = require("./components/UsrProgress");
 var WordsDict_1 = require("./components/WordsDict");
+var timers_1 = require("timers");
 var dictApp = /** @class */ (function () {
-    function dictApp() {
+    function dictApp(startPath) {
+        this.startPath = startPath;
         this.bCfgModfied = false;
         this.dictAgent = new Array();
         this.dictBaseDict = new Map();
         this.curWord = "";
         this.bDebug = false;
     }
-    dictApp.prototype.ReadAndConfigure = function (startPath) {
+    dictApp.prototype.ReadAndConfigure = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _this, common, debugCfg, debugLvl, logFile, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, dictBasesCfg, _a, _b, tab, _c, dictBasesCfg_1, dictBaseCfg, dictSrc_1, wordsDictCfg, dictSrc, audioCfg, audioFile, audioFormatCfg, usrCfg, progressFile, missCfg;
+            var _this, debugCfg, debugLvl, logFile, common, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, dictBasesCfg, _a, _b, tab, _c, dictBasesCfg_1, dictBaseCfg, dictSrc_1, wordsDictCfg, dictSrc, audioCfg, audioFile, audioFormatCfg, usrCfg, progressFile, missCfg;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        this.cfgFile = path.join(startPath, 'Dictionary.json').replace(/\\/g, '/');
+                        this.cfgFile = path.join(this.startPath, 'Dictionary.json').replace(/\\/g, '/');
                         _this = this;
                         if (fs.existsSync(this.cfgFile) == false) {
                             console.log(_this.cfgFile + " doesn't exist");
@@ -89,14 +91,12 @@ var dictApp = /** @class */ (function () {
                         }
                         ;
                         this.cfg = JSON.parse(fs.readFileSync(this.cfgFile).toString());
-                        common = JSON.parse(JSON.stringify(this.cfg.Dictionary.common));
-                        console.log('ver: ' + common.ver);
                         debugCfg = JSON.parse(JSON.stringify(this.cfg.Dictionary.Debug));
                         this.bDebug = debugCfg.bEnable;
                         debugLvl = 'INFO';
                         if (this.bDebug == true) {
                             debugLvl = 'DEBUG';
-                            logFile = path.join(startPath, debugCfg.file);
+                            logFile = path.join(this.startPath, debugCfg.file);
                             console.log("logFile: " + logFile);
                             log4js.configure({
                                 appenders: {
@@ -121,6 +121,8 @@ var dictApp = /** @class */ (function () {
                             });
                         }
                         this.logger = log4js.getLogger('dictLogs');
+                        common = JSON.parse(JSON.stringify(this.cfg.Dictionary.common));
+                        this.logger.info('ver: ' + common.ver);
                         agentCfg = JSON.parse(JSON.stringify(this.cfg['Agents']));
                         bIEAgent = agentCfg.bIEAgent;
                         activeAgent = agentCfg.activeAgent;
@@ -132,43 +134,59 @@ var dictApp = /** @class */ (function () {
                         this.dictAgent.push({ name: '', ip: '', program: '' });
                         this.ActiveAgent(activeAgent);
                         dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
-                        for (_a = 0, _b = JSON.parse(JSON.stringify(this.cfg.Dictionary.Tabs)); _a < _b.length; _a++) {
-                            tab = _b[_a];
-                            for (_c = 0, dictBasesCfg_1 = dictBasesCfg; _c < dictBasesCfg_1.length; _c++) {
-                                dictBaseCfg = dictBasesCfg_1[_c];
-                                if (tab.Dict == dictBaseCfg.Name) {
-                                    dictSrc_1 = path.join(startPath, dictBaseCfg.Dict);
-                                    this.AddDictBase(tab.Name, dictSrc_1, JSON.parse(JSON.stringify(dictBaseCfg.Format)));
-                                    break;
-                                }
-                            }
-                        }
+                        _a = 0, _b = JSON.parse(JSON.stringify(this.cfg.Dictionary.Tabs));
+                        _d.label = 1;
+                    case 1:
+                        if (!(_a < _b.length)) return [3 /*break*/, 6];
+                        tab = _b[_a];
+                        _c = 0, dictBasesCfg_1 = dictBasesCfg;
+                        _d.label = 2;
+                    case 2:
+                        if (!(_c < dictBasesCfg_1.length)) return [3 /*break*/, 5];
+                        dictBaseCfg = dictBasesCfg_1[_c];
+                        if (!(tab.Dict == dictBaseCfg.Name)) return [3 /*break*/, 4];
+                        dictSrc_1 = path.join(this.startPath, dictBaseCfg.Dict);
+                        return [4 /*yield*/, this.AddDictBase(tab.Name, dictSrc_1, JSON.parse(JSON.stringify(dictBaseCfg.Format)))];
+                    case 3:
+                        _d.sent();
+                        return [3 /*break*/, 5];
+                    case 4:
+                        _c++;
+                        return [3 /*break*/, 2];
+                    case 5:
+                        _a++;
+                        return [3 /*break*/, 1];
+                    case 6:
                         wordsDictCfg = this.cfg.WordsDict;
-                        dictSrc = path.join(startPath, wordsDictCfg.Dict);
+                        dictSrc = path.join(this.startPath, wordsDictCfg.Dict);
                         this.wordsDict = new WordsDict_1.WordsDict();
                         return [4 /*yield*/, this.wordsDict.Open(dictSrc)];
-                    case 1:
+                    case 7:
                         _d.sent();
                         audioCfg = JSON.parse(JSON.stringify(this.cfg['AudioBases']))[0];
-                        audioFile = path.join(startPath, audioCfg.Audio);
+                        audioFile = path.join(this.startPath, audioCfg.Audio);
                         audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
-                        if (audioFormatCfg.Type == 'ZIP') {
-                            this.audioPackage = new AuidoArchive_1.AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
-                        }
+                        if (!(audioFormatCfg.Type == 'ZIP')) return [3 /*break*/, 9];
+                        this.audioPackage = new AuidoArchive_1.AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
+                        return [4 /*yield*/, this.audioPackage.Open()];
+                    case 8:
+                        _d.sent();
+                        _d.label = 9;
+                    case 9:
                         usrCfg = JSON.parse(JSON.stringify(this.cfg['Users']))[0];
-                        progressFile = path.join(startPath, usrCfg.Progress).replace(/\\/g, '/');
+                        progressFile = path.join(this.startPath, usrCfg.Progress).replace(/\\/g, '/');
                         this.usrProgress = new UsrProgress_1.UsrProgress();
                         return [4 /*yield*/, this.usrProgress.Open(progressFile, "New")];
-                    case 2:
+                    case 10:
                         _d.sent();
                         return [4 /*yield*/, this.usrProgress.ExistTable("New")];
-                    case 3:
+                    case 11:
                         if ((_d.sent()) == false) {
                             this.usrProgress.NewTable("New");
                         }
                         missCfg = JSON.parse(JSON.stringify(this.cfg.Dictionary.Miss));
-                        this.miss_dict = path.join(startPath, missCfg.miss_dict);
-                        this.miss_audio = path.join(startPath, missCfg.miss_audio);
+                        this.miss_dict = path.join(this.startPath, missCfg.miss_dict);
+                        this.miss_audio = path.join(this.startPath, missCfg.miss_audio);
                         return [2 /*return*/, true];
                 }
             });
@@ -185,65 +203,147 @@ var dictApp = /** @class */ (function () {
             }
         });
     };
-    dictApp.prototype.Start = function (bDev, startPath) {
+    dictApp.prototype.Run = function (argvs) {
         return __awaiter(this, void 0, void 0, function () {
-            var dQueue;
+            var bShow, dQueue, wordsLst, _i, wordsLst_1, wd;
+            var _this_1 = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.CreateWindow(bDev, startPath)];
-                    case 1:
-                        _a.sent();
-                        dQueue = new DownloardQueue_1.DownloardQueue(this.win);
-                        globalInterface_1.globalVar.dQueue = dQueue;
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    dictApp.prototype.CreateWindow = function (bDev, startPath) {
-        return __awaiter(this, void 0, void 0, function () {
-            var size;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        size = { w: 0, h: 0 };
-                        return [4 /*yield*/, this.ReadAndConfigure(startPath)];
+                    case 0: return [4 /*yield*/, this.ReadAndConfigure()];
                     case 1:
                         if ((_a.sent()) == false) {
                             return [2 /*return*/];
                         }
-                        this.getWinSize(size);
-                        // Create the browser window.
-                        this.win = new electron_1.BrowserWindow({
-                            icon: path.join(__dirname, 'assets/img/dictApp.ico'),
-                            width: size.w,
-                            height: size.h,
-                            frame: false,
-                            webPreferences: {
-                                nodeIntegration: true,
-                            },
-                        });
-                        // and load the index.html of the app.
-                        this.win.loadURL("file://" + __dirname + "/assets/Dictionary.html");
-                        if (bDev) {
-                            // Open the DevTools.
-                            this.win.webContents.openDevTools({ mode: 'detach' });
+                        this.logger.info("Query word: " + argvs.word);
+                        bShow = true;
+                        if (argvs.typ == "c") {
+                            bShow = false;
                         }
-                        // let _this = this;
-                        // Emitted when the window is closed.
-                        this.win.on('closed', function () {
-                            // Dereference the window object, usually you would store windows
-                            // in an array if your app supports multi windows, this is the time
-                            // when you should delete the corresponding element.
-                            // _this.win = null;
-                        });
-                        return [2 /*return*/];
+                        return [4 /*yield*/, this.CreateWindow(bShow, argvs.bDev)];
+                    case 2:
+                        _a.sent();
+                        dQueue = new DownloardQueue_1.DownloardQueue(this.win);
+                        globalInterface_1.globalVar.dQueue = dQueue;
+                        if (!(argvs.typ == "c")) return [3 /*break*/, 7];
+                        this.dictId = "dict1";
+                        this.curDictBase = this.get_curDB();
+                        wordsLst = argvs.word.split(" ");
+                        _i = 0, wordsLst_1 = wordsLst;
+                        _a.label = 3;
+                    case 3:
+                        if (!(_i < wordsLst_1.length)) return [3 /*break*/, 6];
+                        wd = wordsLst_1[_i];
+                        return [4 /*yield*/, this.QueryWord2(wd)];
+                    case 4:
+                        _a.sent();
+                        _a.label = 5;
+                    case 5:
+                        _i++;
+                        return [3 /*break*/, 3];
+                    case 6:
+                        this.WaitAsyncTasksFnshd(function () { return __awaiter(_this_1, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, this.Quit()];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        _a.label = 7;
+                    case 7: return [2 /*return*/];
                 }
+            });
+        });
+    };
+    dictApp.prototype.CreateWindow = function (bShow, bDev) {
+        return __awaiter(this, void 0, void 0, function () {
+            var size;
+            return __generator(this, function (_a) {
+                size = { w: 0, h: 0 };
+                this.getWinSize(size);
+                // Create the browser window.
+                this.win = new electron_1.BrowserWindow({
+                    icon: path.join(__dirname, 'assets/img/dictApp.ico'),
+                    width: size.w,
+                    height: size.h,
+                    show: bShow,
+                    frame: false,
+                    webPreferences: {
+                        nodeIntegration: true,
+                    },
+                });
+                if (bShow) {
+                    this.win.loadURL("file://" + __dirname + "/assets/Dictionary.html");
+                    if (bDev) {
+                        // Open the DevTools.
+                        this.win.webContents.openDevTools({ mode: 'detach' });
+                    }
+                }
+                // let _this = this;
+                // Emitted when the window is closed.
+                this.win.on('closed', function () {
+                    // Dereference the window object, usually you would store windows
+                    // in an array if your app supports multi windows, this is the time
+                    // when you should delete the corresponding element.
+                    // _this.win = null;
+                });
+                return [2 /*return*/];
             });
         });
     };
     dictApp.prototype.GetWindow = function () {
         return this.win;
+    };
+    dictApp.prototype.WaitAsyncTasksFnshd = function (cb) {
+        var _this_1 = this;
+        this.logger.info("Start to quit Dictionary");
+        var timerID = setInterval(function () { return __awaiter(_this_1, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (globalInterface_1.globalVar.dQueue.IsFnshd()) {
+                    console.info("Finshed to download all files.");
+                    timers_1.clearInterval(timerID);
+                    this.logger.info("Wait 2s to quit.");
+                    setTimeout(function () {
+                        cb();
+                    }, 2000);
+                }
+                return [2 /*return*/];
+            });
+        }); }, 2000);
+    };
+    dictApp.prototype.Quit = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: 
+                    // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
+                    // ...
+                    // safeExit = true;
+                    return [4 /*yield*/, this.Record2File(this.miss_audio, "")];
+                    case 1:
+                        // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
+                        // ...
+                        // safeExit = true;
+                        _a.sent();
+                        return [4 /*yield*/, this.Close()];
+                    case 2:
+                        _a.sent();
+                        this.logger.info("Quit Dictionary\n");
+                        log4js.shutdown(function (error) {
+                            if (error) {
+                                console.error(error.message);
+                            }
+                            else {
+                                console.info("Succes to shutdown log4js");
+                            }
+                            electron_1.app.quit(); // 退出程序
+                        });
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     dictApp.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -287,14 +387,22 @@ var dictApp = /** @class */ (function () {
         });
     };
     dictApp.prototype.Record2File = function (file, something) {
-        var _this_1 = this;
-        fs.writeFile(file, something, { 'flag': 'a' }, function (err) {
-            if (err) {
-                _this_1.logger.error("Fail to record " + something + " in " + file + "!");
-            }
-            else {
-                console.log("Success to record " + something + " in " + file + "!");
-            }
+        return __awaiter(this, void 0, void 0, function () {
+            var _this_1 = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        fs.writeFile(file, something, { 'flag': 'a' }, function (err) {
+                            if (err) {
+                                _this_1.logger.error("Fail to record " + something + " in " + file + "!");
+                                resolve(false);
+                            }
+                            else {
+                                console.log("Success to record " + something + " in " + file + "!");
+                                resolve(true);
+                            }
+                        });
+                    })];
+            });
         });
     };
     dictApp.prototype.ActiveAgent = function (activeAgent) {
@@ -345,23 +453,38 @@ var dictApp = /** @class */ (function () {
         return false;
     };
     dictApp.prototype.AddDictBase = function (name, dictSrc, format) {
-        var dictBase = null;
-        if (format.Type == 'ZIP') {
-            dictBase = new GDictBase_1.GDictBase(dictSrc, format.Compression, format.Compress_Level);
-        }
-        else if (format.Type == 'SQLite') {
-            dictBase = new SDictBase_1.SDictBase(dictSrc);
-        }
-        else if (format.Type == 'mdx') {
-            // dictBase = new MDictBase(dictSrc);
-            this.logger.error("not support mdx dict: " + name);
-            return;
-        }
-        else {
-            throw new Error("Unknown dict's type: " + format.Type + "!");
-        }
-        var dictId = 'dict' + String(this.dictBaseDict.size + 1);
-        this.dictBaseDict.set(dictId, { 'name': name, 'dictBase': dictBase });
+        return __awaiter(this, void 0, void 0, function () {
+            var dictBase, dictId;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        dictBase = null;
+                        if (!(format.Type == 'ZIP')) return [3 /*break*/, 2];
+                        dictBase = new GDictBase_1.GDictBase(dictSrc, format.Compression, format.Compress_Level);
+                        return [4 /*yield*/, dictBase.Open()];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 3];
+                    case 2:
+                        if (format.Type == 'SQLite') {
+                            dictBase = new SDictBase_1.SDictBase(dictSrc);
+                        }
+                        else if (format.Type == 'mdx') {
+                            // dictBase = new MDictBase(dictSrc);
+                            this.logger.error("not support mdx dict: " + name);
+                            return [2 /*return*/];
+                        }
+                        else {
+                            throw new Error("Unknown dict's type: " + format.Type + "!");
+                        }
+                        _a.label = 3;
+                    case 3:
+                        dictId = 'dict' + String(this.dictBaseDict.size + 1);
+                        this.dictBaseDict.set(dictId, { 'name': name, 'dictBase': dictBase });
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     dictApp.prototype.getWinSize = function (size) {
         /*
@@ -394,16 +517,15 @@ var dictApp = /** @class */ (function () {
                         }
                         return [3 /*break*/, 6];
                     case 1: 
-                    // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
-                    // ...
-                    // safeExit = true;
-                    return [4 /*yield*/, this.Close()];
+                    // this.WaitAsyncTasksFnshd(async () => {
+                    //     await this.Quit();
+                    // })
+                    return [4 /*yield*/, this.Quit()];
                     case 2:
-                        // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
-                        // ...
-                        // safeExit = true;
+                        // this.WaitAsyncTasksFnshd(async () => {
+                        //     await this.Quit();
+                        // })
                         _b.sent();
-                        electron_1.app.quit(); // 退出程序
                         return [3 /*break*/, 7];
                     case 3:
                         this.win.minimize();
@@ -535,6 +657,44 @@ var dictApp = /** @class */ (function () {
         this.win.webContents.send("gui", "playMP3", audio);
         return true;
     };
+    dictApp.prototype.QueryWord2 = function (word) {
+        return __awaiter(this, void 0, void 0, function () {
+            var retDict, dict, retAudio, audio;
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        this.logger.info("word = " + word + ";");
+                        retDict = -1;
+                        dict = "";
+                        retAudio = -1;
+                        audio = "";
+                        return [4 /*yield*/, this.curDictBase.query_word(word)];
+                    case 1:
+                        _a = _c.sent(), retDict = _a[0], dict = _a[1];
+                        return [4 /*yield*/, this.audioPackage.query_audio(word)];
+                    case 2:
+                        _b = _c.sent(), retAudio = _b[0], audio = _b[1];
+                        if (retDict < 0) {
+                            this.Record2File(this.miss_dict, "Dict of " + word + ": " + dict + "\n");
+                        }
+                        else if (retDict == 0) {
+                            this.logger.info(dict);
+                        }
+                        if (retAudio < 0) {
+                            this.Record2File(this.miss_audio, "Audio of " + word + ": " + audio + "\n");
+                        }
+                        else if (retAudio == 0) {
+                            this.logger.info(audio);
+                        }
+                        if (retDict < 0 || retAudio < 0) {
+                            this.Record2File(this.miss_audio, "\n");
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     dictApp.prototype.QueryWord = function (word, nDirect) {
         if (nDirect === void 0) { nDirect = 0; }
         return __awaiter(this, void 0, void 0, function () {
@@ -610,17 +770,16 @@ var dictApp = /** @class */ (function () {
                         if (retAudio <= 0) {
                             this.logger.error("audio: " + audio);
                             this.info(-1, 2, word, audio);
-                            audio = path.join(__dirname, "audio", "WrongHint.mp3");
+                            audio = path.join(this.startPath, "audio", "WrongHint.mp3");
                             if (retAudio < 0) {
                                 this.Record2File(this.miss_audio, "Audio of " + word + ": " + audio + "\n\n");
-                                audio = path.join(__dirname, "audio", "WrongHint.mp3");
+                                audio = path.join(this.startPath, "audio", "WrongHint.mp3");
                             }
                         }
                         else if (retDict < 0) {
                             this.Record2File(this.miss_audio, "\n");
                         }
                         if (retAudio == 1) {
-                            // this.win.webContents.send("gui", "modifyValue", "status", "");
                             this.info(0, 2, "", "");
                         }
                         audio = audio.replace(/\\/g, "/");
@@ -720,6 +879,8 @@ var dictApp = /** @class */ (function () {
                 }
             }
         }
+        // console.log("info: " + msg);
+        // this.logger.info(msg);
         this.win.webContents.send("gui", "modifyValue", "status", msg);
     };
     dictApp.prototype.log = function (lvl, msg) {
