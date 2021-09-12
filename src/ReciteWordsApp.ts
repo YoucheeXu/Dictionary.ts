@@ -54,7 +54,7 @@ export class ReciteWordsApp {
     private lastWord = "";
     private curWord = "";
 
-    constructor(readonly startPath:string) {
+    constructor(readonly startPath: string) {
         /*
         this.root.bind("<Escape>", this.exit_app);
         this.root.bind("<Return>", this.check_input);
@@ -149,10 +149,11 @@ export class ReciteWordsApp {
 
     public async Run(argvs: any) {
         this.CreateWindow(argvs.bDev);
-        this.initDict();
 
         let dQueue = new DownloardQueue(this.win);
         globalVar.dQueue = dQueue;
+
+        await this.initDict();
     }
 
     public CreateWindow(bDev: boolean): void {
@@ -188,7 +189,7 @@ export class ReciteWordsApp {
         });
     }
 
-    private initDict() {
+    private async initDict() {
         try {
             let dictBase = this.cfg.ReciteWords.DictBase;
             let dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
@@ -210,6 +211,7 @@ export class ReciteWordsApp {
                     let compression = audioBaseCfg["Format"]["Compression"];
                     let compressLevel = audioBaseCfg["Format"]["Compress Level"];
                     this.audioBase = new AuidoArchive(audioFile, compression, compressLevel);
+                    await this.audioBase.Open();
                     break;
                 }
             }

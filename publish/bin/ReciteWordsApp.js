@@ -173,11 +173,16 @@ var ReciteWordsApp = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var dQueue;
             return __generator(this, function (_a) {
-                this.CreateWindow(argvs.bDev);
-                this.initDict();
-                dQueue = new DownloardQueue_1.DownloardQueue(this.win);
-                globalInterface_1.globalVar.dQueue = dQueue;
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        this.CreateWindow(argvs.bDev);
+                        dQueue = new DownloardQueue_1.DownloardQueue(this.win);
+                        globalInterface_1.globalVar.dQueue = dQueue;
+                        return [4 /*yield*/, this.initDict()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
             });
         });
     };
@@ -210,36 +215,53 @@ var ReciteWordsApp = /** @class */ (function () {
         });
     };
     ReciteWordsApp.prototype.initDict = function () {
-        try {
-            var dictBase = this.cfg.ReciteWords.DictBase;
-            var dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
-            for (var _i = 0, dictBasesCfg_1 = dictBasesCfg; _i < dictBasesCfg_1.length; _i++) {
-                var dictBaseCfg = dictBasesCfg_1[_i];
-                if (dictBase == dictBaseCfg.Name) {
-                    var dictFile = path.join(this.startPath, dictBaseCfg.Dict).replace(/\\/g, '/');
-                    console.log("dict: " + dictFile);
-                    this.dictBase = new SDictBase_1.SDictBase(dictFile);
-                    break;
+        return __awaiter(this, void 0, void 0, function () {
+            var dictBase, dictBasesCfg, _i, dictBasesCfg_1, dictBaseCfg, dictFile, audioBase, audioBasesCfg, _a, audioBasesCfg_1, audioBaseCfg, audioFile, compression, compressLevel, e_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 5, , 6]);
+                        dictBase = this.cfg.ReciteWords.DictBase;
+                        dictBasesCfg = JSON.parse(JSON.stringify(this.cfg.DictBases));
+                        for (_i = 0, dictBasesCfg_1 = dictBasesCfg; _i < dictBasesCfg_1.length; _i++) {
+                            dictBaseCfg = dictBasesCfg_1[_i];
+                            if (dictBase == dictBaseCfg.Name) {
+                                dictFile = path.join(this.startPath, dictBaseCfg.Dict).replace(/\\/g, '/');
+                                console.log("dict: " + dictFile);
+                                this.dictBase = new SDictBase_1.SDictBase(dictFile);
+                                break;
+                            }
+                        }
+                        audioBase = this.cfg.ReciteWords.AudioBase;
+                        audioBasesCfg = JSON.parse(JSON.stringify(this.cfg.AudioBases));
+                        _a = 0, audioBasesCfg_1 = audioBasesCfg;
+                        _b.label = 1;
+                    case 1:
+                        if (!(_a < audioBasesCfg_1.length)) return [3 /*break*/, 4];
+                        audioBaseCfg = audioBasesCfg_1[_a];
+                        if (!(audioBase == audioBaseCfg.Name)) return [3 /*break*/, 3];
+                        audioFile = path.join(this.startPath, audioBaseCfg.Audio).replace(/\\/g, '/');
+                        console.log("audio: " + audioFile);
+                        compression = audioBaseCfg["Format"]["Compression"];
+                        compressLevel = audioBaseCfg["Format"]["Compress Level"];
+                        this.audioBase = new AuidoArchive_1.AuidoArchive(audioFile, compression, compressLevel);
+                        return [4 /*yield*/, this.audioBase.Open()];
+                    case 2:
+                        _b.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        _a++;
+                        return [3 /*break*/, 1];
+                    case 4: return [3 /*break*/, 6];
+                    case 5:
+                        e_1 = _b.sent();
+                        this.logger.error(e_1.message);
+                        electron_1.app.quit();
+                        return [3 /*break*/, 6];
+                    case 6: return [2 /*return*/];
                 }
-            }
-            var audioBase = this.cfg.ReciteWords.AudioBase;
-            var audioBasesCfg = JSON.parse(JSON.stringify(this.cfg.AudioBases));
-            for (var _a = 0, audioBasesCfg_1 = audioBasesCfg; _a < audioBasesCfg_1.length; _a++) {
-                var audioBaseCfg = audioBasesCfg_1[_a];
-                if (audioBase == audioBaseCfg.Name) {
-                    var audioFile = path.join(this.startPath, audioBaseCfg.Audio).replace(/\\/g, '/');
-                    console.log("audio: " + audioFile);
-                    var compression = audioBaseCfg["Format"]["Compression"];
-                    var compressLevel = audioBaseCfg["Format"]["Compress Level"];
-                    this.audioBase = new AuidoArchive_1.AuidoArchive(audioFile, compression, compressLevel);
-                    break;
-                }
-            }
-        }
-        catch (e) {
-            this.logger.error(e.message);
-            electron_1.app.quit();
-        }
+            });
+        });
     };
     ReciteWordsApp.prototype.GoStudyMode = function () {
         this.Mode = "Study Mode";
@@ -729,7 +751,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.isLevelDone = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progress, progressFile, numOfUnrecitedWord1, numOfUnrecitedWord2, ret, e_1;
+            var _i, _a, usrCfg, progress, progressFile, numOfUnrecitedWord1, numOfUnrecitedWord2, ret, e_2;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -779,9 +801,9 @@ var ReciteWordsApp = /** @class */ (function () {
                     case 10: return [2 /*return*/, Promise.resolve(false)];
                     case 11: return [3 /*break*/, 13];
                     case 12:
-                        e_1 = _b.sent();
-                        this.logger.error(e_1);
-                        return [2 /*return*/, Promise.reject(e_1)];
+                        e_2 = _b.sent();
+                        this.logger.error(e_2);
+                        return [2 /*return*/, Promise.reject(e_2)];
                     case 13: return [3 /*break*/, 15];
                     case 14:
                         _i++;
@@ -1006,7 +1028,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Save_Progress = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, word, _b, _c, word, data, familiar, lastDate, nextDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, nextDate, allLen, lastDateStr, nexDateStr, mapStr, i, nFnshd, iterator, r, todayStr, interval, index, nextInterval, _h, word, _j, familiar, lastDate, nextDate, percent, e_2;
+            var _i, _a, word, _b, _c, word, data, familiar, lastDate, nextDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, nextDate, allLen, lastDateStr, nexDateStr, mapStr, i, nFnshd, iterator, r, todayStr, interval, index, nextInterval, _h, word, _j, familiar, lastDate, nextDate, percent, e_3;
             return __generator(this, function (_k) {
                 switch (_k.label) {
                     case 0:
@@ -1143,9 +1165,9 @@ var ReciteWordsApp = /** @class */ (function () {
                         this.win.webContents.send("gui", "modifyValue", "info", percent.toFixed(2) + "% to save progress.");
                         return [3 /*break*/, 5];
                     case 4:
-                        e_2 = _k.sent();
-                        this.logger.error(e_2.message);
-                        this.logger.error(e_2);
+                        e_3 = _k.sent();
+                        this.logger.error(e_3.message);
+                        this.logger.error(e_3);
                         return [3 /*break*/, 5];
                     case 5: return [3 /*break*/, 1];
                     case 6:
