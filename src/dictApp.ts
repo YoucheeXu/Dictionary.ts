@@ -627,8 +627,14 @@ export class dictApp {
                 bNew = false;
             }
             else {
-                console.log(word + " has been marked as new.");
-                bNew = true;
+                let familiar = await this.usrProgress.GetItem(word, "Familiar");
+                if (familiar < 10) {
+                    console.log(word + " has been marked as new.");
+                    bNew = true;
+                } else {
+                    console.log(word + " has been rectied.");
+                    bNew = false;
+                }
             }
         }
 
@@ -661,7 +667,7 @@ export class dictApp {
 
     public speechWord(audio: string): void {
         if (fs.statSync(audio).isFile() == false) {
-            this.logger.error("The is no mp3: " + audio);
+            this.logger.error("There is no mp3: " + audio);
         }
         try {
             this.playMP3(audio);

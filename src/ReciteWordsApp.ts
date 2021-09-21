@@ -797,95 +797,104 @@ export class ReciteWordsApp {
         this.win.webContents.send("gui", "modifyValue", "InProgressCount", `Words in learning: ${InProgressCount}`);
         this.LogProgress(`Words in learning: ${InProgressCount}`);
 
-        // read configuration
-        let timeArray = this.cfg["ReciteWords"]["TimeInterval"];
-        for (let timeGroup of timeArray) {
-            if (timeGroup["Unit"] == "d") {
-                this.timeDayLst.push(timeGroup["Interval"]);
-            }
-        }
-        let allLimit = this.cfg.ReciteWords.General.Limit;
-        let newWdsLimit = this.cfg.ReciteWords.StudyMode.Limit;
-        this.TestCount = this.cfg.ReciteWords.TestMode.Times;
+
+        // ready to get words to recite
+        let allLimit = this.cfg.ReciteWords.General.TotalLimit;
+        let newWdsLimit = this.cfg.ReciteWords.General.NewLimit;
         let limit = 0;
 
         // start get words to recite
-
         let wdsLst = new Array();
-        let numOfWords = 0;
         let todayStr = formatDate(this.today);
 
-        // get over due words
-        console.log("starting to get over due words");
+        // Start to get forgotten words
+        console.log("Start to get forgotten words");
         wdsLst.length = 0;
-        limit = allLimit;
+        limit = allLimit - this.WordsDict.size;
+        let forgottenWdNum = 0;
 
-        if (await this.usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)) {
-            for (let wd of wdsLst) {
-                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-                if (this.WordsDict.size >= limit) {
-                    break;
+        if (limit > 0) {
+            if (await this.usrProgress.GetForgottenWordsLst(wdsLst)) {
+                for (let wd of wdsLst) {
+                    this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                    console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                    this.LearnLst.push(wd.Word);
+                    forgottenWdNum++;
+                    if (forgottenWdNum >= limit) {
+                        break;
+                    }
                 }
             }
         }
-        this.LogProgress(`Got ${this.WordsDict.size - numOfWords} over due words.`);
-        numOfWords = this.WordsDict.size;
+        this.LogProgress(`Got ${forgottenWdNum} forgotten words.`);
 
-        // get due words
-        console.log("starting to get due words");
+        // Start to get over due words
+        console.log("Start to get over due words");
         wdsLst.length = 0;
         limit = allLimit - this.WordsDict.size;
+        let OvrDueWdNum = 0;
+
+        if (limit > 0) {
+            if (await this.usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)) {
+                for (let wd of wdsLst) {
+                    this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                    console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                    OvrDueWdNum++;
+                    if (OvrDueWdNum >= limit) {
+                        break;
+                    }
+                }
+            }
+        }
+        this.LogProgress(`Got ${OvrDueWdNum} over due words.`);
+
+        // Start to get due words
+        console.log("Start to get due words");
+        wdsLst.length = 0;
+        limit = allLimit - this.WordsDict.size;
+        let dueWdNum = 0;
 
         if (limit > 0) {
             if (await this.usrProgress.GetDueWordsLst(wdsLst, todayStr)) {
                 for (let wd of wdsLst) {
                     this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                     console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-                    if (this.WordsDict.size >= limit) {
+                    dueWdNum++;
+                    if (dueWdNum >= limit) {
                         break;
                     }
                 }
             }
         }
-        this.LogProgress(`Got ${this.WordsDict.size - numOfWords} due words.`);
-        numOfWords = this.WordsDict.size;
+        this.LogProgress(`Got ${dueWdNum} due words.`);
 
-        // get forgotten words
-        console.log("starting to get forgotten words");
+        // Start to get new words
+        console.log("Start to get new words");
         wdsLst.length = 0;
-        await this.usrProgress.GetForgottenWordsLst(wdsLst)
-        for (let wd of wdsLst) {
-            this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-            console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-            // this.LearnLst.push(wd.Word);
-        }
-        this.LogProgress(`Got ${this.WordsDict.size - numOfWords} extra forgotten words.`);
-        numOfWords = this.WordsDict.size;
-
-        // get new words
-        console.log("starting to get new words");
-        let forgottenNum = 0
-        this.WordsDict.forEach(([familiar, lastDate, nextDate], word) => {
-            if (familiar < 0) {
-                forgottenNum++;
-                this.LearnLst.push(word);
-            }
-        });
-
-        limit = Math.min(newWdsLimit - forgottenNum, allLimit - numOfWords);
+        limit = Math.min(newWdsLimit - forgottenWdNum, allLimit - this.WordsDict.size);
+        let newWdNum = 0;
 
         if (limit > 0) {
-            wdsLst.length = 0;
             if (await this.usrProgress.GetNewWordsLst(wdsLst, limit)) {
                 for (let wd of wdsLst) {
                     this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                     console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
                     this.LearnLst.push(wd.Word);
+                    newWdNum++;
                 }
             }
-            this.LogProgress(`Got ${wdsLst.length} new words.`);
         }
+        this.LogProgress(`Got ${newWdNum} new words.`);
+
+
+        // ready to recite
+        let timeArray = this.cfg["ReciteWords"]["TimeInterval"];
+        for (let timeGroup of timeArray) {
+            if (timeGroup["Unit"] == "d") {
+                this.timeDayLst.push(timeGroup["Interval"]);
+            }
+        }
+        this.TestCount = this.cfg.ReciteWords.TestMode.Times;
 
         // random learn list
         randomArray2(this.LearnLst);

@@ -121,15 +121,15 @@
 		},
 		"StudyMode": {
 			"LeastFamiliar": 0,
-			"GroupNum": 10,
-			"Limit": 50
+			"GroupNum": 10
 		},
 		"TestMode": {
 			"GroupNum": 10,
 			"Times": 4
 		},
 		"General": {
-			"Limit": 200
+			"NewLimit": 50,
+			"TotalLimit": 200
 		},
 		"TimeInterval": [
 			{

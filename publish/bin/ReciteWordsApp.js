@@ -815,7 +815,7 @@ var ReciteWordsApp = /** @class */ (function () {
     };
     ReciteWordsApp.prototype.Go = function (usrName, level) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, InProgressCount, timeArray, _b, timeArray_1, timeGroup, allLimit, newWdsLimit, limit, wdsLst, numOfWords, todayStr, _c, wdsLst_1, wd, _d, wdsLst_2, wd, _e, wdsLst_3, wd, forgottenNum, _f, wdsLst_4, wd, _g, _h, word;
+            var _i, _a, usrCfg, progress, progressFile, allCount, newCount, finishCount, InProgressCount, allLimit, newWdsLimit, limit, wdsLst, todayStr, forgottenWdNum, _b, wdsLst_1, wd, OvrDueWdNum, _c, wdsLst_2, wd, dueWdNum, _d, wdsLst_3, wd, newWdNum, _e, wdsLst_4, wd, timeArray, _f, timeArray_1, timeGroup, _g, _h, word;
             var _this_1 = this;
             return __generator(this, function (_j) {
                 switch (_j.label) {
@@ -882,99 +882,106 @@ var ReciteWordsApp = /** @class */ (function () {
                         InProgressCount = _j.sent();
                         this.win.webContents.send("gui", "modifyValue", "InProgressCount", "Words in learning: " + InProgressCount);
                         this.LogProgress("Words in learning: " + InProgressCount);
+                        allLimit = this.cfg.ReciteWords.General.TotalLimit;
+                        newWdsLimit = this.cfg.ReciteWords.General.NewLimit;
+                        limit = 0;
+                        wdsLst = new Array();
+                        todayStr = utils_1.formatDate(this.today);
+                        // Start to get forgotten words
+                        console.log("Start to get forgotten words");
+                        wdsLst.length = 0;
+                        limit = allLimit - this.WordsDict.size;
+                        forgottenWdNum = 0;
+                        if (!(limit > 0)) return [3 /*break*/, 10];
+                        return [4 /*yield*/, this.usrProgress.GetForgottenWordsLst(wdsLst)];
+                    case 9:
+                        if (_j.sent()) {
+                            for (_b = 0, wdsLst_1 = wdsLst; _b < wdsLst_1.length; _b++) {
+                                wd = wdsLst_1[_b];
+                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                                console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
+                                this.LearnLst.push(wd.Word);
+                                forgottenWdNum++;
+                                if (forgottenWdNum >= limit) {
+                                    break;
+                                }
+                            }
+                        }
+                        _j.label = 10;
+                    case 10:
+                        this.LogProgress("Got " + forgottenWdNum + " forgotten words.");
+                        // Start to get over due words
+                        console.log("Start to get over due words");
+                        wdsLst.length = 0;
+                        limit = allLimit - this.WordsDict.size;
+                        OvrDueWdNum = 0;
+                        if (!(limit > 0)) return [3 /*break*/, 12];
+                        return [4 /*yield*/, this.usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)];
+                    case 11:
+                        if (_j.sent()) {
+                            for (_c = 0, wdsLst_2 = wdsLst; _c < wdsLst_2.length; _c++) {
+                                wd = wdsLst_2[_c];
+                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                                console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
+                                OvrDueWdNum++;
+                                if (OvrDueWdNum >= limit) {
+                                    break;
+                                }
+                            }
+                        }
+                        _j.label = 12;
+                    case 12:
+                        this.LogProgress("Got " + OvrDueWdNum + " over due words.");
+                        // Start to get due words
+                        console.log("Start to get due words");
+                        wdsLst.length = 0;
+                        limit = allLimit - this.WordsDict.size;
+                        dueWdNum = 0;
+                        if (!(limit > 0)) return [3 /*break*/, 14];
+                        return [4 /*yield*/, this.usrProgress.GetDueWordsLst(wdsLst, todayStr)];
+                    case 13:
+                        if (_j.sent()) {
+                            for (_d = 0, wdsLst_3 = wdsLst; _d < wdsLst_3.length; _d++) {
+                                wd = wdsLst_3[_d];
+                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                                console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
+                                dueWdNum++;
+                                if (dueWdNum >= limit) {
+                                    break;
+                                }
+                            }
+                        }
+                        _j.label = 14;
+                    case 14:
+                        this.LogProgress("Got " + dueWdNum + " due words.");
+                        // Start to get new words
+                        console.log("Start to get new words");
+                        wdsLst.length = 0;
+                        limit = Math.min(newWdsLimit - forgottenWdNum, allLimit - this.WordsDict.size);
+                        newWdNum = 0;
+                        if (!(limit > 0)) return [3 /*break*/, 16];
+                        return [4 /*yield*/, this.usrProgress.GetNewWordsLst(wdsLst, limit)];
+                    case 15:
+                        if (_j.sent()) {
+                            for (_e = 0, wdsLst_4 = wdsLst; _e < wdsLst_4.length; _e++) {
+                                wd = wdsLst_4[_e];
+                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                                console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
+                                this.LearnLst.push(wd.Word);
+                                newWdNum++;
+                            }
+                        }
+                        _j.label = 16;
+                    case 16:
+                        this.LogProgress("Got " + newWdNum + " new words.");
                         timeArray = this.cfg["ReciteWords"]["TimeInterval"];
-                        for (_b = 0, timeArray_1 = timeArray; _b < timeArray_1.length; _b++) {
-                            timeGroup = timeArray_1[_b];
+                        for (_f = 0, timeArray_1 = timeArray; _f < timeArray_1.length; _f++) {
+                            timeGroup = timeArray_1[_f];
                             if (timeGroup["Unit"] == "d") {
                                 this.timeDayLst.push(timeGroup["Interval"]);
                             }
                         }
-                        allLimit = this.cfg.ReciteWords.General.Limit;
-                        newWdsLimit = this.cfg.ReciteWords.StudyMode.Limit;
                         this.TestCount = this.cfg.ReciteWords.TestMode.Times;
-                        limit = 0;
-                        wdsLst = new Array();
-                        numOfWords = 0;
-                        todayStr = utils_1.formatDate(this.today);
-                        // get over due words
-                        console.log("starting to get over due words");
-                        wdsLst.length = 0;
-                        limit = allLimit;
-                        return [4 /*yield*/, this.usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)];
-                    case 9:
-                        if (_j.sent()) {
-                            for (_c = 0, wdsLst_1 = wdsLst; _c < wdsLst_1.length; _c++) {
-                                wd = wdsLst_1[_c];
-                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                                console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
-                                if (this.WordsDict.size >= limit) {
-                                    break;
-                                }
-                            }
-                        }
-                        this.LogProgress("Got " + (this.WordsDict.size - numOfWords) + " over due words.");
-                        numOfWords = this.WordsDict.size;
-                        // get due words
-                        console.log("starting to get due words");
-                        wdsLst.length = 0;
-                        limit = allLimit - this.WordsDict.size;
-                        if (!(limit > 0)) return [3 /*break*/, 11];
-                        return [4 /*yield*/, this.usrProgress.GetDueWordsLst(wdsLst, todayStr)];
-                    case 10:
-                        if (_j.sent()) {
-                            for (_d = 0, wdsLst_2 = wdsLst; _d < wdsLst_2.length; _d++) {
-                                wd = wdsLst_2[_d];
-                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                                console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
-                                if (this.WordsDict.size >= limit) {
-                                    break;
-                                }
-                            }
-                        }
-                        _j.label = 11;
-                    case 11:
-                        this.LogProgress("Got " + (this.WordsDict.size - numOfWords) + " due words.");
-                        numOfWords = this.WordsDict.size;
-                        // get forgotten words
-                        console.log("starting to get forgotten words");
-                        wdsLst.length = 0;
-                        return [4 /*yield*/, this.usrProgress.GetForgottenWordsLst(wdsLst)];
-                    case 12:
-                        _j.sent();
-                        for (_e = 0, wdsLst_3 = wdsLst; _e < wdsLst_3.length; _e++) {
-                            wd = wdsLst_3[_e];
-                            this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                            console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
-                            // this.LearnLst.push(wd.Word);
-                        }
-                        this.LogProgress("Got " + (this.WordsDict.size - numOfWords) + " extra forgotten words.");
-                        numOfWords = this.WordsDict.size;
-                        // get new words
-                        console.log("starting to get new words");
-                        forgottenNum = 0;
-                        this.WordsDict.forEach(function (_a, word) {
-                            var familiar = _a[0], lastDate = _a[1], nextDate = _a[2];
-                            if (familiar < 0) {
-                                forgottenNum++;
-                                _this_1.LearnLst.push(word);
-                            }
-                        });
-                        limit = Math.min(newWdsLimit - forgottenNum, allLimit - numOfWords);
-                        if (!(limit > 0)) return [3 /*break*/, 14];
-                        wdsLst.length = 0;
-                        return [4 /*yield*/, this.usrProgress.GetNewWordsLst(wdsLst, limit)];
-                    case 13:
-                        if (_j.sent()) {
-                            for (_f = 0, wdsLst_4 = wdsLst; _f < wdsLst_4.length; _f++) {
-                                wd = wdsLst_4[_f];
-                                this.WordsDict.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                                console.log("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
-                                this.LearnLst.push(wd.Word);
-                            }
-                        }
-                        this.LogProgress("Got " + wdsLst.length + " new words.");
-                        _j.label = 14;
-                    case 14:
                         // random learn list
                         utils_1.randomArray2(this.LearnLst);
                         this.LogProgress("Length of LearnList: " + this.LearnLst.length + ".");
