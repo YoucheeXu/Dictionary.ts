@@ -1,5 +1,6 @@
+// main.ts
 import { ipcMain } from 'electron';
-import { ElectronApp } from "./ElectronApp";
+import { MasterApp } from './MasterApp';
 
 interface KeyValue {
     [key: string]: any
@@ -30,7 +31,7 @@ for (let argv of process.argv) {
 }
 
 try {
-    let myApp = new ElectronApp();
+    let myApp = new MasterApp();
     myApp.Run(argvs)
 }
 catch (e) {

@@ -5,6 +5,17 @@ export class SQLiteDict {
     private dataBase: SQLite;
     private tabName: string;
 
+    constructor(readonly _szName: string, readonly _szSrcFile: string) {
+    }
+
+    public get szSrcFile() {
+        return this._szSrcFile;
+    }
+
+    public get szName() {
+        return this._szName;
+    }
+
     public async Open(dictSrc: string, tabName: string) {
         this.dataBase = new SQLite();
         this.tabName = tabName;
@@ -124,8 +135,7 @@ export class SQLiteDict {
                 return Promise.resolve(false);
             }
         } catch (e) {
-            console.log(e);
-            return Promise.reject(false);
+            return Promise.reject(e);
         }
     }
 

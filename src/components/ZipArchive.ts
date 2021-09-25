@@ -1,7 +1,7 @@
 // ZipArchive.ts
 // 将文件归档到zip文件，并从zip文件中读取数据
 
-//https://stuk.github.io/jszip/documentation/howto/read_zip.html
+// https://stuk.github.io/jszip/documentation/howto/read_zip.html
 import JSZip from "jszip";
 import * as fs from "fs";
 // import * as path from "path";
@@ -25,6 +25,7 @@ export class ZipArchive {
             fs.readFile(_this.zipFile, (err, data) => {
                 if (err) {
                     reject(err);
+                    console.log(`reject, because of ${err}`);
                 } else {
                     resolve(data);
                 }

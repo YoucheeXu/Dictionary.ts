@@ -13,23 +13,23 @@ CREATE TABLE ${Level}(
 export class UsrProgress {
     private dataBase: SQLite;
     private level: string;
-    private dictSrc: string;
+    private _srcFile: string;
 
-    public async Open(dictSrc: string, lvl: string) {
-        this.dictSrc = dictSrc;
-        this.dataBase = new SQLite();
-        await this.dataBase.Open(dictSrc);
-        this.level = lvl;
-        // print("progress of " + dictSrc + "is OK to open!");
-    };
-
-    public GetName(): string {
-        return this.dictSrc;
+    public get srcFile() {
+        return this._srcFile;
     }
 
-    public async New(dictSrc: string, lvl: string) {
+    public async Open(srcFile: string, lvl: string) {
+        this._srcFile = srcFile;
         this.dataBase = new SQLite();
-        await this.dataBase.Open(dictSrc);
+        await this.dataBase.Open(srcFile);
+        this.level = lvl;
+        // print("progress of " + srcFile + "is OK to open!");
+    };
+
+    public async New(srcFile: string, lvl: string) {
+        this.dataBase = new SQLite();
+        await this.dataBase.Open(srcFile);
         let r = await this.dataBase.run(`CREATE TABLE ${lvl}(word text NOT NULL PRIMARY KEY, familiar REAL, lastdate DATE)`);
         if (r) {
             console.log("Table created");

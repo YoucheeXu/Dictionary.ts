@@ -61,7 +61,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZipArchive = void 0;
-//https://stuk.github.io/jszip/documentation/howto/read_zip.html
+// https://stuk.github.io/jszip/documentation/howto/read_zip.html
 var jszip_1 = __importDefault(require("jszip"));
 var fs = __importStar(require("fs"));
 var ZipArchive = /** @class */ (function () {
@@ -88,6 +88,7 @@ var ZipArchive = /** @class */ (function () {
                         fs.readFile(_this.zipFile, function (err, data) {
                             if (err) {
                                 reject(err);
+                                console.log("reject, because of " + err);
                             }
                             else {
                                 resolve(data);

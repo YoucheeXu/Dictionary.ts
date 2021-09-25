@@ -1,13 +1,17 @@
 {
 	"DictBases": [
 		{
-			"Name": "Google",
-			"Dict": "dict/Google.zip",
+			"Name": "GoogleDict",
+			"Dict": "dict/GoogleDict.zip",
 			"Desc": "Google",
 			"Format": {
 				"Type": "ZIP",
 				"Compression": "ZIP_DEFLATED",
 				"Compress_Level": 2
+			},
+			"Download":{
+				"Mode": "Direct",
+				"URL": "http://dictionary.so8848.com/ajax_search?q=${word}"
 			}
 		},
 		{
@@ -29,18 +33,23 @@
 	],
 	"AudioBases": [
 		{
-			"Name": "Google",
-			"Audio": "audio/Google.zip",
+			"Name": "Google2",
+			"Audio": "audio/GoogleAudio.zip",
 			"Desc": "US",
 			"Format": {
 				"Type": "ZIP",
 				"Compression": "ZIP_DEFLATED",
 				"CompressLevel": 2
+			},
+			"Download":{
+				"Mode": "Dict",
+				"Dict": "GoogleDict",
+				"RegEx": "http://www.gstatic.com/dictionary/static/sounds/[^%23]+?${word}%23_us_1.mp3"
 			}
 		}
 	],
 	"WordsDict": {
-		"Name": "Words",
+		"Name": "WordsDict",
 		"Dict": "dict/Words.dict",
 		"allLvls": [
 			"CET6",
@@ -53,7 +62,7 @@
 			"Target": [
 				"New"
 			],
-			"Progress": "anonymous.progress"
+			"Progress": "dict/anonymous.progress"
 		}
 	],
 	"Agents": {
@@ -72,13 +81,18 @@
 			}
 		]
 	},
+	"Miss": {
+		"miss_dict": "miss.txt",
+		"miss_audio": "miss.txt"
+	},
 	"Dictionary":{
 		"common": {
 			"ver": "1.0.1.3"
 		},
 		"GUI": {
 			"Skin": "Skin/",
-			"html": "gui/GUI.html",
+			"html": "assets/Dictionary.html",
+			"bFullScreen": false,
 			"Height": 548,
 			"Width": 701,
 			"BackColor": "67,160,255",
@@ -87,8 +101,8 @@
 		},
 		"Tabs": [
 			{
-				"Name": "Google",
-				"Dict": "Google"
+				"Name": "Google Dict",
+				"Dict": "GoogleDict"
 			},
 			{
 				"Name": "15000",
@@ -99,15 +113,13 @@
 				"Dict": "Collins COBUILD"
 			}
 		],
-		"Audio": "Google",
+		"DictBase": "GoogleDict",
+		"WordsDict": "WordsDict",
+		"AudioBase": "GoogleAudio",
 		"User": "anonymous",
-		"Miss": {
-			"miss_dict": "miss.txt",
-			"miss_audio": "miss.txt"
-		},
 		"Debug": {
 			"bEnable": true,
-			"file": "Dictionary.log"
+			"file": "log/Dictionary.log"
 		}
 	},
 	"ReciteWords":{
@@ -115,7 +127,10 @@
 			"ver": "0.0.0.1"
 		},
 		"GUI": {
+			"Skin": "Skin/",
+			"html": "assets/ReciteWords.html",
 			"BackColor": "67,160,255",
+			"bFullScreen": true,
 			"Height": 551,
 			"Width": 701
 		},
@@ -167,11 +182,11 @@
 		],
 		"Debug": {
 			"bEnable": true,
-			"file": "ReciteWords.log"
+			"file": "log/ReciteWords.log"
 		},
-		"DictBase": "15000",
-		"WordsDict": "Words",
-		"AudioBase": "Google",
+		"DictBase": "GoogleDict",
+		"WordsDict": "WordsDict",
+		"AudioBase": "GoogleAudio",
 		"User": "anonymous"
 	}
 }

@@ -11,17 +11,20 @@ CREATE TABLE [Words](
 */
 
 export class SDictBase extends DictBase {
-    private bWritable: boolean = false;
-    private dict: SQLite = new SQLite();
+    private _dict: SQLite;
 
-    constructor(dictSrc: string) {
-        super(dictSrc);
-        this.dict.Open(dictSrc);
+    constructor(name: string, srcFile: string) {
+        super(name, srcFile);
+        this._dict = new SQLite();
+    }
+
+    public async Open() {
+        this._dict.Open(this._szSrcFile);
     }
 
     public async Close(): Promise<[boolean, string]> {
         try {
-            let ret = await this.dict.Close();
+            let ret = await this._dict.Close();
             if (ret) {
                 return [true, ""];
             }
@@ -42,7 +45,7 @@ export class SDictBase extends DictBase {
     // TODO: to html
     public async query_word(word: string): Promise<[number, string]> {
         let sql = "select * from Words where word=?";
-        let r: any = await this.dict.get(sql, [word]);
+        let r: any = await this._dict.get(sql, [word]);
         if (r === undefined) {
             return [-1, `${word} not in dict!`];
         }
@@ -55,8 +58,8 @@ export class SDictBase extends DictBase {
         // let sql = "select word from Words where word like '?%'";
         let sql = `select word from Words where word like '${word}%' limit 100`;
 
-        // let r = await this.dict.all(sql, [word]);
-        let r = await this.dict.all(sql);
+        // let r = await this._dict.all(sql, [word]);
+        let r = await this._dict.all(sql);
         r.forEach((row: any) => {
             wdsLst.push(row.Word);
         })
@@ -69,14 +72,14 @@ export class SDictBase extends DictBase {
         }
     }
 
-    public getWritable(): boolean {
-        return this.bWritable;
-    }
-
     public del_word(word: string): boolean {
-        throw new Error('Method not implemented.');
+        throw new Error(`del_word of ${this.szName} not implemented.`);
         let sql = '';
-        this.dict.run(sql);
+        this._dict.run(sql);
         return true;
     }
+
+    public CheckAndAddFile(localFile: string) {
+        throw new Error(`CheckAndAddFile of ${this.szName} not implemented.`);
+    };
 };

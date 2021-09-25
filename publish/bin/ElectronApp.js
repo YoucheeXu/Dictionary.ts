@@ -56,118 +56,535 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ElectronApp = void 0;
+// ElectronApp.ts
+var fs = __importStar(require("fs"));
 var path = __importStar(require("path"));
+var log4js = __importStar(require("log4js"));
 var electron_1 = require("electron");
-var dictApp_1 = require("./dictApp");
-var ReciteWordsApp_1 = require("./ReciteWordsApp");
 var globalInterface_1 = require("./utils/globalInterface");
+var WordsDict_1 = require("./components/WordsDict");
+var GDictBase_1 = require("./components/GDictBase");
+var SDictBase_1 = require("./components/SDictBase");
+var AuidoArchive_1 = require("./components/AuidoArchive");
+var DownloardQueue_1 = require("./utils/DownloardQueue");
 var ElectronApp = /** @class */ (function () {
-    function ElectronApp() {
+    function ElectronApp(_startPath) {
+        this._startPath = _startPath;
+        this._bCfgModfied = false;
+        this._bDebug = false;
+        this._dictMap = new Map();
+        this._dictAgent = new Array();
+        console.clear();
+        globalInterface_1.globalVar.app = this;
+        this._wrongHintFile = path.join(this._startPath, "audio", "WrongHint.mp3");
     }
-    ElectronApp.prototype.waitForElectronAppReady = function () {
+    Object.defineProperty(ElectronApp.prototype, "name", {
+        get: function () {
+            return this._name;
+        },
+        set: function (name) {
+            this._name = name;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    ElectronApp.prototype.AddDictBase = function (name, dictSrc, format, download) {
+        if (download === void 0) { download = null; }
         return __awaiter(this, void 0, void 0, function () {
+            var dictBase, dictId;
             return __generator(this, function (_a) {
-                if (electron_1.app.isReady())
-                    return [2 /*return*/, Promise.resolve()];
-                return [2 /*return*/, new Promise(function (resolve) {
-                        var iid = setInterval(function () {
-                            if (electron_1.app.isReady()) {
-                                clearInterval(iid);
-                                resolve(null);
+                switch (_a.label) {
+                    case 0:
+                        if (!(format.Type == 'ZIP')) return [3 /*break*/, 2];
+                        dictBase = new GDictBase_1.GDictBase(name, dictSrc, format.Compression, format.Compress_Level);
+                        return [4 /*yield*/, dictBase.Open()];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 5];
+                    case 2:
+                        if (!(format.Type == 'SQLite')) return [3 /*break*/, 4];
+                        dictBase = new SDictBase_1.SDictBase(name, dictSrc);
+                        return [4 /*yield*/, dictBase.Open()];
+                    case 3:
+                        _a.sent();
+                        return [3 /*break*/, 5];
+                    case 4:
+                        if (format.Type == 'mdx') {
+                            // dictBase = new MDictBase(dictSrc);
+                            this._logger.error("Not support mdx dict: " + name);
+                            return [2 /*return*/];
+                        }
+                        else {
+                            throw new Error("Unknown dict's type: " + format.Type + "!");
+                        }
+                        _a.label = 5;
+                    case 5:
+                        if (name == this._cfg[this._name].DictBase) {
+                            this._curDictBase = dictBase;
+                        }
+                        if (download) {
+                            dictBase.download = download;
+                        }
+                        dictId = 'dict' + String(this._dictMap.size + 1);
+                        this._dictMap.set(dictId, dictBase);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ElectronApp.prototype.ReadAndConfigure = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this, debugCfg, debugLvl, logFile, common, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, dictBasesCfg, _a, _b, tab, _c, dictBasesCfg_1, dictBaseCfg, dictSrc_1, download, wordsDictCfg, dictSrc, audioCfg, audioFile, audioFormatCfg, missCfg;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        this._cfgFile = path.join(this._startPath, 'Dictionary.json').replace(/\\/g, '/');
+                        _this = this;
+                        if (fs.existsSync(this._cfgFile) == false) {
+                            console.log(_this._cfgFile + " doesn't exist");
+                            return [2 /*return*/, false];
+                        }
+                        ;
+                        this._cfg = JSON.parse(fs.readFileSync(this._cfgFile).toString());
+                        debugCfg = JSON.parse(JSON.stringify(this._cfg[this.name].Debug));
+                        this._bDebug = debugCfg.bEnable;
+                        debugLvl = 'INFO';
+                        if (this._bDebug == true) {
+                            debugLvl = 'DEBUG';
+                            logFile = path.join(this._startPath, debugCfg.file);
+                            console.log("logFile: " + logFile);
+                            // %r time in toLocaleTimeString format
+                            // %p log level
+                            // %c log category
+                            // %h hostname
+                            // %m log data
+                            // %d date, formatted - default is ISO8601, format options are: ISO8601, ISO8601_WITH_TZ_OFFSET, ABSOLUTE, DATE, or any string compatible with the date-format library. e.g. %d{DATE}, %d{yyyy/MM/dd-hh.mm.ss}
+                            // %% % - for when you want a literal % in your output
+                            // %n newline
+                            // %z process id (from process.pid)
+                            // %f full path of filename (requires enableCallStack: true on the category, see configuration object)
+                            // %f{depth} path’s depth let you chose to have only filename (%f{1}) or a chosen number of directories
+                            // %l line number (requires enableCallStack: true on the category, see configuration object)
+                            // %o column postion (requires enableCallStack: true on the category, see configuration object)
+                            // %s call stack (requires enableCallStack: true on the category, see configuration object)
+                            // %x{<tokenname>} add dynamic tokens to your log. Tokens are specified in the tokens parameter.
+                            // %X{<tokenname>} add values from the Logger context. Tokens are keys into the context values.
+                            // %[ start a coloured block (colour will be taken from the log level, similar to colouredLayout)
+                            // %] end a coloured block
+                            log4js.configure({
+                                appenders: {
+                                    consoleAppender: {
+                                        type: 'console',
+                                        layout: {
+                                            type: 'pattern',
+                                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                                        }
+                                    },
+                                    dictLogs: {
+                                        type: 'file', filename: logFile, category: this.name,
+                                        layout: {
+                                            type: 'pattern',
+                                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                                        }
+                                    },
+                                },
+                                categories: {
+                                    default: { appenders: ['consoleAppender', 'dictLogs'], level: debugLvl, enableCallStack: true },
+                                },
+                            });
+                        }
+                        this._logger = log4js.getLogger('dictLogs');
+                        common = JSON.parse(JSON.stringify(this._cfg[this.name].common));
+                        this._logger.info(this._name + " v" + common.ver);
+                        agentCfg = JSON.parse(JSON.stringify(this._cfg['Agents']));
+                        bIEAgent = agentCfg.bIEAgent;
+                        activeAgent = agentCfg.activeAgent;
+                        agentInfo = JSON.parse(JSON.stringify(agentCfg['Info']));
+                        for (_i = 0, agentInfo_1 = agentInfo; _i < agentInfo_1.length; _i++) {
+                            agent = agentInfo_1[_i];
+                            this._dictAgent.push({ name: agent.name, ip: agent.ip, program: agent.program });
+                        }
+                        this._dictAgent.push({ name: '', ip: '', program: '' });
+                        this.ActiveAgent(activeAgent);
+                        dictBasesCfg = JSON.parse(JSON.stringify(this._cfg.DictBases));
+                        _a = 0, _b = JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs));
+                        _d.label = 1;
+                    case 1:
+                        if (!(_a < _b.length)) return [3 /*break*/, 6];
+                        tab = _b[_a];
+                        _c = 0, dictBasesCfg_1 = dictBasesCfg;
+                        _d.label = 2;
+                    case 2:
+                        if (!(_c < dictBasesCfg_1.length)) return [3 /*break*/, 5];
+                        dictBaseCfg = dictBasesCfg_1[_c];
+                        if (!(tab.Dict == dictBaseCfg.Name)) return [3 /*break*/, 4];
+                        dictSrc_1 = path.join(this._startPath, dictBaseCfg.Dict);
+                        download = dictBaseCfg.Download;
+                        return [4 /*yield*/, this.AddDictBase(dictBaseCfg.Name, dictSrc_1, JSON.parse(JSON.stringify(dictBaseCfg.Format)), download)];
+                    case 3:
+                        _d.sent();
+                        return [3 /*break*/, 5];
+                    case 4:
+                        _c++;
+                        return [3 /*break*/, 2];
+                    case 5:
+                        _a++;
+                        return [3 /*break*/, 1];
+                    case 6:
+                        wordsDictCfg = this._cfg.WordsDict;
+                        dictSrc = path.join(this._startPath, wordsDictCfg.Dict);
+                        this._wordsDict = new WordsDict_1.WordsDict(wordsDictCfg.Name, dictSrc);
+                        return [4 /*yield*/, this._wordsDict.Open()];
+                    case 7:
+                        _d.sent();
+                        audioCfg = JSON.parse(JSON.stringify(this._cfg['AudioBases']))[0];
+                        audioFile = path.join(this._startPath, audioCfg.Audio);
+                        audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
+                        if (!(audioFormatCfg.Type == 'ZIP')) return [3 /*break*/, 9];
+                        this._audioBase = new AuidoArchive_1.AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
+                        return [4 /*yield*/, this._audioBase.Open()];
+                    case 8:
+                        _d.sent();
+                        if (audioCfg.Download) {
+                            this._audioBase.download = audioCfg.Download;
+                        }
+                        _d.label = 9;
+                    case 9:
+                        missCfg = JSON.parse(JSON.stringify(this._cfg.Miss));
+                        this._miss_dict = path.join(this._startPath, missCfg.miss_dict);
+                        this._miss_audio = path.join(this._startPath, missCfg.miss_audio);
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    ElectronApp.prototype.CreateWindow = function (bShow, bDev) {
+        return __awaiter(this, void 0, void 0, function () {
+            var guiCfg;
+            return __generator(this, function (_a) {
+                guiCfg = JSON.parse(JSON.stringify(this._cfg[this._name]['GUI']));
+                // Create the browser window.
+                this._win = new electron_1.BrowserWindow({
+                    icon: path.join(__dirname, 'assets/img/dictApp.ico'),
+                    width: guiCfg.Width,
+                    height: guiCfg.Height,
+                    fullscreen: guiCfg.bFullScreen,
+                    show: bShow,
+                    frame: false,
+                    webPreferences: {
+                        nodeIntegration: true,
+                    },
+                });
+                if (bShow) {
+                    this._win.loadURL("file://" + __dirname + "/assets/" + this._name + ".html");
+                    if (bDev) {
+                        // Open the DevTools.
+                        this._win.webContents.openDevTools({ mode: 'detach' });
+                    }
+                }
+                // let _this = this;
+                // Emitted when the window is closed.
+                this._win.on('closed', function () {
+                    // Dereference the window object, usually you would store windows
+                    // in an array if your app supports multi windows, this is the time
+                    // when you should delete the corresponding element.
+                    // _this._win = null;
+                });
+                return [2 /*return*/];
+            });
+        });
+    };
+    ElectronApp.prototype.Run = function (argvs) {
+        return __awaiter(this, void 0, void 0, function () {
+            var bShow;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.ReadAndConfigure()];
+                    case 1:
+                        if ((_a.sent()) == false) {
+                            return [2 /*return*/];
+                        }
+                        bShow = true;
+                        if (argvs.typ == "c") {
+                            bShow = false;
+                        }
+                        return [4 /*yield*/, this.CreateWindow(bShow, argvs.bDev)];
+                    case 2:
+                        _a.sent();
+                        this._dQueue = new DownloardQueue_1.DownloardQueue(this._win);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ElectronApp.prototype.ActiveAgent = function (activeAgent) {
+        /*
+        bIEAgent = false;
+        opener = None;
+        this._logger.info("activeAgent = %s" %activeAgent);
+        this._cfgDict["Agents"]["activeAgent"] = activeAgent
+        for (name in this._dictAgent.keys()){
+            if (name == activeAgent){
+                this._dictAgent[name]["bActived"] = true;
+            }
+            else{
+                this._dictAgent[name]["bActived"] = false;
+            }
+        }
+        
+        if (activeAgent != "None"){
+            this._logger.info("active agent: %s" %activeAgent);
+            ip = this._dictAgent[activeAgent]["ip"];
+            proxyHandler = urllib.request.ProxyHandler({
+                'http': ip,
+                'https': ip
+            });
+            opener = urllib.request.build_opener(proxyHandler);
+        }
+        else if (bIEAgent){
+            this._logger.info("ie_agent");
+            opener = urllib.request.build_opener();
+        }
+        else{
+            proxyHandler = urllib.request.ProxyHandler({});
+            opener = urllib.request.build_opener(proxyHandler);
+        }
+        
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')];
+        // install the openen on the module-level
+        urllib.request.install_opener(opener);
+        
+        proxies = urllib.request.getproxies();
+        
+        if (proxies){
+            this._logger.info("proxies: " + str(proxies));
+        }
+        
+        this._bCfgModfied = true;
+        */
+        return false;
+    };
+    ElectronApp.prototype.TriggerDownload = function (owner, word, localFile) {
+        return __awaiter(this, void 0, void 0, function () {
+            var download, mode, iterator, r, _a, id, dict, _b, ret, html, regEx, match, url, url;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        download = owner.download;
+                        mode = download.Mode;
+                        console.log("mode: " + mode);
+                        if (!(mode == 'Dict')) return [3 /*break*/, 5];
+                        iterator = this._dictMap.entries();
+                        r = void 0;
+                        _c.label = 1;
+                    case 1:
+                        if (!(r = iterator.next(), !r.done)) return [3 /*break*/, 4];
+                        _a = r.value, id = _a[0], dict = _a[1];
+                        console.log("name: " + dict.szName);
+                        if (!(download.Dict == dict.szName)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, dict.query_word(word)];
+                    case 2:
+                        _b = _c.sent(), ret = _b[0], html = _b[1];
+                        if (ret == 1) {
+                            regEx = download.RegEx.replace("${word}", word);
+                            match = html.match(regEx);
+                            if (match) {
+                                url = match[0];
+                                this._dQueue.AddQueue(word, url, localFile, function (dFile) {
+                                    owner.CheckAndAddFile(dFile);
+                                });
                             }
-                        }, 10);
+                            else {
+                                this._logger.error("no audio in " + word + " of " + download.Dict + ".");
+                            }
+                        }
+                        else {
+                            this.Info(-1, 1, word, "no " + word + " in the dict of " + download.Dict);
+                        }
+                        return [3 /*break*/, 4];
+                    case 3: return [3 /*break*/, 1];
+                    case 4: return [3 /*break*/, 6];
+                    case 5:
+                        if (mode == "Direct") {
+                            url = download.URL.replace(" ", "%20");
+                            url = url.replace("${word}", word);
+                            this._dQueue.AddQueue(word, url, localFile, function (dFile) {
+                                owner.CheckAndAddFile(dFile);
+                            });
+                        }
+                        else {
+                            this._logger.error("Not support to download " + localFile + ", in " + mode + " mode.");
+                        }
+                        _c.label = 6;
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     *
+     *
+     * @param {number} ret result of msg: <0 means failure, 0 means ongoing, 1 means success
+     * @param {number} typ type of info: 1 means dict, 2 means audio
+     * @param {string} word
+     * @param {string} msg when ret equals 1, it represent local address of word's dict or audio
+     * @memberof dictApp
+     */
+    ElectronApp.prototype.Info = function (ret, typ, word, msg) {
+        if (ret < 0) {
+            this._logger.error(msg);
+            if (typ == 1) {
+                this.Record2File(this._miss_dict, "dict of " + word + " : " + msg + "\n");
+            }
+            else if (typ == 2) {
+                this.Record2File(this._miss_audio, "audio of " + word + " : " + msg + "\n");
+            }
+        }
+        else if (ret = 1) {
+            if (typ == 2) {
+                if (this._curWord == word) {
+                    this._win.webContents.send("gui", "loadAndPlayAudio", msg);
+                    msg = "OK to download audio of " + word;
+                }
+            }
+        }
+        this._win.webContents.send("gui", "modifyValue", "status", msg);
+    };
+    ElectronApp.prototype.Record2File = function (file, something) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this_1 = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        fs.writeFile(file, something, { 'flag': 'a' }, function (err) {
+                            if (err) {
+                                _this_1._logger.error("Fail to record " + something + " in " + file + "!");
+                                resolve(false);
+                            }
+                            else {
+                                console.log("Success to record " + something + " in " + file + "!");
+                                resolve(true);
+                            }
+                        });
                     })];
             });
         });
     };
-    ElectronApp.prototype.ensureSingleInstance = function () {
-        // if (this.env_ === 'dev') return false;
-        var gotTheLock = electron_1.app.requestSingleInstanceLock();
-        if (!gotTheLock) {
-            // Another instance is already running - exit
-            electron_1.app.quit();
-            return true;
+    ElectronApp.prototype.Log = function (lvl, msg) {
+        if (lvl == "info") {
+            this._logger.info(msg);
         }
-        // Someone tried to open a second instance - focus our window instead
-        var _this = this;
-        electron_1.app.on('second-instance', function () {
-            var win = _this.win;
-            if (!win)
-                return;
-            if (win.isMinimized())
-                win.restore();
-            win.show();
-            win.focus();
-        });
-        return false;
+        else if (lvl == "error") {
+            this._logger.error(msg);
+        }
     };
-    ElectronApp.prototype.Run = function (argvs) {
+    ElectronApp.prototype.SaveConfigure = function () {
+        var _this_1 = this;
+        return new Promise(function (resolve, reject) {
+            // Indent by 4 spaces
+            fs.writeFile(_this_1._cfgFile, JSON.stringify(_this_1._cfg, null, 4), { 'flag': 'w' }, function (err) {
+                if (err) {
+                    reject("Fail to SaveConfigure!");
+                }
+                else {
+                    resolve("Success to SaveConfigure");
+                }
+            });
+        });
+    };
+    ElectronApp.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var alreadyRunning, sel, ret, startPath;
+            var _a, ret, msg, srcFile, _b, ret, msg, srcFile, ret, e_1;
             var _this_1 = this;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        this._dictMap.forEach(function (dict, tabId) { return __awaiter(_this_1, void 0, void 0, function () {
+                            var srcFile, _a, ret, msg;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0:
+                                        srcFile = dict.szSrcFile;
+                                        console.log("Start to close " + srcFile);
+                                        return [4 /*yield*/, dict.Close()];
+                                    case 1:
+                                        _a = _b.sent(), ret = _a[0], msg = _a[1];
+                                        if (ret) {
+                                            this._logger.info("OK to close " + srcFile + "; " + msg);
+                                        }
+                                        else {
+                                            this._logger.error("Fail to close " + srcFile + ", because of " + msg);
+                                        }
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        if (this._audioBase) {
+                            _a = this._audioBase.Close(), ret = _a[0], msg = _a[1];
+                            srcFile = this._audioBase.srcFile;
+                            if (ret) {
+                                this._logger.info("OK to close " + srcFile + "; " + msg);
+                            }
+                            else {
+                                this._logger.error("Fail to close " + srcFile + ", because of " + msg);
+                            }
+                        }
+                        if (!this._usrProgress) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this._usrProgress.Close()];
+                    case 1:
+                        _b = _c.sent(), ret = _b[0], msg = _b[1];
+                        srcFile = this._usrProgress.srcFile;
+                        if (ret) {
+                            this._logger.info("OK to close " + srcFile + "; " + msg);
+                        }
+                        else {
+                            this._logger.error("Fail to close " + srcFile + ", because of " + msg);
+                        }
+                        _c.label = 2;
+                    case 2:
+                        if (!this._bCfgModfied) return [3 /*break*/, 6];
+                        _c.label = 3;
+                    case 3:
+                        _c.trys.push([3, 5, , 6]);
+                        return [4 /*yield*/, this.SaveConfigure()];
+                    case 4:
+                        ret = _c.sent();
+                        this._logger.info(ret);
+                        return [3 /*break*/, 6];
+                    case 5:
+                        e_1 = _c.sent();
+                        this._logger.error(e_1);
+                        return [3 /*break*/, 6];
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ElectronApp.prototype.Quit = function () {
+        return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: 
-                    // Since we are doing other async things before creating the window, we might miss
-                    // the "ready" event. So we use the function below to make sure that the app is ready.
-                    return [4 /*yield*/, this.waitForElectronAppReady()];
+                    // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
+                    // ...
+                    // safeExit = true;
+                    return [4 /*yield*/, this.Record2File(this._miss_audio, "")];
                     case 1:
-                        // Since we are doing other async things before creating the window, we might miss
-                        // the "ready" event. So we use the function below to make sure that the app is ready.
+                        // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
+                        // ...
+                        // safeExit = true;
                         _a.sent();
-                        alreadyRunning = this.ensureSingleInstance();
-                        if (alreadyRunning)
-                            return [2 /*return*/];
-                        sel = -1;
-                        if (!argvs.typ) return [3 /*break*/, 2];
-                        if (argvs.typ == "r") {
-                            sel = 1;
-                        }
-                        else if (argvs.typ == "d" || argvs.typ == "c") {
-                            sel = 0;
-                        }
-                        return [3 /*break*/, 4];
-                    case 2: return [4 /*yield*/, electron_1.dialog.showMessageBox({
-                            type: "info",
-                            message: "Select a application",
-                            buttons: ["Dictionary", "ReciteWords"]
-                        })];
-                    case 3:
-                        ret = _a.sent();
-                        sel = ret.response;
-                        _a.label = 4;
-                    case 4:
-                        startPath = "";
-                        // if (process.env.NODE_ENV === 'development') {
-                        if (argvs.bDev) {
-                            startPath = path.join(process.cwd(), "/publish/");
-                        }
-                        else {
-                            startPath = path.join(process.env.PORTABLE_EXECUTABLE_DIR || process.cwd(), "../");
-                        }
-                        console.log(startPath);
-                        if (sel == 1) {
-                            this.myApp = new ReciteWordsApp_1.ReciteWordsApp(startPath);
-                            globalInterface_1.globalVar.app = this.myApp;
-                        }
-                        else if (sel == 0) {
-                            this.myApp = new dictApp_1.dictApp(startPath);
-                            globalInterface_1.globalVar.app = this.myApp;
-                        }
-                        else {
-                            electron_1.app.quit();
-                        }
-                        this.myApp.Run(argvs).catch(function (error) {
-                            console.error("ElectronApp fatal error: " + error);
-                        });
-                        electron_1.app.on('before-quit', function () {
-                            // this.willQuitApp_ = true;
-                        });
-                        electron_1.app.on('window-all-closed', function () {
-                            electron_1.app.quit();
-                        });
-                        electron_1.app.on('activate', function () {
-                            _this_1.win.show();
+                        return [4 /*yield*/, this.Close()];
+                    case 2:
+                        _a.sent();
+                        this._logger.info("Quit!\n");
+                        log4js.shutdown(function (error) {
+                            if (error) {
+                                console.error(error.message);
+                            }
+                            else {
+                                console.info("Succes to shutdown log4js");
+                            }
+                            electron_1.app.quit(); // 退出程序
                         });
                         return [2 /*return*/];
                 }

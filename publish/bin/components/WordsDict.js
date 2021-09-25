@@ -68,10 +68,10 @@ var WordsDict = /** @class */ (function (_super) {
     function WordsDict() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    WordsDict.prototype.Open = function (dictSrc) {
+    WordsDict.prototype.Open = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                _super.prototype.Open.call(this, dictSrc, "Words");
+                _super.prototype.Open.call(this, this._szSrcFile, "Words");
                 return [2 /*return*/];
             });
         });

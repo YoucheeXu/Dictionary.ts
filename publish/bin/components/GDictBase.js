@@ -81,36 +81,34 @@ var utils_1 = require("../utils/utils");
 var globalInterface_1 = require("../utils/globalInterface");
 var GDictBase = /** @class */ (function (_super) {
     __extends(GDictBase, _super);
-    function GDictBase(dictSrc, compression, compresslevel) {
-        var _this_1 = _super.call(this, dictSrc) || this;
-        _this_1.compression = compression;
-        _this_1.compresslevel = compresslevel;
-        _this_1.bWritable = true;
-        _this_1.dictZip = new ZipArchive_1.ZipArchive(dictSrc, compression, compresslevel);
+    function GDictBase(name, dictSrc, _compression, _compresslevel) {
+        var _this_1 = _super.call(this, name, dictSrc) || this;
+        _this_1._compression = _compression;
+        _this_1._compresslevel = _compresslevel;
+        _this_1._dictZip = new ZipArchive_1.ZipArchive(dictSrc, _compression, _compresslevel);
         // this.tempDictDir = tempfile.gettempdir();
-        _this_1.dictArchive = path.basename(dictSrc);
         var filePath = path.dirname(dictSrc);
         var fileName = path.basename(dictSrc, ".zip");
         // console.log(fileName);
-        _this_1.tempDictDir = path.join(filePath, fileName);
+        _this_1._tempDictDir = path.join(filePath, fileName);
         return _this_1;
     }
     GDictBase.prototype.Open = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.dictZip.Open()];
+                return [2 /*return*/, this._dictZip.Open()];
             });
         });
     };
     GDictBase.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                utils_1.RemoveDir(this.tempDictDir);
-                if (fs.existsSync(this.tempDictDir) == false) {
-                    return [2 /*return*/, [true, "; OK to remove " + this.tempDictDir]];
+                utils_1.RemoveDir(this._tempDictDir);
+                if (fs.existsSync(this._tempDictDir) == false) {
+                    return [2 /*return*/, [true, "OK to remove " + this._tempDictDir]];
                 }
                 else {
-                    return [2 /*return*/, [false, "; Fail to remove " + this.tempDictDir]];
+                    return [2 /*return*/, [false, "Fail to remove " + this._tempDictDir]];
                 }
                 return [2 /*return*/];
             });
@@ -122,7 +120,7 @@ var GDictBase = /** @class */ (function (_super) {
     };
     GDictBase.prototype.query_word = function (word) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileName, datum, ret, wordFile, jsonURL, strDatum, dictDatum, info, obj, tabAlign, html, e_1, errMsg;
+            var fileName, datum, ret, wordFile, strDatum, dictDatum, info, obj, tabAlign, html, e_1, errMsg;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -133,25 +131,17 @@ var GDictBase = /** @class */ (function (_super) {
                         _b.label = 1;
                     case 1:
                         _b.trys.push([1, 5, , 6]);
-                        if (!this.dictZip.bFileIn(fileName)) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.dictZip.readFileAsync(fileName)];
+                        if (!this._dictZip.bFileIn(fileName)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this._dictZip.readFileAsync(fileName)];
                     case 2:
                         _a = _b.sent(), ret = _a[0], datum = _a[1];
                         if (!ret) {
-                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.dictArchive])];
+                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.szName])];
                         }
                         return [3 /*break*/, 4];
                     case 3:
-                        if (this.bWritable) {
-                            wordFile = path.join(this.tempDictDir, word + ".json");
-                            jsonURL = "http://dictionary.so8848.com/ajax_search?q=" + word;
-                            jsonURL = jsonURL.replace(" ", "%20");
-                            // download_file(gApp.GetWindow(), jsonURL, wordFile, this, this.notify);
-                            globalInterface_1.globalVar.dQueue.AddQueue(jsonURL, wordFile, this, this.notify);
-                            datum = "dict of " + word + " is added to download queue.";
-                            return [2 /*return*/, Promise.resolve([0, datum])];
-                        }
-                        _b.label = 4;
+                        wordFile = path.join(this._tempDictDir, word + ".json");
+                        return [2 /*return*/, Promise.resolve([0, wordFile])];
                     case 4:
                         strDatum = String(datum);
                         dictDatum = JSON.parse(strDatum);
@@ -180,49 +170,34 @@ var GDictBase = /** @class */ (function (_super) {
             });
         });
     };
-    GDictBase.prototype.notify = function (name, progress, state, why) {
-        console.log((progress * 100).toFixed(2) + "% of " + name + " was " + state + " to download!");
-        var gApp = globalInterface_1.globalVar.app;
-        var word = path.basename(name, ".json");
-        switch (state) {
-            case 'ongoing':
-                break;
-            case 'fail':
-                gApp.info(-1, 1, word, "Fail to download dict of " + word + ", because of " + why);
-                break;
-            case 'done':
-                this.checkAndAddFile(name);
-                break;
-        }
-    };
-    GDictBase.prototype.checkAndAddFile = function (wordFile) {
-        var word = path.basename(wordFile, ".json");
+    GDictBase.prototype.CheckAndAddFile = function (localFile) {
+        var word = path.basename(localFile, ".json");
         var fileName = word[0] + "/" + word + ".json";
         var info = "";
         var _this = this;
         var gApp = globalInterface_1.globalVar.app;
-        if (fs.existsSync(wordFile)) {
-            var dict = fs.readFileSync(wordFile).toString();
+        if (fs.existsSync(localFile)) {
+            var dict = fs.readFileSync(localFile).toString();
             var inWord = this.GetInWord(dict);
-            fs.unlink(wordFile, function () { });
+            fs.unlink(localFile, function () { });
             if (inWord != "") {
                 if (inWord == word) {
                     // gApp.log("info", "%s's json is OK!" %word)
-                    _this.dictZip.addFile(fileName, dict);
-                    return gApp.info(1, 1, word, "OK to download dict of " + word);
+                    _this._dictZip.addFile(fileName, dict);
+                    return gApp.Info(1, 1, word, "OK to download dict of " + word);
                 }
                 else {
-                    return gApp.info(-1, 1, inWord, "Wrong word: We except '" + word + "', but we get '" + inWord + "'");
+                    return gApp.Info(-1, 1, inWord, "Wrong word: We except '" + word + "', but we get '" + inWord + "'");
                     // gApp.log("error", "%s isn't what we want!" %word)
                 }
             }
             else {
-                return gApp.info(-1, 1, word, "No dict of " + word + " in " + this.dictArchive + ".");
+                return gApp.Info(-1, 1, word, "No dict of " + word + " in " + this.szName + ".");
             }
         }
         else {
-            console.log(wordFile + " doesn't exist");
-            return gApp.info(-1, 1, word, "Doesn't exist dict of " + word);
+            console.log(localFile + " doesn't exist");
+            return gApp.Info(-1, 1, word, "Doesn't exist dict of " + word);
         }
     };
     GDictBase.prototype.GetInWord = function (dict) {
@@ -248,7 +223,7 @@ var GDictBase = /** @class */ (function (_super) {
     GDictBase.prototype.get_wordsLst = function (word, wdMatchLst) {
         var fileName = word[0] + "/" + word + ".*\.json";
         // print("Going to find: " + fileName)
-        this.dictZip.searchFile(fileName, wdMatchLst, 100);
+        this._dictZip.searchFile(fileName, wdMatchLst, 100);
         // for i in range(len(wdMatchLst)){
         for (var i = 0; i < wdMatchLst.length; i++) {
             wdMatchLst[i] = wdMatchLst[i].slice(2, -5);
@@ -260,12 +235,9 @@ var GDictBase = /** @class */ (function (_super) {
             return false;
         }
     };
-    GDictBase.prototype.getWritable = function () {
-        return this.bWritable;
-    };
     GDictBase.prototype.del_word = function (word) {
         var fileName = word[0] + "/" + word + ".json";
-        return this.dictZip.delFile(fileName);
+        return this._dictZip.delFile(fileName);
     };
     return GDictBase;
 }(DictBase_1.DictBase));

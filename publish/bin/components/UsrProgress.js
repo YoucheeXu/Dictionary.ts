@@ -50,14 +50,21 @@ CREATE TABLE ${Level}(
 var UsrProgress = /** @class */ (function () {
     function UsrProgress() {
     }
-    UsrProgress.prototype.Open = function (dictSrc, lvl) {
+    Object.defineProperty(UsrProgress.prototype, "srcFile", {
+        get: function () {
+            return this._srcFile;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    UsrProgress.prototype.Open = function (srcFile, lvl) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.dictSrc = dictSrc;
+                        this._srcFile = srcFile;
                         this.dataBase = new SQLite_1.SQLite();
-                        return [4 /*yield*/, this.dataBase.Open(dictSrc)];
+                        return [4 /*yield*/, this.dataBase.Open(srcFile)];
                     case 1:
                         _a.sent();
                         this.level = lvl;
@@ -67,17 +74,14 @@ var UsrProgress = /** @class */ (function () {
         });
     };
     ;
-    UsrProgress.prototype.GetName = function () {
-        return this.dictSrc;
-    };
-    UsrProgress.prototype.New = function (dictSrc, lvl) {
+    UsrProgress.prototype.New = function (srcFile, lvl) {
         return __awaiter(this, void 0, void 0, function () {
             var r;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         this.dataBase = new SQLite_1.SQLite();
-                        return [4 /*yield*/, this.dataBase.Open(dictSrc)];
+                        return [4 /*yield*/, this.dataBase.Open(srcFile)];
                     case 1:
                         _a.sent();
                         return [4 /*yield*/, this.dataBase.run("CREATE TABLE " + lvl + "(word text NOT NULL PRIMARY KEY, familiar REAL, lastdate DATE)")];

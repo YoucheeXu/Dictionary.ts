@@ -8,32 +8,29 @@ import { RemoveDir } from "../utils/utils";
 import { globalVar } from "../utils/globalInterface";
 
 export class GDictBase extends DictBase {
-    private readonly bWritable: boolean = true;
-    private dictArchive: string;
-    private dictZip: ZipArchive;
-    private tempDictDir: string;
+    private _dictZip: ZipArchive;
+    private _tempDictDir: string;
 
-    constructor(dictSrc: string, readonly compression: string, readonly compresslevel: string) {
-        super(dictSrc);
-        this.dictZip = new ZipArchive(dictSrc, compression, compresslevel);
+    constructor(name: string, dictSrc: string, readonly _compression: string, readonly _compresslevel: string) {
+        super(name, dictSrc);
+        this._dictZip = new ZipArchive(dictSrc, _compression, _compresslevel);
         // this.tempDictDir = tempfile.gettempdir();
-        this.dictArchive = path.basename(dictSrc);
         let filePath = path.dirname(dictSrc);
         let fileName = path.basename(dictSrc, ".zip");
         // console.log(fileName);
-        this.tempDictDir = path.join(filePath, fileName);
+        this._tempDictDir = path.join(filePath, fileName);
     }
 
     public async Open() {
-        return this.dictZip.Open();
+        return this._dictZip.Open();
     }
 
     public async Close(): Promise<[boolean, string]> {
-        RemoveDir(this.tempDictDir);
-        if (fs.existsSync(this.tempDictDir) == false) {
-            return [true, `; OK to remove ${this.tempDictDir}`];
+        RemoveDir(this._tempDictDir);
+        if (fs.existsSync(this._tempDictDir) == false) {
+            return [true, `OK to remove ${this._tempDictDir}`];
         } else {
-            return [false, `; Fail to remove ${this.tempDictDir}`];
+            return [false, `Fail to remove ${this._tempDictDir}`];
         }
     }
 
@@ -50,20 +47,14 @@ export class GDictBase extends DictBase {
         // let gApp = globalVar.app;
         let wordFile = "";
         try {
-            if (this.dictZip.bFileIn(fileName)) {
-                [ret, datum] = await this.dictZip.readFileAsync(fileName);
+            if (this._dictZip.bFileIn(fileName)) {
+                [ret, datum] = await this._dictZip.readFileAsync(fileName);
                 if (!ret) {
-                    return Promise.resolve([-1, `Fail to read ${word} in ${this.dictArchive}`]);
+                    return Promise.resolve([-1, `Fail to read ${word} in ${this.szName}`]);
                 }
-            }
-            else if (this.bWritable) {
-                wordFile = path.join(this.tempDictDir, word + ".json");
-                let jsonURL = "http://dictionary.so8848.com/ajax_search?q=" + word;
-                jsonURL = jsonURL.replace(" ", "%20");
-                // download_file(gApp.GetWindow(), jsonURL, wordFile, this, this.notify);
-                globalVar.dQueue.AddQueue(jsonURL, wordFile, this, this.notify);
-                datum = `dict of ${word} is added to download queue.`;
-                return Promise.resolve([0, datum]);
+            } else {
+                wordFile = path.join(this._tempDictDir, word + ".json");
+                return Promise.resolve([0, wordFile]);
             }
 
             let strDatum = String(datum);
@@ -93,52 +84,36 @@ export class GDictBase extends DictBase {
         }
     }
 
-    private notify(name: string, progress: number, state: string, why?: string) {
-        console.log(`${(progress * 100).toFixed(2)}% of ${name} was ${state} to download!`);
-        let gApp = globalVar.app;
-        let word = path.basename(name, ".json");
-        switch (state) {
-            case 'ongoing':
-                break;
-            case 'fail':
-                gApp.info(-1, 1, word, `Fail to download dict of ${word}, because of ${why}`);
-                break;
-            case 'done':
-                this.checkAndAddFile(name);
-                break;
-        }
-    }
-
-    private checkAndAddFile(wordFile: string) {
-        let word = path.basename(wordFile, ".json");
+    public CheckAndAddFile(localFile: string) {
+        let word = path.basename(localFile, ".json");
         let fileName = word[0] + "/" + word + ".json";
         let info = "";
         let _this = this;
         let gApp = globalVar.app;
-        if (fs.existsSync(wordFile)) {
-            let dict = fs.readFileSync(wordFile).toString();
+        if (fs.existsSync(localFile)) {
+            let dict = fs.readFileSync(localFile).toString();
             let inWord = this.GetInWord(dict);
 
-            fs.unlink(wordFile, () => { });
+            fs.unlink(localFile, () => { });
 
             if (inWord != "") {
                 if (inWord == word) {
                     // gApp.log("info", "%s's json is OK!" %word)
-                    _this.dictZip.addFile(fileName, dict);
-                    return gApp.info(1, 1, word, "OK to download dict of " + word);
+                    _this._dictZip.addFile(fileName, dict);
+                    return gApp.Info(1, 1, word, "OK to download dict of " + word);
                 }
                 else {
-                    return gApp.info(-1, 1, inWord, `Wrong word: We except '${word}', but we get '${inWord}'`);
+                    return gApp.Info(-1, 1, inWord, `Wrong word: We except '${word}', but we get '${inWord}'`);
                     // gApp.log("error", "%s isn't what we want!" %word)
                 }
             }
             else {
-                return gApp.info(-1, 1, word, `No dict of ${word} in ${this.dictArchive}.`);
+                return gApp.Info(-1, 1, word, `No dict of ${word} in ${this.szName}.`);
             }
         }
         else {
-            console.log(wordFile + " doesn't exist");
-            return gApp.info(-1, 1, word, "Doesn't exist dict of " + word);
+            console.log(localFile + " doesn't exist");
+            return gApp.Info(-1, 1, word, "Doesn't exist dict of " + word);
         }
     }
 
@@ -166,7 +141,7 @@ export class GDictBase extends DictBase {
     public get_wordsLst(word: string, wdMatchLst: string[]): boolean {
         let fileName = word[0] + "/" + word + ".*\.json";
         // print("Going to find: " + fileName)
-        this.dictZip.searchFile(fileName, wdMatchLst, 100);
+        this._dictZip.searchFile(fileName, wdMatchLst, 100);
 
         // for i in range(len(wdMatchLst)){
         for (let i = 0; i < wdMatchLst.length; i++) {
@@ -181,12 +156,8 @@ export class GDictBase extends DictBase {
         }
     }
 
-    public getWritable(): boolean {
-        return this.bWritable;
-    }
-
     public del_word(word: string): boolean {
         let fileName = word[0] + "/" + word + ".json";
-        return this.dictZip.delFile(fileName);
+        return this._dictZip.delFile(fileName);
     }
 };

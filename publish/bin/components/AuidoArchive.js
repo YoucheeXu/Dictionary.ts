@@ -64,59 +64,63 @@ var utils_1 = require("../utils/utils");
 var ZipArchive_1 = require("./ZipArchive");
 var globalInterface_1 = require("../utils/globalInterface");
 var AuidoArchive = /** @class */ (function () {
-    function AuidoArchive(audioSrc, compression, compresslevel) {
-        this.audioSrc = audioSrc;
+    function AuidoArchive(_srcFile, compression, compresslevel) {
+        this._srcFile = _srcFile;
         this.compression = compression;
         this.compresslevel = compresslevel;
-        this.bWritable = true;
-        this.szAudioArchive = path.basename(audioSrc);
-        // console.log(this.szAudioArchive);
-        var filePath = path.dirname(audioSrc);
-        var fileName = path.basename(audioSrc, ".zip");
+        this._download = null;
+        this._szAudioArchive = path.basename(_srcFile);
+        // console.log(this._szAudioArchive);
+        var filePath = path.dirname(_srcFile);
+        var fileName = path.basename(_srcFile, ".zip");
         // console.log(fileName);
-        this.tempAudioDir = path.join(filePath, fileName);
-        // console.log(this.tempAudioDir);
+        this._tempAudioDir = path.join(filePath, fileName);
+        // console.log(this._tempAudioDir);
         var _this = this;
-        if (fs.existsSync(_this.tempAudioDir) == false) {
-            fs.mkdir(_this.tempAudioDir, function (error) {
+        if (fs.existsSync(_this._tempAudioDir) == false) {
+            fs.mkdir(_this._tempAudioDir, function (error) {
                 if (error) {
                     console.log(error);
                     return false;
                 }
-                console.log('Success to create folder: ' + _this.tempAudioDir);
+                console.log('Success to create folder: ' + _this._tempAudioDir);
             });
         }
-        // gLogger.info("tempAudioDir: " + this.tempAudioDir);
-        this.audioZip = new ZipArchive_1.ZipArchive(audioSrc, compression, compresslevel);
+        // gLogger.info("tempAudioDir: " + this._tempAudioDir);
+        this._audioZip = new ZipArchive_1.ZipArchive(_srcFile, compression, compresslevel);
     }
+    Object.defineProperty(AuidoArchive.prototype, "srcFile", {
+        get: function () {
+            return this._srcFile;
+        },
+        enumerable: false,
+        configurable: true
+    });
     AuidoArchive.prototype.Open = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.audioZip.Open()];
+                return [2 /*return*/, this._audioZip.Open()];
             });
         });
     };
-    AuidoArchive.prototype.GetName = function () {
-        return this.szAudioArchive;
-    };
     AuidoArchive.prototype.Close = function () {
-        utils_1.RemoveDir(this.tempAudioDir);
-        if (fs.existsSync(this.tempAudioDir) == false) {
-            return [true, "; OK to remove " + this.tempAudioDir];
+        utils_1.RemoveDir(this._tempAudioDir);
+        if (fs.existsSync(this._tempAudioDir) == false) {
+            return [true, "OK to remove " + this._tempAudioDir];
         }
         else {
-            return [false, "; Fail to remove " + this.tempAudioDir];
+            return [false, "Fail to remove " + this._tempAudioDir];
         }
     };
     AuidoArchive.prototype.query_audio = function (word) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileName, audioFile, ret, audio, audioURL, e_1;
+            var fileName, audioFile, ret, audio, e_1;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         fileName = word[0] + "/" + word + ".mp3";
-                        audioFile = path.join(this.tempAudioDir, word + ".mp3");
+                        audioFile = path.join(this._tempAudioDir, word + ".mp3");
                         ret = false;
                         _b.label = 1;
                     case 1:
@@ -124,8 +128,8 @@ var AuidoArchive = /** @class */ (function () {
                         if (!(fs.existsSync(audioFile) == true)) return [3 /*break*/, 2];
                         return [2 /*return*/, Promise.resolve([1, audioFile])];
                     case 2:
-                        if (!this.audioZip.bFileIn(fileName)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.audioZip.readFileAsync(fileName)];
+                        if (!this._audioZip.bFileIn(fileName)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this._audioZip.readFileAsync(fileName)];
                     case 3:
                         _a = _b.sent(), ret = _a[0], audio = _a[1];
                         if (ret) {
@@ -138,20 +142,10 @@ var AuidoArchive = /** @class */ (function () {
                             return [2 /*return*/, Promise.resolve([1, audioFile])];
                         }
                         else {
-                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.szAudioArchive + "!"])];
+                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this._szAudioArchive + "!"])];
                         }
                         return [3 /*break*/, 5];
-                    case 4:
-                        if (this.bWritable) {
-                            audioURL = "http://www.gstatic.com/dictionary/static/sounds/lf/0/x/x" + word.substr(0, 1) + "/x" + word.substr(0, 2) + "/x" + word + "%23_us_1.mp3";
-                            globalInterface_1.globalVar.dQueue.AddQueue(audioURL, audioFile, this, this.notify);
-                            audioFile = "audio of " + word + " is added to download queue.";
-                            return [2 /*return*/, Promise.resolve([0, audioFile])];
-                        }
-                        else {
-                            return [2 /*return*/, Promise.resolve([-1, "no audio of " + word + " in " + this.szAudioArchive])];
-                        }
-                        _b.label = 5;
+                    case 4: return [2 /*return*/, Promise.resolve([0, audioFile])];
                     case 5: return [3 /*break*/, 7];
                     case 6:
                         e_1 = _b.sent();
@@ -161,22 +155,17 @@ var AuidoArchive = /** @class */ (function () {
             });
         });
     };
-    AuidoArchive.prototype.notify = function (name, progress, state, why) {
-        var gApp = globalInterface_1.globalVar.app;
-        console.log((progress * 100).toFixed(2) + "% of " + name + " was " + state + " to download!");
-        var word = path.basename(name, ".mp3");
-        switch (state) {
-            case 'ongoing':
-                break;
-            case 'fail':
-                gApp.info(-1, 2, word, "Fail to download audio of " + word + ", because of " + why);
-                break;
-            case 'done':
-                this.checkAndAddFile(name);
-                break;
-        }
-    };
-    AuidoArchive.prototype.checkAndAddFile = function (audioFile) {
+    Object.defineProperty(AuidoArchive.prototype, "download", {
+        get: function () {
+            return this._download;
+        },
+        set: function (download) {
+            this._download = download;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    AuidoArchive.prototype.CheckAndAddFile = function (audioFile) {
         var word = path.basename(audioFile, ".mp3");
         var fileName = word[0] + "/" + word + ".mp3";
         var _this = this;
@@ -184,21 +173,18 @@ var AuidoArchive = /** @class */ (function () {
         if (fs.existsSync(audioFile)) {
             var audio = fs.readFileSync(audioFile);
             fs.unlink(audioFile, function () { });
-            _this.audioZip.addFile(fileName, audio);
-            // return gApp.info(1, 2, word, "OK to download audio of " + word);
-            return gApp.info(1, 2, word, audioFile);
+            _this._audioZip.addFile(fileName, audio);
+            // return gApp.Info(1, 2, word, "OK to download audio of " + word);
+            return gApp.Info(1, 2, word, audioFile);
         }
         else {
             console.log(audioFile + " doesn't exist");
-            return gApp.info(-1, 2, word, "Doesn't exist audio of " + word);
+            return gApp.Info(-1, 2, word, "Doesn't exist audio of " + word);
         }
-    };
-    AuidoArchive.prototype.getWritable = function () {
-        return this.bWritable;
     };
     AuidoArchive.prototype.del_audio = function (word) {
         var fileName = word[0] + "/" + word + ".mp3";
-        return this.audioZip.delFile(fileName);
+        return this._audioZip.delFile(fileName);
     };
     return AuidoArchive;
 }());

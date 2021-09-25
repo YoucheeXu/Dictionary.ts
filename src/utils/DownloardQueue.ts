@@ -1,52 +1,67 @@
 import * as fs from "fs";
+import * as path from "path";
 import { BrowserWindow } from 'electron';
-import { strictEqual } from "assert";
+import { globalVar } from "./globalInterface";
 
 export class DownloardQueue {
-    private downloadQueue = new Array();
-    private bDownloading = false;
+    private _downloadQueue = new Array();
+    private _bDownloading = false;
 
-    constructor(readonly win: BrowserWindow) {
+    constructor(readonly _win: BrowserWindow) {
     }
 
     public IsFnshd(): boolean {
-        if (this.downloadQueue.length == 0 && this.bDownloading == false) {
+        if (this._downloadQueue.length == 0 && this._bDownloading == false) {
             return true;
         } else {
             return false;
         }
     }
 
-    public AddQueue(url: string, local: string, caller: any, notify: Function) {
-        for (let item of this.downloadQueue) {
+    private Dealer(cb: (file: string) => void, word: string, dfile: string, progress: number, state: string, why?: string) {
+        console.log(`${(progress * 100).toFixed(2)}% of ${dfile} was ${state} to download!`);
+        let gApp = globalVar.app;
+        switch (state) {
+            case 'ongoing':
+                break;
+            case 'fail':
+                gApp.Info(-1, 1, word, `Fail to download dict of ${word}, because of ${why}`);
+                break;
+            case 'done':
+                cb(dfile);
+                break;
+        }
+    }
+
+    public AddQueue(word: string, url: string, local: string, cb: (file: string) => void) {
+        for (let item of this._downloadQueue) {
             let urlinQueue = item["url"];
             if (urlinQueue == url) {
                 return;
             }
         }
-        this.downloadQueue.push({ url: url, local: local, caller: caller, notify: notify });
+        this._downloadQueue.push({ word: word, url: url, local: local, notify: cb });
         this.DownloadNext();
     }
 
     private DownloadNext() {
-        if (!this.bDownloading) {
-            if (this.downloadQueue.length > 0) {
-                let valMap = this.downloadQueue.pop();
-                this.bDownloading = true;
-                // this.download_file(valMap.get("url"), valMap.get("local"), valMap.get("caller"), valMap.get("notify"));
-                this.DownloadFile(valMap.url, valMap.local, valMap.caller, valMap.notify);
+        if (!this._bDownloading) {
+            if (this._downloadQueue.length > 0) {
+                let valMap = this._downloadQueue.pop();
+                this._bDownloading = true;
+                this.DownloadFile(valMap.word, valMap.url, valMap.local, valMap.notify);
             }
         }
     }
 
-    private DownloadFile(url: string, local: string, caller: any, notify: Function) {
+    private DownloadFile(word: string, url: string, local: string, cb: (file: string) => void) {
         if (fs.existsSync(local) == true) {
             console.log("Already exists " + local);
             return;
         }
 
         let _this = this;
-        this.win.webContents.session.on('will-download', (event, item, webContents) => {
+        _this._win.webContents.session.on('will-download', (event, item, webContents) => {
             item.setSavePath(local);
             item.on('updated', (e, state) => {
                 if (state === 'progressing') {
@@ -58,11 +73,11 @@ export class DownloardQueue {
                             totalBytes = 0.0001;
                         }
                         const progress = item.getReceivedBytes() / totalBytes;
-                        notify.call(caller, local, progress, "ongoing", state + " in updated");
+                        _this.Dealer(cb, word, local, progress, "ongoing", state + " in updated");
                     }
                 } else {
-                    notify.call(caller, local, -1, "fail", state + " in updated");
-                    _this.bDownloading = false;
+                    _this.Dealer(cb, word, local, -1, "fail", state + " in updated");
+                    _this._bDownloading = false;
                     _this.DownloadNext();
                 }
             });
@@ -70,13 +85,13 @@ export class DownloardQueue {
             item.on('done', (event, state) => {
                 if (state === 'completed') {
                     // 这里是主战场
-                    notify.call(caller, local, 1, "done");
-                    _this.bDownloading = false;
+                    _this.Dealer(cb, word, local, 1, "done");
+                    _this._bDownloading = false;
                     _this.DownloadNext();
                 }
                 else {
-                    notify.call(caller, local, -1, "fail", state + " in done");
-                    _this.bDownloading = false;
+                    _this.Dealer(cb, word, local, -1, "fail", state + " in done");
+                    _this._bDownloading = false;
                     _this.DownloadNext();
                 }
             })
@@ -87,6 +102,6 @@ export class DownloardQueue {
             }
 
         })
-        this.win.webContents.downloadURL(url);
+        this._win.webContents.downloadURL(url);
     }
 }

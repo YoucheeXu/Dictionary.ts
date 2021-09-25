@@ -36,8 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// main.ts
 var electron_1 = require("electron");
-var ElectronApp_1 = require("./ElectronApp");
+var MasterApp_1 = require("./MasterApp");
 var argvs = {};
 for (var _i = 0, _a = process.argv; _i < _a.length; _i++) {
     var argv = _a[_i];
@@ -64,7 +65,7 @@ for (var _i = 0, _a = process.argv; _i < _a.length; _i++) {
     }
 }
 try {
-    var myApp = new ElectronApp_1.ElectronApp();
+    var myApp = new MasterApp_1.MasterApp();
     myApp.Run(argvs);
 }
 catch (e) {

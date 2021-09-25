@@ -64,13 +64,19 @@ CREATE TABLE [Words](
 */
 var SDictBase = /** @class */ (function (_super) {
     __extends(SDictBase, _super);
-    function SDictBase(dictSrc) {
-        var _this = _super.call(this, dictSrc) || this;
-        _this.bWritable = false;
-        _this.dict = new SQLite_1.SQLite();
-        _this.dict.Open(dictSrc);
+    function SDictBase(name, srcFile) {
+        var _this = _super.call(this, name, srcFile) || this;
+        _this._dict = new SQLite_1.SQLite();
         return _this;
     }
+    SDictBase.prototype.Open = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                this._dict.Open(this._szSrcFile);
+                return [2 /*return*/];
+            });
+        });
+    };
     SDictBase.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
             var ret, e_1;
@@ -78,7 +84,7 @@ var SDictBase = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.dict.Close()];
+                        return [4 /*yield*/, this._dict.Close()];
                     case 1:
                         ret = _a.sent();
                         if (ret) {
@@ -108,7 +114,7 @@ var SDictBase = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         sql = "select * from Words where word=?";
-                        return [4 /*yield*/, this.dict.get(sql, [word])];
+                        return [4 /*yield*/, this._dict.get(sql, [word])];
                     case 1:
                         r = _a.sent();
                         if (r === undefined) {
@@ -129,7 +135,7 @@ var SDictBase = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         sql = "select word from Words where word like '" + word + "%' limit 100";
-                        return [4 /*yield*/, this.dict.all(sql)];
+                        return [4 /*yield*/, this._dict.all(sql)];
                     case 1:
                         r = _a.sent();
                         r.forEach(function (row) {
@@ -146,15 +152,16 @@ var SDictBase = /** @class */ (function (_super) {
             });
         });
     };
-    SDictBase.prototype.getWritable = function () {
-        return this.bWritable;
-    };
     SDictBase.prototype.del_word = function (word) {
-        throw new Error('Method not implemented.');
+        throw new Error("del_word of " + this.szName + " not implemented.");
         var sql = '';
-        this.dict.run(sql);
+        this._dict.run(sql);
         return true;
     };
+    SDictBase.prototype.CheckAndAddFile = function (localFile) {
+        throw new Error("CheckAndAddFile of " + this.szName + " not implemented.");
+    };
+    ;
     return SDictBase;
 }(DictBase_1.DictBase));
 exports.SDictBase = SDictBase;

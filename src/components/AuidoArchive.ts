@@ -7,62 +7,62 @@ import { ZipArchive } from "./ZipArchive";
 import { globalVar } from "../utils/globalInterface";
 
 export class AuidoArchive {
-    private bWritable: boolean = true;
-    private szAudioArchive: string;
-    private audioZip: ZipArchive;
-    private tempAudioDir: string;
+    private _download: any = null;
+    private _szAudioArchive: string;
+    private _audioZip: ZipArchive;
+    private _tempAudioDir: string;
 
-    constructor(readonly audioSrc: string, readonly compression: string, readonly compresslevel: string) {
-        this.szAudioArchive = path.basename(audioSrc);
-        // console.log(this.szAudioArchive);
-        let filePath = path.dirname(audioSrc);
-        let fileName = path.basename(audioSrc, ".zip");
+    constructor(readonly _srcFile: string, readonly compression: string, readonly compresslevel: string) {
+        this._szAudioArchive = path.basename(_srcFile);
+        // console.log(this._szAudioArchive);
+        let filePath = path.dirname(_srcFile);
+        let fileName = path.basename(_srcFile, ".zip");
         // console.log(fileName);
-        this.tempAudioDir = path.join(filePath, fileName);
-        // console.log(this.tempAudioDir);
+        this._tempAudioDir = path.join(filePath, fileName);
+        // console.log(this._tempAudioDir);
         let _this = this;
-        if (fs.existsSync(_this.tempAudioDir) == false) {
-            fs.mkdir(_this.tempAudioDir, function (error) {
+        if (fs.existsSync(_this._tempAudioDir) == false) {
+            fs.mkdir(_this._tempAudioDir, function (error) {
                 if (error) {
                     console.log(error);
                     return false;
                 }
-                console.log('Success to create folder: ' + _this.tempAudioDir);
+                console.log('Success to create folder: ' + _this._tempAudioDir);
             })
         }
-        // gLogger.info("tempAudioDir: " + this.tempAudioDir);
+        // gLogger.info("tempAudioDir: " + this._tempAudioDir);
 
-        this.audioZip = new ZipArchive(audioSrc, compression, compresslevel);
+        this._audioZip = new ZipArchive(_srcFile, compression, compresslevel);
+    }
+
+    public get srcFile() {
+        return this._srcFile;
     }
 
     public async Open() {
-        return this.audioZip.Open();
-    }
-
-    public GetName(): string {
-        return this.szAudioArchive;
+        return this._audioZip.Open();
     }
 
     public Close(): [boolean, string] {
-        RemoveDir(this.tempAudioDir);
-        if (fs.existsSync(this.tempAudioDir) == false) {
-            return [true, `; OK to remove ${this.tempAudioDir}`];
+        RemoveDir(this._tempAudioDir);
+        if (fs.existsSync(this._tempAudioDir) == false) {
+            return [true, `OK to remove ${this._tempAudioDir}`];
         } else {
-            return [false, `; Fail to remove ${this.tempAudioDir}`]
+            return [false, `Fail to remove ${this._tempAudioDir}`]
         }
     }
 
     public async query_audio(word: string): Promise<[number, string]> {
         let fileName = word[0] + "/" + word + ".mp3";
-        let audioFile: string = path.join(this.tempAudioDir, word + ".mp3");
+        let audioFile: string = path.join(this._tempAudioDir, word + ".mp3");
         let ret: boolean = false;
         let audio: Buffer;
         try {
             if (fs.existsSync(audioFile) == true) {
                 return Promise.resolve([1, audioFile]);
             }
-            else if (this.audioZip.bFileIn(fileName)) {
-                [ret, audio] = await this.audioZip.readFileAsync(fileName);
+            else if (this._audioZip.bFileIn(fileName)) {
+                [ret, audio] = await this._audioZip.readFileAsync(fileName);
                 if (ret) {
                     try {
                         fs.writeFileSync(audioFile, audio);
@@ -70,21 +70,11 @@ export class AuidoArchive {
                         return Promise.resolve([-1, (e as Error).message]);
                     }
                     return Promise.resolve([1, audioFile]);
+                } else {
+                    return Promise.resolve([-1, `Fail to read ${word} in ${this._szAudioArchive}!`]);
                 }
-                else {
-                    return Promise.resolve([-1, `Fail to read ${word} in ${this.szAudioArchive}!`]);
-                }
-            }
-            else if (this.bWritable) {
-                // let audioURL = `https://ssl.gstatic.com/dictionary/static/sounds/oxford/${word}--_us_1.mp3`
-                // http://www.gstatic.com/dictionary/static/sounds/lf/0/x/xc/xco/xconsent%23_us_1.mp3
-                let audioURL = `http://www.gstatic.com/dictionary/static/sounds/lf/0/x/x${word.substr(0, 1)}/x${word.substr(0, 2)}/x${word}%23_us_1.mp3`;
-                globalVar.dQueue.AddQueue(audioURL, audioFile, this, this.notify);
-                audioFile = `audio of ${word} is added to download queue.`;
+            } else {
                 return Promise.resolve([0, audioFile]);
-            }
-            else {
-                return Promise.resolve([-1, `no audio of ${word} in ${this.szAudioArchive}`]);
             }
         }
         catch (e) {
@@ -92,23 +82,15 @@ export class AuidoArchive {
         }
     }
 
-    private notify(name: string, progress: number, state: string, why?: string) {
-        let gApp = globalVar.app;
-        console.log(`${(progress * 100).toFixed(2)}% of ${name} was ${state} to download!`);
-        let word = path.basename(name, ".mp3");
-        switch (state) {
-            case 'ongoing':
-                break;
-            case 'fail':
-                gApp.info(-1, 2, word, `Fail to download audio of ${word}, because of ${why}`);
-                break;
-            case 'done':
-                this.checkAndAddFile(name);
-                break;
-        }
+    public set download(download: any) {
+        this._download = download;
     }
 
-    private checkAndAddFile(audioFile: string) {
+    public get download() {
+        return this._download;
+    }
+
+    public CheckAndAddFile(audioFile: string) {
         let word = path.basename(audioFile, ".mp3");
         let fileName = word[0] + "/" + word + ".mp3";
         let _this = this;
@@ -116,22 +98,17 @@ export class AuidoArchive {
         if (fs.existsSync(audioFile)) {
             let audio = fs.readFileSync(audioFile);
             fs.unlink(audioFile, () => { });
-            _this.audioZip.addFile(fileName, audio);
-            // return gApp.info(1, 2, word, "OK to download audio of " + word);
-            return gApp.info(1, 2, word, audioFile);
-        }
-        else {
+            _this._audioZip.addFile(fileName, audio);
+            // return gApp.Info(1, 2, word, "OK to download audio of " + word);
+            return gApp.Info(1, 2, word, audioFile);
+        } else {
             console.log(audioFile + " doesn't exist");
-            return gApp.info(-1, 2, word, "Doesn't exist audio of " + word);
+            return gApp.Info(-1, 2, word, "Doesn't exist audio of " + word);
         }
-    }
-
-    public getWritable(): boolean {
-        return this.bWritable;
     }
 
     public del_audio(word: string): boolean {
         let fileName = word[0] + "/" + word + ".mp3";
-        return this.audioZip.delFile(fileName);
+        return this._audioZip.delFile(fileName);
     }
 };

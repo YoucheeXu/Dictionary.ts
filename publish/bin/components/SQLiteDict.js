@@ -39,8 +39,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SQLiteDict = void 0;
 var SQLite_1 = require("./SQLite");
 var SQLiteDict = /** @class */ (function () {
-    function SQLiteDict() {
+    function SQLiteDict(_szName, _szSrcFile) {
+        this._szName = _szName;
+        this._szSrcFile = _szSrcFile;
     }
+    Object.defineProperty(SQLiteDict.prototype, "szSrcFile", {
+        get: function () {
+            return this._szSrcFile;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(SQLiteDict.prototype, "szName", {
+        get: function () {
+            return this._szName;
+        },
+        enumerable: false,
+        configurable: true
+    });
     SQLiteDict.prototype.Open = function (dictSrc, tabName) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -235,8 +251,7 @@ var SQLiteDict = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         e_6 = _a.sent();
-                        console.log(e_6);
-                        return [2 /*return*/, Promise.reject(false)];
+                        return [2 /*return*/, Promise.reject(e_6)];
                     case 4: return [2 /*return*/];
                 }
             });

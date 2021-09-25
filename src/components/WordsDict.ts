@@ -11,9 +11,10 @@ CREATE TABLE [Words](
 );
 */
 export class WordsDict extends SQLiteDict {
-    public async Open(dictSrc: string) {
-        super.Open(dictSrc, "Words");
+    public async Open() {
+        super.Open(this._szSrcFile, "Words");
     }
+
     public async GetLevel(word: string): Promise<string> {
         let ret = await super.GetItem(word, "Level");
         if (ret) {
@@ -31,6 +32,7 @@ export class WordsDict extends SQLiteDict {
     public async SetLevel(word: string, level: string): Promise<boolean> {
         return super.UpdateItem(word, "Level", level);
     }
+
     public async GetStar(word: string): Promise<number> {
         let ret = await super.GetItem(word, "Stars");
         if (ret) {
