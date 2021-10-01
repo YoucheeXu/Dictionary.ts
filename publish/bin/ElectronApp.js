@@ -241,7 +241,7 @@ var ElectronApp = /** @class */ (function () {
                         audioFile = path.join(this._startPath, audioCfg.Audio);
                         audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
                         if (!(audioFormatCfg.Type == 'ZIP')) return [3 /*break*/, 9];
-                        this._audioBase = new AuidoArchive_1.AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
+                        this._audioBase = new AuidoArchive_1.AuidoArchive(audioCfg.Name, audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
                         return [4 /*yield*/, this._audioBase.Open()];
                     case 8:
                         _d.sent();

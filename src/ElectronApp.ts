@@ -185,7 +185,7 @@ export abstract class ElectronApp {
         let audioFile = path.join(this._startPath, audioCfg.Audio);
         let audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
         if (audioFormatCfg.Type == 'ZIP') {
-            this._audioBase = new AuidoArchive(audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
+            this._audioBase = new AuidoArchive(audioCfg.Name, audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
             await this._audioBase.Open();
             if (audioCfg.Download) {
                 this._audioBase.download = audioCfg.Download;

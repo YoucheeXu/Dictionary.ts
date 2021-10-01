@@ -380,32 +380,30 @@ export class ReciteWordsApp extends ElectronApp {
     private async PlayAudio(): Promise<boolean> {
         if (this._curWord == this._lastWord) {
             this._win.webContents.send("gui", "playAudio");
-            return Promise.resolve(true);
         }
         else {
             let retAudio = -1;
             let audioFile = "";
             [retAudio, audioFile] = await this._audioBase.query_audio(this._curWord);
-            if (retAudio <= 0) {
+            if (retAudio < 0) {
                 this._logger.error(audioFile);
-                console.log(audioFile);
                 this._win.webContents.send("gui", "loadAndPlayAudio", this._wrongHintFile.replace(/\\/g, '/'));
-                if (retAudio == 0) {
-                    if (this._audioBase.download) {
-                        await this.TriggerDownload(this._audioBase, this._curWord, audioFile);
-                    }
+                return Promise.resolve(false);
+            } else if (retAudio == 0) {
+                if (this._audioBase.download) {
+                    await this.TriggerDownload(this._audioBase, this._curWord, audioFile);
+                } else {
+                    this._logger.error(`There is no audio of ${this._curWord} in ${this._audioBase.srcFile}`);
                 }
                 return Promise.resolve(false);
-            }
-            else {
+            } else {
                 this._win.webContents.send("gui", "loadAndPlayAudio", audioFile.replace(/\\/g, '/'));
                 if (this._mode == "Study Mode") {
                     this._lastWord = this._curWord;
                 }
             }
-
-            return Promise.resolve(true);
         }
+        return Promise.resolve(true);
     }
 
     private async Show_Content(word: string, bShowWord = false) {
@@ -644,67 +642,73 @@ export class ReciteWordsApp extends ElectronApp {
         console.log("Start to get forgotten words");
         wdsLst.length = 0;
         limit = allLimit - this._wordsMap.size;
-        let forgottenWdNum = 0;
+        let numOfAllForgoten = 0, numOfSelForgotten = 0;
 
         if (limit > 0) {
             if (await this._usrProgress.GetForgottenWordsLst(wdsLst)) {
+                numOfAllForgoten = wdsLst.length;
                 for (let wd of wdsLst) {
                     this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                     console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
                     this._learnLst.push(wd.Word);
-                    forgottenWdNum++;
-                    if (forgottenWdNum >= limit) {
+                    numOfSelForgotten++;
+                    if (numOfSelForgotten >= limit) {
                         break;
                     }
                 }
             }
         }
-        this.LogProgress(`Got ${forgottenWdNum} forgotten words.`);
+        this.LogProgress(`Got ${numOfAllForgoten} forgotten words.`);
+        this.LogProgress(`Select ${numOfSelForgotten} forgotten words.`);
 
         // Start to get over due words
         console.log("Start to get over due words");
         wdsLst.length = 0;
         limit = allLimit - this._wordsMap.size;
-        let OvrDueWdNum = 0;
+        let numOfAllOvrDue = 0, numOfSelOvrDue = 0;
 
         if (limit > 0) {
             if (await this._usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)) {
+                numOfAllOvrDue = wdsLst.length;
                 for (let wd of wdsLst) {
                     this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                     console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-                    OvrDueWdNum++;
-                    if (OvrDueWdNum >= limit) {
+                    numOfSelOvrDue++;
+                    if (numOfSelOvrDue >= limit) {
                         break;
                     }
                 }
             }
         }
-        this.LogProgress(`Got ${OvrDueWdNum} over due words.`);
+        this.LogProgress(`Got ${numOfAllOvrDue} over due words.`);
+        this.LogProgress(`Select ${numOfSelOvrDue} over due words.`);
 
         // Start to get due words
         console.log("Start to get due words");
         wdsLst.length = 0;
         limit = allLimit - this._wordsMap.size;
-        let dueWdNum = 0;
+        let numOfAllDue = 0, numOfSelDue = 0;
 
         if (limit > 0) {
             if (await this._usrProgress.GetDueWordsLst(wdsLst, todayStr)) {
+                numOfAllDue = wdsLst.length;
                 for (let wd of wdsLst) {
                     this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                     console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-                    dueWdNum++;
-                    if (dueWdNum >= limit) {
+                    numOfSelDue++;
+                    if (numOfSelDue >= limit) {
                         break;
                     }
                 }
             }
         }
-        this.LogProgress(`Got ${dueWdNum} due words.`);
+        this.LogProgress(`Got ${numOfAllDue} due words.`);
+        this.LogProgress(`Selct ${numOfSelDue} due words.`);
 
         // Start to get new words
         console.log("Start to get new words");
         wdsLst.length = 0;
-        limit = Math.min(newWdsLimit - forgottenWdNum, allLimit - this._wordsMap.size);
+        limit = Math.min(newWdsLimit - numOfSelForgotten, allLimit - this._wordsMap.size);
         let newWdNum = 0;
 
         if (limit > 0) {

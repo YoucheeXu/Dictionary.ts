@@ -1,3 +1,4 @@
+// SDictBase.ts
 import { DictBase } from "./DictBase";
 import { SQLite } from "./SQLite";
 

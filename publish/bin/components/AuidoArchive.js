@@ -64,10 +64,11 @@ var utils_1 = require("../utils/utils");
 var ZipArchive_1 = require("./ZipArchive");
 var globalInterface_1 = require("../utils/globalInterface");
 var AuidoArchive = /** @class */ (function () {
-    function AuidoArchive(_srcFile, compression, compresslevel) {
+    function AuidoArchive(_name, _srcFile, _compression, _compresslevel) {
+        this._name = _name;
         this._srcFile = _srcFile;
-        this.compression = compression;
-        this.compresslevel = compresslevel;
+        this._compression = _compression;
+        this._compresslevel = _compresslevel;
         this._download = null;
         this._szAudioArchive = path.basename(_srcFile);
         // console.log(this._szAudioArchive);
@@ -87,8 +88,15 @@ var AuidoArchive = /** @class */ (function () {
             });
         }
         // gLogger.info("tempAudioDir: " + this._tempAudioDir);
-        this._audioZip = new ZipArchive_1.ZipArchive(_srcFile, compression, compresslevel);
+        this._audioZip = new ZipArchive_1.ZipArchive(_srcFile, _compression, _compresslevel);
     }
+    Object.defineProperty(AuidoArchive.prototype, "name", {
+        get: function () {
+            return this._name;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(AuidoArchive.prototype, "srcFile", {
         get: function () {
             return this._srcFile;

@@ -1,17 +1,13 @@
 {
 	"DictBases": [
 		{
-			"Name": "GoogleDict",
-			"Dict": "dict/GoogleDict.zip",
+			"Name": "Google",
+			"Dict": "dict/Google.zip",
 			"Desc": "Google",
 			"Format": {
 				"Type": "ZIP",
 				"Compression": "ZIP_DEFLATED",
 				"Compress_Level": 2
-			},
-			"Download":{
-				"Mode": "Direct",
-				"URL": "http://dictionary.so8848.com/ajax_search?q=${word}"
 			}
 		},
 		{
@@ -33,23 +29,18 @@
 	],
 	"AudioBases": [
 		{
-			"Name": "Google2",
-			"Audio": "audio/GoogleAudio.zip",
+			"Name": "Google",
+			"Audio": "audio/Google.zip",
 			"Desc": "US",
 			"Format": {
 				"Type": "ZIP",
 				"Compression": "ZIP_DEFLATED",
 				"CompressLevel": 2
-			},
-			"Download":{
-				"Mode": "Dict",
-				"Dict": "GoogleDict",
-				"RegEx": "http://www.gstatic.com/dictionary/static/sounds/[^%23]+?${word}%23_us_1.mp3"
 			}
 		}
 	],
 	"WordsDict": {
-		"Name": "WordsDict",
+		"Name": "Words",
 		"Dict": "dict/Words.dict",
 		"allLvls": [
 			"CET6",
@@ -101,8 +92,8 @@
 		},
 		"Tabs": [
 			{
-				"Name": "Google Dict",
-				"Dict": "GoogleDict"
+				"Name": "Google",
+				"Dict": "Google"
 			},
 			{
 				"Name": "15000",
@@ -113,9 +104,9 @@
 				"Dict": "Collins COBUILD"
 			}
 		],
-		"DictBase": "GoogleDict",
-		"WordsDict": "WordsDict",
-		"AudioBase": "GoogleAudio",
+		"DictBase": "Google",
+		"WordsDict": "Words",
+		"AudioBase": "Google",
 		"User": "anonymous",
 		"Debug": {
 			"bEnable": true,
@@ -184,9 +175,9 @@
 			"bEnable": true,
 			"file": "log/ReciteWords.log"
 		},
-		"DictBase": "GoogleDict",
-		"WordsDict": "WordsDict",
-		"AudioBase": "GoogleAudio",
+		"DictBase": "15000",
+		"WordsDict": "Words",
+		"AudioBase": "Google",
 		"User": "anonymous"
 	}
 }

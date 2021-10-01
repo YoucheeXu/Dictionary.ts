@@ -52,6 +52,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SDictBase = void 0;
+// SDictBase.ts
 var DictBase_1 = require("./DictBase");
 var SQLite_1 = require("./SQLite");
 /*
