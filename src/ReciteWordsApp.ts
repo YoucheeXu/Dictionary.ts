@@ -88,14 +88,20 @@ export class ReciteWordsApp extends ElectronApp {
         if (len > 0) {
             this._curWord = this._curLearnLst[this._curLearnPos];
 
-            // TODO: get 'lastDate' from 'this._wordsMap'
-            let lastDate = await this._usrProgress.GetLastDate(this._curWord);
+            this._win.webContents.send("gui", "modifyValue", "score", "");
 
-            if (lastDate == null) {
-                this._win.webContents.send("gui", "modifyValue", "score", "New!");
-            }
-            else {
-                this._win.webContents.send("gui", "modifyValue", "score", "");
+            let value = this._wordsMap.get(this._curWord);
+            if (value) {
+                let familiar = value[0];
+                let lastDate = value[1];
+
+                if (lastDate.getFullYear() == 1970) {
+                    this._win.webContents.send("gui", "modifyValue", "score", "New!");
+                } else if (familiar < 0) {
+                    this._win.webContents.send("gui", "modifyValue", "score", "Forgotten");
+                } else {
+                    this._win.webContents.send("gui", "modifyValue", "score", "");
+                }
             }
 
             let data = this._wordsMap.get(this._curWord);
@@ -195,9 +201,9 @@ export class ReciteWordsApp extends ElectronApp {
         else {
             if (input_word != this._curWord) {
                 this._errCount += 1;
-                this._win.webContents.send("gui", "modifyValue", "score", `Wrong ${this._errCount}!`);
-                console.log(`ErrCount: ${this._errCount}`);
-                console.log(`Right word: ${this._curWord}, Wrong word: ${input_word}.`);
+                this._win.webContents.send("gui", "modifyValue", "score", `Wrong word: ${input_word}, wrong count: ${this._errCount}!`);
+                this._logger.debug(`ErrCount: ${this._errCount}`);
+                this._logger.debug(`Right word: ${this._curWord}, Wrong word: ${input_word}.`);
 
                 let data = this._wordsMap.get(this._curWord);
                 if (data === undefined) {
@@ -648,7 +654,7 @@ export class ReciteWordsApp extends ElectronApp {
             numOfAllForgoten = wdsLst.length;
             for (let wd of wdsLst) {
                 this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                this._logger.debug(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
                 this._learnLst.push(wd.Word);
                 numOfSelForgotten++;
                 if (numOfSelForgotten >= limit) {
@@ -669,7 +675,7 @@ export class ReciteWordsApp extends ElectronApp {
             numOfAllOvrDue = wdsLst.length;
             for (let wd of wdsLst) {
                 this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                this._logger.debug(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
                 numOfSelOvrDue++;
                 if (numOfSelOvrDue >= limit) {
                     break;
@@ -689,7 +695,7 @@ export class ReciteWordsApp extends ElectronApp {
             numOfAllDue = wdsLst.length;
             for (let wd of wdsLst) {
                 this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                this._logger.debug(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
                 numOfSelDue++;
                 if (numOfSelDue >= limit) {
                     break;
@@ -709,7 +715,7 @@ export class ReciteWordsApp extends ElectronApp {
             if (await this._usrProgress.GetNewWordsLst(wdsLst, limit)) {
                 for (let wd of wdsLst) {
                     this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                    console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                    this._logger.debug(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
                     this._learnLst.push(wd.Word);
                     newWdNum++;
                 }
@@ -759,7 +765,7 @@ export class ReciteWordsApp extends ElectronApp {
         let now = new Date();
         let nowStr = formatTime(now);
         let something = `${nowStr} ${info}\n`;
-        console.log(something);
+        // console.log(something);
 
         return super.Record2File(this._personalProgressFile, something);
     }
@@ -885,11 +891,10 @@ export class ReciteWordsApp extends ElectronApp {
             nexDateStr = formatDate(nextDate);
 
             try {
-                console.log(`${word}: ${String(familiar)}, lastDate: ${todayStr}, nextDate: ${nexDateStr}`);
+                this._logger.debug(`${word}: ${String(familiar)}, lastDate: ${todayStr}, nextDate: ${nexDateStr}`);
                 await this._usrProgress.UpdateProgress2(word, familiar, todayStr, nexDateStr);
                 i++;
                 let percent = i / allLen * 100;
-                console.log(`${percent.toFixed(2)}% to save progress.`);
                 this._win.webContents.send("gui", "modifyValue", "info", `${percent.toFixed(2)}% to save progress.`);
             }
             catch (e) {
