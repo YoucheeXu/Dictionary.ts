@@ -150,6 +150,18 @@ export class dictApp extends ElectronApp {
         const html = `\n							<div id = "toggle_example" align = "right">- Hide Examples</div>
 							<p></p>`;
 
+
+        for (let tab of JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs))) {
+            let dictBase = this._dictMap.get(tab.dict);
+            if (dictBase) {
+                let name = dictBase.szName;
+                let tabName = tab.Name;
+                this._logger.info(`AddTab: ${tabName} with dict: ${name}`);
+                this._win.webContents.send("gui", "AddTab", tabName, name, html);
+                this._dictId = tabName;
+            }
+        }
+
         this._dictMap.forEach((dict: DictBase, tabId: string) => {
             let name = dict.szName;
             this._logger.info(`AddTab: ${tabId}, ${name}`);
@@ -160,8 +172,7 @@ export class dictApp extends ElectronApp {
         // self.get_browser().ExecuteFunction("BindSwitchTab");
         this._win.webContents.send("gui", "BindSwitchTab");
 
-        // switch to dict1
-        this._dictId = "dict1";
+        // switch to default tab
         this._curDictBase = this.get_curDB();
         this._dictParseFun = this._curDictBase.get_parseFun();
         // self.get_browser().ExecuteFunction("ActiveTab", this._dictId);

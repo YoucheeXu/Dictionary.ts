@@ -765,7 +765,6 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                         wdsLst.length = 0;
                         limit = allLimit - this._wordsMap.size;
                         numOfAllForgoten = 0, numOfSelForgotten = 0;
-                        if (!(limit > 0)) return [3 /*break*/, 10];
                         return [4 /*yield*/, this._usrProgress.GetForgottenWordsLst(wdsLst)];
                     case 9:
                         if (_j.sent()) {
@@ -781,8 +780,6 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                                 }
                             }
                         }
-                        _j.label = 10;
-                    case 10:
                         this.LogProgress("Got " + numOfAllForgoten + " forgotten words.");
                         this.LogProgress("Select " + numOfSelForgotten + " forgotten words.");
                         // Start to get over due words
@@ -790,9 +787,8 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                         wdsLst.length = 0;
                         limit = allLimit - this._wordsMap.size;
                         numOfAllOvrDue = 0, numOfSelOvrDue = 0;
-                        if (!(limit > 0)) return [3 /*break*/, 12];
                         return [4 /*yield*/, this._usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)];
-                    case 11:
+                    case 10:
                         if (_j.sent()) {
                             numOfAllOvrDue = wdsLst.length;
                             for (_c = 0, wdsLst_2 = wdsLst; _c < wdsLst_2.length; _c++) {
@@ -805,8 +801,6 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                                 }
                             }
                         }
-                        _j.label = 12;
-                    case 12:
                         this.LogProgress("Got " + numOfAllOvrDue + " over due words.");
                         this.LogProgress("Select " + numOfSelOvrDue + " over due words.");
                         // Start to get due words
@@ -814,9 +808,8 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                         wdsLst.length = 0;
                         limit = allLimit - this._wordsMap.size;
                         numOfAllDue = 0, numOfSelDue = 0;
-                        if (!(limit > 0)) return [3 /*break*/, 14];
                         return [4 /*yield*/, this._usrProgress.GetDueWordsLst(wdsLst, todayStr)];
-                    case 13:
+                    case 11:
                         if (_j.sent()) {
                             numOfAllDue = wdsLst.length;
                             for (_d = 0, wdsLst_3 = wdsLst; _d < wdsLst_3.length; _d++) {
@@ -829,8 +822,6 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                                 }
                             }
                         }
-                        _j.label = 14;
-                    case 14:
                         this.LogProgress("Got " + numOfAllDue + " due words.");
                         this.LogProgress("Selct " + numOfSelDue + " due words.");
                         // Start to get new words
@@ -838,9 +829,9 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                         wdsLst.length = 0;
                         limit = Math.min(newWdsLimit - numOfSelForgotten, allLimit - this._wordsMap.size);
                         newWdNum = 0;
-                        if (!(limit > 0)) return [3 /*break*/, 16];
+                        if (!(limit > 0)) return [3 /*break*/, 13];
                         return [4 /*yield*/, this._usrProgress.GetNewWordsLst(wdsLst, limit)];
-                    case 15:
+                    case 12:
                         if (_j.sent()) {
                             for (_e = 0, wdsLst_4 = wdsLst; _e < wdsLst_4.length; _e++) {
                                 wd = wdsLst_4[_e];
@@ -850,8 +841,8 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                                 newWdNum++;
                             }
                         }
-                        _j.label = 16;
-                    case 16:
+                        _j.label = 13;
+                    case 13:
                         this.LogProgress("Got " + newWdNum + " new words.");
                         timeArray = this._cfg["ReciteWords"]["TimeInterval"];
                         for (_f = 0, timeArray_1 = timeArray; _f < timeArray_1.length; _f++) {
@@ -902,7 +893,7 @@ var ReciteWordsApp = /** @class */ (function (_super) {
     };
     ReciteWordsApp.prototype.Save_Progress = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, word, _b, _c, word, data, familiar, lastDate, nextDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, nextDate, allLen, lastDateStr, nexDateStr, mapStr, i, nFnshd, iterator, r, todayStr, interval, index, nextInterval, _h, word, _j, familiar, lastDate, nextDate, percent, e_2;
+            var _i, _a, word, _b, _c, word, data, familiar, lastDate, nextDate, _d, _e, word, _f, _g, word, data, familiar, lastDate, nextDate, allLen, lastDateStr, nexDateStr, mapStr, i, nFnshd, iterator, r, todayStr, intervalDay, index, nextInterval, _h, word, _j, familiar, lastDate, nextDate, percent, e_2;
             return __generator(this, function (_k) {
                 switch (_k.label) {
                     case 0:
@@ -975,7 +966,7 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                         i = 0, nFnshd = 0;
                         iterator = this._wordsMap.entries();
                         todayStr = utils_1.formatDate(this._today);
-                        interval = 0, index = 0;
+                        intervalDay = 0, index = 0;
                         nextInterval = 0;
                         _k.label = 1;
                     case 1:
@@ -992,26 +983,21 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                         familiar = Number(familiar.toFixed(1));
                         // calc next date
                         if (lastDate != null && nextDate != null) {
-                            interval = (nextDate.valueOf() - lastDate.valueOf()) / 1000 / 60 / 60 / 24;
+                            intervalDay = (nextDate.valueOf() - lastDate.valueOf()) / 1000 / 60 / 60 / 24;
                         }
                         else {
-                            interval = 0;
+                            intervalDay = 0;
                             index = 0;
                         }
-                        if (interval > 0) {
-                            if ((nextDate.getFullYear() == this._today.getFullYear()) && (nextDate.getMonth() == this._today.getMonth()) && (nextDate.getDate() == this._today.getDate())) { // due
-                                index = this._timeDayLst.indexOf(interval);
-                                if (index != -1) {
-                                    index++;
-                                    if (index >= this._timeDayLst.length) { // next round
-                                        index = 0;
-                                    }
-                                }
-                                else { // error
+                        if (intervalDay > 0) {
+                            index = this._timeDayLst.indexOf(intervalDay);
+                            if (index != -1) {
+                                index++;
+                                if (index >= this._timeDayLst.length) { // next round
                                     index = 0;
                                 }
                             }
-                            else { // over due
+                            else { // error
                                 index = 0;
                             }
                         }

@@ -11,6 +11,7 @@ import { WordsDict } from "./components/WordsDict";
 import { DictBase } from "./components/DictBase";
 import { GDictBase } from "./components/GDictBase";
 import { SDictBase } from "./components/SDictBase";
+import { MDictBase } from "./components/MDictBase";
 
 import { AuidoArchive } from "./components/AuidoArchive";
 import { UsrProgress } from "./components/UsrProgress";
@@ -30,7 +31,7 @@ export abstract class ElectronApp {
     protected _win: BrowserWindow;
 
     protected _wordsDict: WordsDict;
-    protected _dictMap: any = new Map();
+    protected _dictMap: any = new Map<string, Database>();  // <name, database>
     protected _curDictBase: DictBase;
     protected _audioBase: AuidoArchive;
 
@@ -64,17 +65,20 @@ export abstract class ElectronApp {
         let dictBase: DictBase;
         if (format.Type == 'ZIP') {
             dictBase = new GDictBase(name, dictSrc, format.Compression, format.Compress_Level);
-            await dictBase.Open();
         } else if (format.Type == 'SQLite') {
             dictBase = new SDictBase(name, dictSrc);
-            await dictBase.Open();
         } else if (format.Type == 'mdx') {
-            // dictBase = new MDictBase(dictSrc);
-            this._logger.error(`Not support mdx dict: ${name}`);
-            return;
-        }
-        else {
+            dictBase = new MDictBase(name, dictSrc);
+        } else {
             throw new Error(`Unknown dict's type: ${format.Type}!`);
+        }
+
+        try {
+            await dictBase.Open();
+        }
+        catch (e) {
+            this._logger.error(`Fail to open ${dictSrc}, because of ${e}`);
+            return;
         }
 
         if (name == this._cfg[this._name].DictBase) {
@@ -85,8 +89,7 @@ export abstract class ElectronApp {
             dictBase.download = download;
         }
 
-        let dictId = 'dict' + String(this._dictMap.size + 1);
-        this._dictMap.set(dictId, dictBase);
+        this._dictMap.set(name, dictBase);
     }
 
     protected async ReadAndConfigure(): Promise<boolean> {
@@ -150,6 +153,7 @@ export abstract class ElectronApp {
         }
 
         this._logger = log4js.getLogger('dictLogs');
+        globalVar.Logger = this._logger;
 
         let common = JSON.parse(JSON.stringify(this._cfg[this.name].common));
         this._logger.info(`${this._name} v${common.ver}`);
@@ -165,15 +169,10 @@ export abstract class ElectronApp {
         this.ActiveAgent(activeAgent);
 
         let dictBasesCfg = JSON.parse(JSON.stringify(this._cfg.DictBases));
-        for (let tab of JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs))) {
-            for (let dictBaseCfg of dictBasesCfg) {
-                if (tab.Dict == dictBaseCfg.Name) {
-                    let dictSrc = path.join(this._startPath, dictBaseCfg.Dict);
-                    let download = dictBaseCfg.Download;
-                    await this.AddDictBase(dictBaseCfg.Name, dictSrc, JSON.parse(JSON.stringify(dictBaseCfg.Format)), download);
-                    break;
-                }
-            }
+        for (let dictBaseCfg of dictBasesCfg) {
+            let dictSrc = path.join(this._startPath, dictBaseCfg.Dict);
+            let download = dictBaseCfg.Download;
+            await this.AddDictBase(dictBaseCfg.Name, dictSrc, JSON.parse(JSON.stringify(dictBaseCfg.Format)), download);
         }
 
         let wordsDictCfg = this._cfg.WordsDict;
@@ -186,7 +185,13 @@ export abstract class ElectronApp {
         let audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
         if (audioFormatCfg.Type == 'ZIP') {
             this._audioBase = new AuidoArchive(audioCfg.Name, audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
-            await this._audioBase.Open();
+            try {
+                await this._audioBase.Open();;
+            }
+            catch (e) {
+                this._logger.error(`Fail to open ${dictSrc}, because of ${e}`);
+            }
+
             if (audioCfg.Download) {
                 this._audioBase.download = audioCfg.Download;
             }

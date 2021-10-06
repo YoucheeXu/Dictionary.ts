@@ -45,44 +45,6 @@ set-ExecutionPolicy RemoteSigned
 
 然后输入A，回车
 
-### 安装electron
-
-推荐安装 v11.1.0
-
-#### 全局安装
-
-```bash
-cnpm install electron -g
-```
-
-#### 确认安装正常
-
-```bash
-electron -v
-```
-
-#### 链接electron
-
-进入到node_modules目录后执行命令
-
-```bash
-npm link electron
-```
-
-### 全局安装TypeScript
-
-推荐安装v4.1.3
-
-```bash
-cnpm install -g typescript
-```
-
-确认安装成功
-
-```bash
-tsc -v
-```
-
 ### 批量导入安装包
 
 ```bash

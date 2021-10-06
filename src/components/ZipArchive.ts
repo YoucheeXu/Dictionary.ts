@@ -25,7 +25,6 @@ export class ZipArchive {
             fs.readFile(_this.zipFile, (err, data) => {
                 if (err) {
                     reject(err);
-                    console.log(`reject, because of ${err}`);
                 } else {
                     resolve(data);
                 }

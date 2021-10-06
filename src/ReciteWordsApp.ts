@@ -644,17 +644,15 @@ export class ReciteWordsApp extends ElectronApp {
         limit = allLimit - this._wordsMap.size;
         let numOfAllForgoten = 0, numOfSelForgotten = 0;
 
-        if (limit > 0) {
-            if (await this._usrProgress.GetForgottenWordsLst(wdsLst)) {
-                numOfAllForgoten = wdsLst.length;
-                for (let wd of wdsLst) {
-                    this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                    console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-                    this._learnLst.push(wd.Word);
-                    numOfSelForgotten++;
-                    if (numOfSelForgotten >= limit) {
-                        break;
-                    }
+        if (await this._usrProgress.GetForgottenWordsLst(wdsLst)) {
+            numOfAllForgoten = wdsLst.length;
+            for (let wd of wdsLst) {
+                this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                this._learnLst.push(wd.Word);
+                numOfSelForgotten++;
+                if (numOfSelForgotten >= limit) {
+                    break;
                 }
             }
         }
@@ -667,16 +665,14 @@ export class ReciteWordsApp extends ElectronApp {
         limit = allLimit - this._wordsMap.size;
         let numOfAllOvrDue = 0, numOfSelOvrDue = 0;
 
-        if (limit > 0) {
-            if (await this._usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)) {
-                numOfAllOvrDue = wdsLst.length;
-                for (let wd of wdsLst) {
-                    this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                    console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-                    numOfSelOvrDue++;
-                    if (numOfSelOvrDue >= limit) {
-                        break;
-                    }
+        if (await this._usrProgress.GetOvrDueWordsLst(wdsLst, todayStr)) {
+            numOfAllOvrDue = wdsLst.length;
+            for (let wd of wdsLst) {
+                this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                numOfSelOvrDue++;
+                if (numOfSelOvrDue >= limit) {
+                    break;
                 }
             }
         }
@@ -689,16 +685,14 @@ export class ReciteWordsApp extends ElectronApp {
         limit = allLimit - this._wordsMap.size;
         let numOfAllDue = 0, numOfSelDue = 0;
 
-        if (limit > 0) {
-            if (await this._usrProgress.GetDueWordsLst(wdsLst, todayStr)) {
-                numOfAllDue = wdsLst.length;
-                for (let wd of wdsLst) {
-                    this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
-                    console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
-                    numOfSelDue++;
-                    if (numOfSelDue >= limit) {
-                        break;
-                    }
+        if (await this._usrProgress.GetDueWordsLst(wdsLst, todayStr)) {
+            numOfAllDue = wdsLst.length;
+            for (let wd of wdsLst) {
+                this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
+                console.log(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
+                numOfSelDue++;
+                if (numOfSelDue >= limit) {
+                    break;
                 }
             }
         }
@@ -843,7 +837,7 @@ export class ReciteWordsApp extends ElectronApp {
         let iterator = this._wordsMap.entries();
         let r: IteratorResult<[string, [number, Date, Date]]>;
         let todayStr = formatDate(this._today);
-        let interval = 0, index = 0;
+        let intervalDay = 0, index = 0;
         let nextInterval = 0;
         while (r = iterator.next(), !r.done) {
             let [word, [familiar, lastDate, nextDate]] = r.value;
@@ -861,30 +855,22 @@ export class ReciteWordsApp extends ElectronApp {
 
             // calc next date
             if (lastDate != null && nextDate != null) {
-                interval = (nextDate.valueOf() - lastDate.valueOf()) / 1000 / 60 / 60 / 24;
-            }
-            else {
-                interval = 0;
+                intervalDay = (nextDate.valueOf() - lastDate.valueOf()) / 1000 / 60 / 60 / 24;
+            } else {
+                intervalDay = 0;
                 index = 0;
             }
-            if (interval > 0) {
-                if ((nextDate.getFullYear() == this._today.getFullYear()) && (nextDate.getMonth() == this._today.getMonth()) && (nextDate.getDate() == this._today.getDate())) {  // due
-                    index = this._timeDayLst.indexOf(interval)
-                    if (index != -1) {
-                        index++;
-                        if (index >= this._timeDayLst.length) {	// next round
-                            index = 0;
-                        }
-                    }
-                    else {	// error
+            if (intervalDay > 0) {
+                index = this._timeDayLst.indexOf(intervalDay)
+                if (index != -1) {
+                    index++;
+                    if (index >= this._timeDayLst.length) {	// next round
                         index = 0;
                     }
-                }
-                else {   // over due
+                } else {	// error
                     index = 0;
                 }
-            }
-            else {	// new word
+            } else {	// new word
                 index = 0;
             }
 

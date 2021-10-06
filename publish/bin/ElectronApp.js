@@ -65,6 +65,7 @@ var globalInterface_1 = require("./utils/globalInterface");
 var WordsDict_1 = require("./components/WordsDict");
 var GDictBase_1 = require("./components/GDictBase");
 var SDictBase_1 = require("./components/SDictBase");
+var MDictBase_1 = require("./components/MDictBase");
 var AuidoArchive_1 = require("./components/AuidoArchive");
 var DownloardQueue_1 = require("./utils/DownloardQueue");
 var ElectronApp = /** @class */ (function () {
@@ -72,7 +73,7 @@ var ElectronApp = /** @class */ (function () {
         this._startPath = _startPath;
         this._bCfgModfied = false;
         this._bDebug = false;
-        this._dictMap = new Map();
+        this._dictMap = new Map(); // <name, database>
         this._dictAgent = new Array();
         console.clear();
         globalInterface_1.globalVar.app = this;
@@ -91,42 +92,41 @@ var ElectronApp = /** @class */ (function () {
     ElectronApp.prototype.AddDictBase = function (name, dictSrc, format, download) {
         if (download === void 0) { download = null; }
         return __awaiter(this, void 0, void 0, function () {
-            var dictBase, dictId;
+            var dictBase, e_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(format.Type == 'ZIP')) return [3 /*break*/, 2];
-                        dictBase = new GDictBase_1.GDictBase(name, dictSrc, format.Compression, format.Compress_Level);
-                        return [4 /*yield*/, dictBase.Open()];
-                    case 1:
-                        _a.sent();
-                        return [3 /*break*/, 5];
-                    case 2:
-                        if (!(format.Type == 'SQLite')) return [3 /*break*/, 4];
-                        dictBase = new SDictBase_1.SDictBase(name, dictSrc);
-                        return [4 /*yield*/, dictBase.Open()];
-                    case 3:
-                        _a.sent();
-                        return [3 /*break*/, 5];
-                    case 4:
-                        if (format.Type == 'mdx') {
-                            // dictBase = new MDictBase(dictSrc);
-                            this._logger.error("Not support mdx dict: " + name);
-                            return [2 /*return*/];
+                        if (format.Type == 'ZIP') {
+                            dictBase = new GDictBase_1.GDictBase(name, dictSrc, format.Compression, format.Compress_Level);
+                        }
+                        else if (format.Type == 'SQLite') {
+                            dictBase = new SDictBase_1.SDictBase(name, dictSrc);
+                        }
+                        else if (format.Type == 'mdx') {
+                            dictBase = new MDictBase_1.MDictBase(name, dictSrc);
                         }
                         else {
                             throw new Error("Unknown dict's type: " + format.Type + "!");
                         }
-                        _a.label = 5;
-                    case 5:
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, dictBase.Open()];
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        e_1 = _a.sent();
+                        this._logger.error("Fail to open " + dictSrc + ", because of " + e_1);
+                        return [2 /*return*/];
+                    case 4:
                         if (name == this._cfg[this._name].DictBase) {
                             this._curDictBase = dictBase;
                         }
                         if (download) {
                             dictBase.download = download;
                         }
-                        dictId = 'dict' + String(this._dictMap.size + 1);
-                        this._dictMap.set(dictId, dictBase);
+                        this._dictMap.set(name, dictBase);
                         return [2 /*return*/];
                 }
             });
@@ -134,9 +134,9 @@ var ElectronApp = /** @class */ (function () {
     };
     ElectronApp.prototype.ReadAndConfigure = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _this, debugCfg, debugLvl, logFile, common, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, dictBasesCfg, _a, _b, tab, _c, dictBasesCfg_1, dictBaseCfg, dictSrc_1, download, wordsDictCfg, dictSrc, audioCfg, audioFile, audioFormatCfg, missCfg;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            var _this, debugCfg, debugLvl, logFile, common, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, dictBasesCfg, _a, dictBasesCfg_1, dictBaseCfg, dictSrc_1, download, wordsDictCfg, dictSrc, audioCfg, audioFile, audioFormatCfg, e_2, missCfg;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         this._cfgFile = path.join(this._startPath, 'Dictionary.json').replace(/\\/g, '/');
                         _this = this;
@@ -194,6 +194,7 @@ var ElectronApp = /** @class */ (function () {
                             });
                         }
                         this._logger = log4js.getLogger('dictLogs');
+                        globalInterface_1.globalVar.Logger = this._logger;
                         common = JSON.parse(JSON.stringify(this._cfg[this.name].common));
                         this._logger.info(this._name + " v" + common.ver);
                         agentCfg = JSON.parse(JSON.stringify(this._cfg['Agents']));
@@ -207,49 +208,50 @@ var ElectronApp = /** @class */ (function () {
                         this._dictAgent.push({ name: '', ip: '', program: '' });
                         this.ActiveAgent(activeAgent);
                         dictBasesCfg = JSON.parse(JSON.stringify(this._cfg.DictBases));
-                        _a = 0, _b = JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs));
-                        _d.label = 1;
+                        _a = 0, dictBasesCfg_1 = dictBasesCfg;
+                        _b.label = 1;
                     case 1:
-                        if (!(_a < _b.length)) return [3 /*break*/, 6];
-                        tab = _b[_a];
-                        _c = 0, dictBasesCfg_1 = dictBasesCfg;
-                        _d.label = 2;
-                    case 2:
-                        if (!(_c < dictBasesCfg_1.length)) return [3 /*break*/, 5];
-                        dictBaseCfg = dictBasesCfg_1[_c];
-                        if (!(tab.Dict == dictBaseCfg.Name)) return [3 /*break*/, 4];
+                        if (!(_a < dictBasesCfg_1.length)) return [3 /*break*/, 4];
+                        dictBaseCfg = dictBasesCfg_1[_a];
                         dictSrc_1 = path.join(this._startPath, dictBaseCfg.Dict);
                         download = dictBaseCfg.Download;
                         return [4 /*yield*/, this.AddDictBase(dictBaseCfg.Name, dictSrc_1, JSON.parse(JSON.stringify(dictBaseCfg.Format)), download)];
+                    case 2:
+                        _b.sent();
+                        _b.label = 3;
                     case 3:
-                        _d.sent();
-                        return [3 /*break*/, 5];
-                    case 4:
-                        _c++;
-                        return [3 /*break*/, 2];
-                    case 5:
                         _a++;
                         return [3 /*break*/, 1];
-                    case 6:
+                    case 4:
                         wordsDictCfg = this._cfg.WordsDict;
                         dictSrc = path.join(this._startPath, wordsDictCfg.Dict);
                         this._wordsDict = new WordsDict_1.WordsDict(wordsDictCfg.Name, dictSrc);
                         return [4 /*yield*/, this._wordsDict.Open()];
-                    case 7:
-                        _d.sent();
+                    case 5:
+                        _b.sent();
                         audioCfg = JSON.parse(JSON.stringify(this._cfg['AudioBases']))[0];
                         audioFile = path.join(this._startPath, audioCfg.Audio);
                         audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
-                        if (!(audioFormatCfg.Type == 'ZIP')) return [3 /*break*/, 9];
+                        if (!(audioFormatCfg.Type == 'ZIP')) return [3 /*break*/, 10];
                         this._audioBase = new AuidoArchive_1.AuidoArchive(audioCfg.Name, audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
+                        _b.label = 6;
+                    case 6:
+                        _b.trys.push([6, 8, , 9]);
                         return [4 /*yield*/, this._audioBase.Open()];
+                    case 7:
+                        _b.sent();
+                        ;
+                        return [3 /*break*/, 9];
                     case 8:
-                        _d.sent();
+                        e_2 = _b.sent();
+                        this._logger.error("Fail to open " + dictSrc + ", because of " + e_2);
+                        return [3 /*break*/, 9];
+                    case 9:
                         if (audioCfg.Download) {
                             this._audioBase.download = audioCfg.Download;
                         }
-                        _d.label = 9;
-                    case 9:
+                        _b.label = 10;
+                    case 10:
                         missCfg = JSON.parse(JSON.stringify(this._cfg.Miss));
                         this._miss_dict = path.join(this._startPath, missCfg.miss_dict);
                         this._miss_audio = path.join(this._startPath, missCfg.miss_audio);
@@ -493,7 +495,7 @@ var ElectronApp = /** @class */ (function () {
     };
     ElectronApp.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, ret, msg, srcFile, _b, ret, msg, srcFile, ret, e_1;
+            var _a, ret, msg, srcFile, _b, ret, msg, srcFile, ret, e_3;
             var _this_1 = this;
             return __generator(this, function (_c) {
                 switch (_c.label) {
@@ -551,8 +553,8 @@ var ElectronApp = /** @class */ (function () {
                         this._logger.info(ret);
                         return [3 /*break*/, 6];
                     case 5:
-                        e_1 = _c.sent();
-                        this._logger.error(e_1);
+                        e_3 = _c.sent();
+                        this._logger.error(e_3);
                         return [3 /*break*/, 6];
                     case 6: return [2 /*return*/];
                 }

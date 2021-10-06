@@ -88,7 +88,6 @@ var ZipArchive = /** @class */ (function () {
                         fs.readFile(_this.zipFile, function (err, data) {
                             if (err) {
                                 reject(err);
-                                console.log("reject, because of " + err);
                             }
                             else {
                                 resolve(data);

@@ -19,9 +19,9 @@
 			}
 		},
 		{
-			"Name": "Collins COBUILD",
-			"Desc": "Collins COBUILD",
-			"Dict": "dict/Collins COBUILD Advanced Learner's English-Chinese Dictionary.mdx",
+			"Name": "牛津英语搭配词典",
+			"Desc": "牛津英语搭配词典",
+			"Dict": "dict/牛津英语搭配词典.mdx",
 			"Format": {
 				"Type": "mdx"
 			}

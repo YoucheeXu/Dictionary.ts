@@ -1,5 +1,7 @@
+import exp from "constants";
 import * as fs from "fs";
-import { BrowserWindow } from 'electron';
+import jDataView from "jdataView";
+import * as ADLER32 from 'adler-32';
 
 export function RemoveDir(dir: string) {
     if (fs.existsSync(dir) == true) {
@@ -153,4 +155,82 @@ export function formatDate(data: Date): string {
 // 2021-09-04 15:49:54
 export function formatTime(data: Date): string {
     return `${data.getFullYear()}-${data.getMonth() + 1 >= 10 ? (data.getMonth() + 1) : '0' + (data.getMonth() + 1)}-${data.getDate() >= 10 ? data.getDate() : '0' + data.getDate()} ${data.getHours() >= 10 ? data.getHours() : '0' + data.getHours()}:${data.getMinutes() >= 10 ? data.getMinutes() : '0' + data.getMinutes()}:${data.getSeconds() >= 10 ? data.getSeconds() : '0' + data.getSeconds()}`;
+}
+
+export function Bytes2Num(format: string, buf: Buffer, offset?: number, length?: number): number {
+    let bLittleEndian = (format[0] == "<");
+    let jdv = new jDataView(buf, offset, length, bLittleEndian);
+    let typ = format[1];
+    if (typ == "B") {
+        return jdv.getUint8();
+    } else if (typ == "H") {
+        return jdv.getUint16();
+    } else if (typ == "I" || typ == 'L') {
+        return jdv.getUint32();
+    } else if (typ == "Q") {
+        let bigNum = jdv.getUint64();
+        let value = bigNum.valueOf();
+        // if (bigNum.hi > 0) {
+        if (!Number.isSafeInteger(value)) {
+            throw new Error(`${value} exceeds MAX_SAFE_INTEGER. Precision may be lost`);
+        }
+        return value;
+    } else {
+        throw new Error(`Don't support to convert to type of number: ${typ}`);
+    }
+}
+
+export function Num2Bytes(format: string, num: number): Buffer {
+    // let bLittleEndian = (format[0] == "<");
+    let endian = (format[0] == "<") ? 'LE' : 'BE';
+    let typ = format[1];
+    if (typ == "L") {
+        let buf = Buffer.alloc(4);
+        let fcn = `buf.writeUInt32${endian}(${num})`;
+        eval(fcn);
+        return buf;
+    } else if (typ == "Q") {
+        let buf = Buffer.allocUnsafe(8);
+        let fcn = `buf.writeBigUInt64${endian}(64)`;
+        eval(fcn);
+        return buf;
+    } else {
+        throw new Error(`Don't support convert from type of number: ${typ}`);
+    }
+}
+
+export function DecodeBytes(buf: Buffer, code = 'utf-8'): string {
+    let decoder = new TextDecoder(code);
+    return decoder.decode(buf);
+}
+
+// export function BufferConcat(a: Buffer, b: Buffer): Buffer {
+//     let c = Buffer.alloc(a.length + b.length);
+//     c.set(a);
+//     c.set(b, a.length);
+//     return c;
+// }
+
+export function BufferConcat(firstBuf: Buffer, ...bufAry: Buffer[]): Buffer {
+    let lenOfBuf = firstBuf.length;
+    for (let buf of bufAry) {
+        lenOfBuf += buf.length;
+    }
+
+    let c = Buffer.alloc(lenOfBuf);
+    c.set(firstBuf);
+
+    let offset = firstBuf.length;
+    for (let buf of bufAry) {
+        c.set(buf, offset);
+        offset += buf.length;
+    }
+    return c;
+}
+
+export function Adler32FromBuffer(data: Buffer): number {
+    // notice that adler32 returns signed value
+    let retOfAdler32Sign = ADLER32.buf(data);
+    let a = new Uint32Array([retOfAdler32Sign]);
+    return a[0];
 }

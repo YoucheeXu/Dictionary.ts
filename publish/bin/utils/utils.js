@@ -54,9 +54,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatTime = exports.formatDate = exports.randomArray2 = exports.randomArray = exports.asyncCheck = exports.RemoveDir = void 0;
+exports.Adler32FromBuffer = exports.BufferConcat = exports.DecodeBytes = exports.Num2Bytes = exports.Bytes2Num = exports.formatTime = exports.formatDate = exports.randomArray2 = exports.randomArray = exports.asyncCheck = exports.RemoveDir = void 0;
 var fs = __importStar(require("fs"));
+var jdataView_1 = __importDefault(require("jdataView"));
+var ADLER32 = __importStar(require("adler-32"));
 function RemoveDir(dir) {
     if (fs.existsSync(dir) == true) {
         if (fs.statSync(dir).isDirectory()) {
@@ -219,4 +224,92 @@ function formatTime(data) {
     return data.getFullYear() + "-" + (data.getMonth() + 1 >= 10 ? (data.getMonth() + 1) : '0' + (data.getMonth() + 1)) + "-" + (data.getDate() >= 10 ? data.getDate() : '0' + data.getDate()) + " " + (data.getHours() >= 10 ? data.getHours() : '0' + data.getHours()) + ":" + (data.getMinutes() >= 10 ? data.getMinutes() : '0' + data.getMinutes()) + ":" + (data.getSeconds() >= 10 ? data.getSeconds() : '0' + data.getSeconds());
 }
 exports.formatTime = formatTime;
+function Bytes2Num(format, buf, offset, length) {
+    var bLittleEndian = (format[0] == "<");
+    var jdv = new jdataView_1.default(buf, offset, length, bLittleEndian);
+    var typ = format[1];
+    if (typ == "B") {
+        return jdv.getUint8();
+    }
+    else if (typ == "H") {
+        return jdv.getUint16();
+    }
+    else if (typ == "I" || typ == 'L') {
+        return jdv.getUint32();
+    }
+    else if (typ == "Q") {
+        var bigNum = jdv.getUint64();
+        var value = bigNum.valueOf();
+        // if (bigNum.hi > 0) {
+        if (!Number.isSafeInteger(value)) {
+            throw new Error(value + " exceeds MAX_SAFE_INTEGER. Precision may be lost");
+        }
+        return value;
+    }
+    else {
+        throw new Error("Don't support to convert to type of number: " + typ);
+    }
+}
+exports.Bytes2Num = Bytes2Num;
+function Num2Bytes(format, num) {
+    // let bLittleEndian = (format[0] == "<");
+    var endian = (format[0] == "<") ? 'LE' : 'BE';
+    var typ = format[1];
+    if (typ == "L") {
+        var buf = Buffer.alloc(4);
+        var fcn = "buf.writeUInt32" + endian + "(" + num + ")";
+        eval(fcn);
+        return buf;
+    }
+    else if (typ == "Q") {
+        var buf = Buffer.allocUnsafe(8);
+        var fcn = "buf.writeBigUInt64" + endian + "(64)";
+        eval(fcn);
+        return buf;
+    }
+    else {
+        throw new Error("Don't support convert from type of number: " + typ);
+    }
+}
+exports.Num2Bytes = Num2Bytes;
+function DecodeBytes(buf, code) {
+    if (code === void 0) { code = 'utf-8'; }
+    var decoder = new TextDecoder(code);
+    return decoder.decode(buf);
+}
+exports.DecodeBytes = DecodeBytes;
+// export function BufferConcat(a: Buffer, b: Buffer): Buffer {
+//     let c = Buffer.alloc(a.length + b.length);
+//     c.set(a);
+//     c.set(b, a.length);
+//     return c;
+// }
+function BufferConcat(firstBuf) {
+    var bufAry = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        bufAry[_i - 1] = arguments[_i];
+    }
+    var lenOfBuf = firstBuf.length;
+    for (var _a = 0, bufAry_1 = bufAry; _a < bufAry_1.length; _a++) {
+        var buf = bufAry_1[_a];
+        lenOfBuf += buf.length;
+    }
+    var c = Buffer.alloc(lenOfBuf);
+    c.set(firstBuf);
+    var offset = firstBuf.length;
+    for (var _b = 0, bufAry_2 = bufAry; _b < bufAry_2.length; _b++) {
+        var buf = bufAry_2[_b];
+        c.set(buf, offset);
+        offset += buf.length;
+    }
+    return c;
+}
+exports.BufferConcat = BufferConcat;
+function Adler32FromBuffer(data) {
+    // notice that adler32 returns signed value
+    var retOfAdler32Sign = ADLER32.buf(data);
+    var a = new Uint32Array([retOfAdler32Sign]);
+    return a[0];
+}
+exports.Adler32FromBuffer = Adler32FromBuffer;
 //# sourceMappingURL=utils.js.map

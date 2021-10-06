@@ -264,6 +264,17 @@ var dictApp = /** @class */ (function (_super) {
     dictApp.prototype.AddTabs = function () {
         var _this = this;
         var html = "\n\t\t\t\t\t\t\t<div id = \"toggle_example\" align = \"right\">- Hide Examples</div>\n\t\t\t\t\t\t\t<p></p>";
+        for (var _i = 0, _a = JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs)); _i < _a.length; _i++) {
+            var tab = _a[_i];
+            var dictBase = this._dictMap.get(tab.dict);
+            if (dictBase) {
+                var name_1 = dictBase.szName;
+                var tabName = tab.Name;
+                this._logger.info("AddTab: " + tabName + " with dict: " + name_1);
+                this._win.webContents.send("gui", "AddTab", tabName, name_1, html);
+                this._dictId = tabName;
+            }
+        }
         this._dictMap.forEach(function (dict, tabId) {
             var name = dict.szName;
             _this._logger.info("AddTab: " + tabId + ", " + name);
@@ -272,8 +283,7 @@ var dictApp = /** @class */ (function (_super) {
         });
         // self.get_browser().ExecuteFunction("BindSwitchTab");
         this._win.webContents.send("gui", "BindSwitchTab");
-        // switch to dict1
-        this._dictId = "dict1";
+        // switch to default tab
         this._curDictBase = this.get_curDB();
         this._dictParseFun = this._curDictBase.get_parseFun();
         // self.get_browser().ExecuteFunction("ActiveTab", this._dictId);
