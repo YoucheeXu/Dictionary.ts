@@ -75,8 +75,7 @@ export abstract class ElectronApp {
 
         try {
             await dictBase.Open();
-        }
-        catch (e) {
+        } catch (e) {
             this._logger.error(`Fail to open ${dictSrc}, because of ${e}`);
             return;
         }
@@ -108,49 +107,51 @@ export abstract class ElectronApp {
         let debugLvl = 'INFO';
         if (this._bDebug == true) {
             debugLvl = 'DEBUG';
-            let logFile = path.join(this._startPath, debugCfg.file);
-            console.log("logFile: " + logFile);
-
-            // %r time in toLocaleTimeString format
-            // %p log level
-            // %c log category
-            // %h hostname
-            // %m log data
-            // %d date, formatted - default is ISO8601, format options are: ISO8601, ISO8601_WITH_TZ_OFFSET, ABSOLUTE, DATE, or any string compatible with the date-format library. e.g. %d{DATE}, %d{yyyy/MM/dd-hh.mm.ss}
-            // %% % - for when you want a literal % in your output
-            // %n newline
-            // %z process id (from process.pid)
-            // %f full path of filename (requires enableCallStack: true on the category, see configuration object)
-            // %f{depth} path’s depth let you chose to have only filename (%f{1}) or a chosen number of directories
-            // %l line number (requires enableCallStack: true on the category, see configuration object)
-            // %o column postion (requires enableCallStack: true on the category, see configuration object)
-            // %s call stack (requires enableCallStack: true on the category, see configuration object)
-            // %x{<tokenname>} add dynamic tokens to your log. Tokens are specified in the tokens parameter.
-            // %X{<tokenname>} add values from the Logger context. Tokens are keys into the context values.
-            // %[ start a coloured block (colour will be taken from the log level, similar to colouredLayout)
-            // %] end a coloured block
-            log4js.configure({
-                appenders: {
-                    consoleAppender: {
-                        type: 'console',
-                        layout: {
-                            type: 'pattern',
-                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
-                        }
-                    },
-                    dictLogs: {
-                        type: 'file', filename: logFile, category: this.name,
-                        layout: {
-                            type: 'pattern',
-                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
-                        }
-                    },
-                },
-                categories: {
-                    default: { appenders: ['consoleAppender', 'dictLogs'], level: debugLvl, enableCallStack: true },
-                },
-            });
         }
+
+        let logFile = path.join(this._startPath, debugCfg.file);
+        console.log("logFile: " + logFile);
+
+        // %r time in toLocaleTimeString format
+        // %p log level
+        // %c log category
+        // %h hostname
+        // %m log data
+        // %d date, formatted - default is ISO8601, format options are: ISO8601, ISO8601_WITH_TZ_OFFSET, ABSOLUTE, DATE, or any string compatible with the date-format library. e.g. %d{DATE}, %d{yyyy/MM/dd-hh.mm.ss}
+        // %% % - for when you want a literal % in your output
+        // %n newline
+        // %z process id (from process.pid)
+        // %f full path of filename (requires enableCallStack: true on the category, see configuration object)
+        // %f{depth} path’s depth let you chose to have only filename (%f{1}) or a chosen number of directories
+        // %l line number (requires enableCallStack: true on the category, see configuration object)
+        // %o column postion (requires enableCallStack: true on the category, see configuration object)
+        // %s call stack (requires enableCallStack: true on the category, see configuration object)
+        // %x{<tokenname>} add dynamic tokens to your log. Tokens are specified in the tokens parameter.
+        // %X{<tokenname>} add values from the Logger context. Tokens are keys into the context values.
+        // %[ start a coloured block (colour will be taken from the log level, similar to colouredLayout)
+        // %] end a coloured block
+        log4js.configure({
+            appenders: {
+                consoleAppender: {
+                    type: 'console',
+                    layout: {
+                        type: 'pattern',
+                        pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                    }
+                },
+                dictLogs: {
+                    type: 'file', filename: logFile, category: this.name,
+                    layout: {
+                        type: 'pattern',
+                        pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                    }
+                },
+            },
+            categories: {
+                default: { appenders: ['consoleAppender', 'dictLogs'], level: debugLvl, enableCallStack: true },
+            },
+        });
+
 
         this._logger = log4js.getLogger('dictLogs');
         globalVar.Logger = this._logger;
@@ -177,19 +178,24 @@ export abstract class ElectronApp {
 
         let wordsDictCfg = this._cfg.WordsDict;
         let dictSrc = path.join(this._startPath, wordsDictCfg.Dict);
-        this._wordsDict = new WordsDict(wordsDictCfg.Name, dictSrc);
-        await this._wordsDict.Open();
+        try {
+            this._wordsDict = new WordsDict(wordsDictCfg.Name, dictSrc);
+            await this._wordsDict.Open();
+        }
+        catch (e) {
+            this._logger.error(`Fail to open ${dictSrc}, because of ${e}`);
+        }
 
         let audioCfg = JSON.parse(JSON.stringify(this._cfg['AudioBases']))[0];
         let audioFile = path.join(this._startPath, audioCfg.Audio);
         let audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
         if (audioFormatCfg.Type == 'ZIP') {
-            this._audioBase = new AuidoArchive(audioCfg.Name, audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
             try {
-                await this._audioBase.Open();;
+                this._audioBase = new AuidoArchive(audioCfg.Name, audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
+                await this._audioBase.Open();
             }
             catch (e) {
-                this._logger.error(`Fail to open ${dictSrc}, because of ${e}`);
+                this._logger.error(`Fail to open ${audioFile}, because of ${e}`);
             }
 
             if (audioCfg.Download) {

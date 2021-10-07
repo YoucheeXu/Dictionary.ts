@@ -83,24 +83,35 @@ var dictApp = /** @class */ (function (_super) {
     }
     dictApp.prototype.ReadAndConfigure = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var usrCfg, progressFile;
+            var usrsCfg, defaultUsr, _i, usrsCfg_1, usrCfg, progressFile;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, _super.prototype.ReadAndConfigure.call(this)];
                     case 1:
                         _a.sent();
-                        usrCfg = JSON.parse(JSON.stringify(this._cfg['Users']))[0];
+                        usrsCfg = JSON.parse(JSON.stringify(this._cfg['Users']));
+                        defaultUsr = this._cfg.Dictionary.User;
+                        _i = 0, usrsCfg_1 = usrsCfg;
+                        _a.label = 2;
+                    case 2:
+                        if (!(_i < usrsCfg_1.length)) return [3 /*break*/, 6];
+                        usrCfg = usrsCfg_1[_i];
+                        if (!(usrCfg.Name == defaultUsr)) return [3 /*break*/, 5];
                         progressFile = path.join(this._startPath, usrCfg.Progress);
                         this._usrProgress = new UsrProgress_1.UsrProgress();
                         return [4 /*yield*/, this._usrProgress.Open(progressFile, "New")];
-                    case 2:
+                    case 3:
                         _a.sent();
                         return [4 /*yield*/, this._usrProgress.ExistTable("New")];
-                    case 3:
+                    case 4:
                         if ((_a.sent()) == false) {
                             this._usrProgress.NewTable("New");
                         }
-                        return [2 /*return*/, true];
+                        return [3 /*break*/, 6];
+                    case 5:
+                        _i++;
+                        return [3 /*break*/, 2];
+                    case 6: return [2 /*return*/, true];
                 }
             });
         });
@@ -262,11 +273,10 @@ var dictApp = /** @class */ (function (_super) {
         // this.FillMenus();
     };
     dictApp.prototype.AddTabs = function () {
-        var _this = this;
         var html = "\n\t\t\t\t\t\t\t<div id = \"toggle_example\" align = \"right\">- Hide Examples</div>\n\t\t\t\t\t\t\t<p></p>";
         for (var _i = 0, _a = JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs)); _i < _a.length; _i++) {
             var tab = _a[_i];
-            var dictBase = this._dictMap.get(tab.dict);
+            var dictBase = this._dictMap.get(tab.Dict);
             if (dictBase) {
                 var name_1 = dictBase.szName;
                 var tabName = tab.Name;
@@ -275,15 +285,16 @@ var dictApp = /** @class */ (function (_super) {
                 this._dictId = tabName;
             }
         }
-        this._dictMap.forEach(function (dict, tabId) {
-            var name = dict.szName;
-            _this._logger.info("AddTab: " + tabId + ", " + name);
-            _this._win.webContents.send("gui", "AddTab", tabId, name, html);
-            _this._dictId = tabId;
-        });
+        // this._dictMap.forEach((dict: DictBase, tabId: string) => {
+        //     let name = dict.szName;
+        //     this._logger.info(`Add tab: ${tabId}, dict: ${name}`);
+        //     this._win.webContents.send("gui", "AddTab", tabId, name, html);
+        //     this._dictId = tabId;
+        // });
         // self.get_browser().ExecuteFunction("BindSwitchTab");
         this._win.webContents.send("gui", "BindSwitchTab");
         // switch to default tab
+        this._dictId = this._cfg.Dictionary.Tab;
         this._curDictBase = this.get_curDB();
         this._dictParseFun = this._curDictBase.get_parseFun();
         // self.get_browser().ExecuteFunction("ActiveTab", this._dictId);

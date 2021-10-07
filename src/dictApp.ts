@@ -20,15 +20,22 @@ export class dictApp extends ElectronApp {
     public async ReadAndConfigure(): Promise<boolean> {
         await super.ReadAndConfigure();
 
-        let usrCfg = JSON.parse(JSON.stringify(this._cfg['Users']))[0];
-        // let progressFile = path.join(this._startPath, usrCfg.Progress).replace(/\\/g, '/');
-        let progressFile = path.join(this._startPath, usrCfg.Progress);
-        this._usrProgress = new UsrProgress();
-        await this._usrProgress.Open(progressFile, "New");
-        if (await this._usrProgress.ExistTable("New") == false) {
-            this._usrProgress.NewTable("New");
-        }
+        let usrsCfg = JSON.parse(JSON.stringify(this._cfg['Users']));
 
+        let defaultUsr = this._cfg.Dictionary.User;
+
+        for (let usrCfg of usrsCfg) {
+            // let progressFile = path.join(this._startPath, usrCfg.Progress).replace(/\\/g, '/');
+            if (usrCfg.Name == defaultUsr) {
+                let progressFile = path.join(this._startPath, usrCfg.Progress);
+                this._usrProgress = new UsrProgress();
+                await this._usrProgress.Open(progressFile, "New");
+                if (await this._usrProgress.ExistTable("New") == false) {
+                    this._usrProgress.NewTable("New");
+                }
+                break;
+            }
+        }
         return true;
     }
 
@@ -150,9 +157,8 @@ export class dictApp extends ElectronApp {
         const html = `\n							<div id = "toggle_example" align = "right">- Hide Examples</div>
 							<p></p>`;
 
-
         for (let tab of JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs))) {
-            let dictBase = this._dictMap.get(tab.dict);
+            let dictBase = this._dictMap.get(tab.Dict);
             if (dictBase) {
                 let name = dictBase.szName;
                 let tabName = tab.Name;
@@ -162,17 +168,18 @@ export class dictApp extends ElectronApp {
             }
         }
 
-        this._dictMap.forEach((dict: DictBase, tabId: string) => {
-            let name = dict.szName;
-            this._logger.info(`AddTab: ${tabId}, ${name}`);
-            this._win.webContents.send("gui", "AddTab", tabId, name, html);
-            this._dictId = tabId;
-        });
+        // this._dictMap.forEach((dict: DictBase, tabId: string) => {
+        //     let name = dict.szName;
+        //     this._logger.info(`Add tab: ${tabId}, dict: ${name}`);
+        //     this._win.webContents.send("gui", "AddTab", tabId, name, html);
+        //     this._dictId = tabId;
+        // });
 
         // self.get_browser().ExecuteFunction("BindSwitchTab");
         this._win.webContents.send("gui", "BindSwitchTab");
 
         // switch to default tab
+        this._dictId = this._cfg.Dictionary.Tab;
         this._curDictBase = this.get_curDB();
         this._dictParseFun = this._curDictBase.get_parseFun();
         // self.get_browser().ExecuteFunction("ActiveTab", this._dictId);

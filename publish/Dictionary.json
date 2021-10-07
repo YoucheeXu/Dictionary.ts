@@ -96,20 +96,20 @@
 				"Dict": "Google"
 			},
 			{
-				"Name": "15000",
-				"Dict": "15000"
+				"Name": "牛津英语搭配词典",
+				"Dict": "牛津英语搭配词典"
 			},
 			{
-				"Name": "Collins COBUILD",
-				"Dict": "Collins COBUILD"
+				"Name": "15000",
+				"Dict": "15000"
 			}
 		],
-		"DictBase": "Google",
+		"Tab": "牛津英语搭配词典",
 		"WordsDict": "Words",
 		"AudioBase": "Google",
 		"User": "anonymous",
 		"Debug": {
-			"bEnable": true,
+			"bEnable": false,
 			"file": "log/Dictionary.log"
 		}
 	},

@@ -134,7 +134,7 @@ var ElectronApp = /** @class */ (function () {
     };
     ElectronApp.prototype.ReadAndConfigure = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _this, debugCfg, debugLvl, logFile, common, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, dictBasesCfg, _a, dictBasesCfg_1, dictBaseCfg, dictSrc_1, download, wordsDictCfg, dictSrc, audioCfg, audioFile, audioFormatCfg, e_2, missCfg;
+            var _this, debugCfg, debugLvl, logFile, common, agentCfg, bIEAgent, activeAgent, agentInfo, _i, agentInfo_1, agent, dictBasesCfg, _a, dictBasesCfg_1, dictBaseCfg, dictSrc_1, download, wordsDictCfg, dictSrc, e_2, audioCfg, audioFile, audioFormatCfg, e_3, missCfg;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -151,48 +151,48 @@ var ElectronApp = /** @class */ (function () {
                         debugLvl = 'INFO';
                         if (this._bDebug == true) {
                             debugLvl = 'DEBUG';
-                            logFile = path.join(this._startPath, debugCfg.file);
-                            console.log("logFile: " + logFile);
-                            // %r time in toLocaleTimeString format
-                            // %p log level
-                            // %c log category
-                            // %h hostname
-                            // %m log data
-                            // %d date, formatted - default is ISO8601, format options are: ISO8601, ISO8601_WITH_TZ_OFFSET, ABSOLUTE, DATE, or any string compatible with the date-format library. e.g. %d{DATE}, %d{yyyy/MM/dd-hh.mm.ss}
-                            // %% % - for when you want a literal % in your output
-                            // %n newline
-                            // %z process id (from process.pid)
-                            // %f full path of filename (requires enableCallStack: true on the category, see configuration object)
-                            // %f{depth} path’s depth let you chose to have only filename (%f{1}) or a chosen number of directories
-                            // %l line number (requires enableCallStack: true on the category, see configuration object)
-                            // %o column postion (requires enableCallStack: true on the category, see configuration object)
-                            // %s call stack (requires enableCallStack: true on the category, see configuration object)
-                            // %x{<tokenname>} add dynamic tokens to your log. Tokens are specified in the tokens parameter.
-                            // %X{<tokenname>} add values from the Logger context. Tokens are keys into the context values.
-                            // %[ start a coloured block (colour will be taken from the log level, similar to colouredLayout)
-                            // %] end a coloured block
-                            log4js.configure({
-                                appenders: {
-                                    consoleAppender: {
-                                        type: 'console',
-                                        layout: {
-                                            type: 'pattern',
-                                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
-                                        }
-                                    },
-                                    dictLogs: {
-                                        type: 'file', filename: logFile, category: this.name,
-                                        layout: {
-                                            type: 'pattern',
-                                            pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
-                                        }
-                                    },
-                                },
-                                categories: {
-                                    default: { appenders: ['consoleAppender', 'dictLogs'], level: debugLvl, enableCallStack: true },
-                                },
-                            });
                         }
+                        logFile = path.join(this._startPath, debugCfg.file);
+                        console.log("logFile: " + logFile);
+                        // %r time in toLocaleTimeString format
+                        // %p log level
+                        // %c log category
+                        // %h hostname
+                        // %m log data
+                        // %d date, formatted - default is ISO8601, format options are: ISO8601, ISO8601_WITH_TZ_OFFSET, ABSOLUTE, DATE, or any string compatible with the date-format library. e.g. %d{DATE}, %d{yyyy/MM/dd-hh.mm.ss}
+                        // %% % - for when you want a literal % in your output
+                        // %n newline
+                        // %z process id (from process.pid)
+                        // %f full path of filename (requires enableCallStack: true on the category, see configuration object)
+                        // %f{depth} path’s depth let you chose to have only filename (%f{1}) or a chosen number of directories
+                        // %l line number (requires enableCallStack: true on the category, see configuration object)
+                        // %o column postion (requires enableCallStack: true on the category, see configuration object)
+                        // %s call stack (requires enableCallStack: true on the category, see configuration object)
+                        // %x{<tokenname>} add dynamic tokens to your log. Tokens are specified in the tokens parameter.
+                        // %X{<tokenname>} add values from the Logger context. Tokens are keys into the context values.
+                        // %[ start a coloured block (colour will be taken from the log level, similar to colouredLayout)
+                        // %] end a coloured block
+                        log4js.configure({
+                            appenders: {
+                                consoleAppender: {
+                                    type: 'console',
+                                    layout: {
+                                        type: 'pattern',
+                                        pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                                    }
+                                },
+                                dictLogs: {
+                                    type: 'file', filename: logFile, category: this.name,
+                                    layout: {
+                                        type: 'pattern',
+                                        pattern: '%d{yyyy-MM-dd hh:mm:ss} %-5p [%l@%f{1}] - %m'
+                                    }
+                                },
+                            },
+                            categories: {
+                                default: { appenders: ['consoleAppender', 'dictLogs'], level: debugLvl, enableCallStack: true },
+                            },
+                        });
                         this._logger = log4js.getLogger('dictLogs');
                         globalInterface_1.globalVar.Logger = this._logger;
                         common = JSON.parse(JSON.stringify(this._cfg[this.name].common));
@@ -225,33 +225,41 @@ var ElectronApp = /** @class */ (function () {
                     case 4:
                         wordsDictCfg = this._cfg.WordsDict;
                         dictSrc = path.join(this._startPath, wordsDictCfg.Dict);
+                        _b.label = 5;
+                    case 5:
+                        _b.trys.push([5, 7, , 8]);
                         this._wordsDict = new WordsDict_1.WordsDict(wordsDictCfg.Name, dictSrc);
                         return [4 /*yield*/, this._wordsDict.Open()];
-                    case 5:
+                    case 6:
                         _b.sent();
+                        return [3 /*break*/, 8];
+                    case 7:
+                        e_2 = _b.sent();
+                        this._logger.error("Fail to open " + dictSrc + ", because of " + e_2);
+                        return [3 /*break*/, 8];
+                    case 8:
                         audioCfg = JSON.parse(JSON.stringify(this._cfg['AudioBases']))[0];
                         audioFile = path.join(this._startPath, audioCfg.Audio);
                         audioFormatCfg = JSON.parse(JSON.stringify(audioCfg['Format']));
-                        if (!(audioFormatCfg.Type == 'ZIP')) return [3 /*break*/, 10];
-                        this._audioBase = new AuidoArchive_1.AuidoArchive(audioCfg.Name, audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
-                        _b.label = 6;
-                    case 6:
-                        _b.trys.push([6, 8, , 9]);
-                        return [4 /*yield*/, this._audioBase.Open()];
-                    case 7:
-                        _b.sent();
-                        ;
-                        return [3 /*break*/, 9];
-                    case 8:
-                        e_2 = _b.sent();
-                        this._logger.error("Fail to open " + dictSrc + ", because of " + e_2);
-                        return [3 /*break*/, 9];
+                        if (!(audioFormatCfg.Type == 'ZIP')) return [3 /*break*/, 13];
+                        _b.label = 9;
                     case 9:
+                        _b.trys.push([9, 11, , 12]);
+                        this._audioBase = new AuidoArchive_1.AuidoArchive(audioCfg.Name, audioFile, audioFormatCfg.Compression, audioFormatCfg.CompressLevel);
+                        return [4 /*yield*/, this._audioBase.Open()];
+                    case 10:
+                        _b.sent();
+                        return [3 /*break*/, 12];
+                    case 11:
+                        e_3 = _b.sent();
+                        this._logger.error("Fail to open " + audioFile + ", because of " + e_3);
+                        return [3 /*break*/, 12];
+                    case 12:
                         if (audioCfg.Download) {
                             this._audioBase.download = audioCfg.Download;
                         }
-                        _b.label = 10;
-                    case 10:
+                        _b.label = 13;
+                    case 13:
                         missCfg = JSON.parse(JSON.stringify(this._cfg.Miss));
                         this._miss_dict = path.join(this._startPath, missCfg.miss_dict);
                         this._miss_audio = path.join(this._startPath, missCfg.miss_audio);
@@ -495,7 +503,7 @@ var ElectronApp = /** @class */ (function () {
     };
     ElectronApp.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, ret, msg, srcFile, _b, ret, msg, srcFile, ret, e_3;
+            var _a, ret, msg, srcFile, _b, ret, msg, srcFile, ret, e_4;
             var _this_1 = this;
             return __generator(this, function (_c) {
                 switch (_c.label) {
@@ -553,8 +561,8 @@ var ElectronApp = /** @class */ (function () {
                         this._logger.info(ret);
                         return [3 /*break*/, 6];
                     case 5:
-                        e_3 = _c.sent();
-                        this._logger.error(e_3);
+                        e_4 = _c.sent();
+                        this._logger.error(e_4);
                         return [3 /*break*/, 6];
                     case 6: return [2 /*return*/];
                 }
