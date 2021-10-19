@@ -73,8 +73,8 @@
 		]
 	},
 	"Miss": {
-		"miss_dict": "miss.txt",
-		"miss_audio": "miss.txt"
+		"miss_dict": "log/miss.txt",
+		"miss_audio": "log/miss.txt"
 	},
 	"Dictionary":{
 		"common": {

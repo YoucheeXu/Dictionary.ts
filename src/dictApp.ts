@@ -10,7 +10,7 @@ import { UsrProgress } from "./components/UsrProgress";
 
 export class dictApp extends ElectronApp {
     private _dictId: string;
-    private _dictParseFun: string;
+
     private _dictSysMenu: string[] | any;
 
     constructor(startPath: string) {
@@ -181,7 +181,6 @@ export class dictApp extends ElectronApp {
         // switch to default tab
         this._dictId = this._cfg.Dictionary.Tab;
         this._curDictBase = this.get_curDB();
-        this._dictParseFun = this._curDictBase.get_parseFun();
         // self.get_browser().ExecuteFunction("ActiveTab", this._dictId);
         this._win.webContents.send("gui", "ActiveTab", this._dictId);
 
@@ -221,7 +220,6 @@ export class dictApp extends ElectronApp {
         this._logger.info("switch to tab: " + tabId);
         this._dictId = tabId;
         this._curDictBase = this.get_curDB();
-        this._dictParseFun = this._curDictBase.get_parseFun();
     }
 
     public get_curDB(): DictBase {
@@ -372,7 +370,7 @@ export class dictApp extends ElectronApp {
             this._logger.error(`Fail to read ${word} from ${this._wordsDict.szName}, because of ${e}.`);
         }
 
-        this._win.webContents.send("QueryWord", this._dictParseFun, word, this._dictId, dict, audio, bNew, level, nStars);
+        this._win.webContents.send("QueryWord", "dictHtml", word, this._dictId, dict, audio, bNew, level, nStars);
 
         // this._lastWord = word;
     }

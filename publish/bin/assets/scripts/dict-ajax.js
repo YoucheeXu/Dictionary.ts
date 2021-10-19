@@ -51,29 +51,6 @@ function mark_new(bNew) {
     }
 }
 
-function dictJson(word, tabId, dict, audio, bNew, level, nStars) {
-    if ($('#panel1 first').html() == 'false') {
-        return;
-    }
-    try {
-        let obj = JSON.parse(dict);
-        let tabAlign = '\t\t\t\t\t\t\t';
-        let display = '\r\n' + process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
-
-        $('#' + tabId + ' p').html(display);
-        $('.Word').html(load_word(word, audio, level));
-        load_new(bNew, function (bSetNew) {
-            ipcRenderer.send('dictApp', 'markNew', word, bSetNew);
-        });
-        load_starts(nStars);
-        loadPlayer();
-    } catch (error) {
-        log('error', error, true);
-    }
-
-    $('#panel1 first').html('false');
-}
-
 function dictHtml(word, tabId, dict, audio, bNew, level, nStars) {
     if ($('#panel1 first').html() == 'false') {
         return;
@@ -94,101 +71,11 @@ function dictHtml(word, tabId, dict, audio, bNew, level, nStars) {
     $('#panel1 first').html('false');
 }
 
-function google_search() {
-    // alert(google_search)
-    if ($('#panel1 first').html() == 'false') {
-        // alert("google_first: " + $('#panel1 first').html());
-        return;
-    }
-    debugger;
-    // let word = $('#queryword').html();
-    // word = word.replace(/\ /g, "_");
-    let word = get_word();
-    // alert(word)
-
-    let furl =
-        'http://www.google.com/dictionary/json?callback=dict_api.callbacks.id100&q=test&sl=en&tl=en&restrict=pr%2Cde&client=te';
-    let furl2 = 'http://dictionary.so8848.com/ajax_search/?q=class';
-    let curl2 = '../dict/Google/' + word.substr(0, 1) + '/' + word + '.json';
-
-    let url = '';
-    if (word == 'class2') {
-        url = furl2;
-    } else {
-        url = curl2;
-    }
-    // alert(document.documentMode);
-    // alert("google_url: " + url);
-
-    $.ajax({
-        type: 'GET',
-        url: url,
-        datatype: 'json',
-        cache: false,
-        //async: false,
-        success: function (data) {
-            let obj = eval('(' + data + ')');
-            if (obj.ok != false) {
-                let obj = eval('(' + obj.info + ')');
-                let display = process_primary(obj.primaries);
-                $('#panel1 p').html(display);
-                loadPlayer();
-                //changeSound();
-                /*if (display.length > 1000) {
-					$('#button_ads').attr('style', '');
-				}
-				$.get('http://dictionary.so8848.com/suggestion', {
-					q : word
-				}, function (data) {
-					$('.wordtype').first().before(data);
-				});*/
-                // window.external.OnSaveHtml(display);
-                // alert("google_success: " + word);
-            } else {
-                /*$.get('http://dictionary.so8848.com/suggestion', {
-					q : word
-				}, function (data) {
-					$('#toggle_example').first().after(data.replace("Similar", "Wow, not in the dict. Check out the suggested"));
-					alert("fail: " + data);
-				});
-				alert("fail: " + word);*/
-                google_suggest(word);
-                // alert("no such " + word + " in google");
-                window.external.wrongJson(word);
-            }
-        },
-        /*error: function(err){
-			$('#panel1 p').html("can't find " + word + " in google");
-            // alert("can't find " + word + " in google");
-		}*/
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            // alert(XMLHttpRequest.status);
-            // alert();
-            // alert('读取超时，请检查网络连接');
-            $('#panel1 p').html(
-                'Error occur when find ' +
-                    word +
-                    ' in google' +
-                    '<br>' +
-                    XMLHttpRequest.status +
-                    '<br>' +
-                    XMLHttpRequest.readyState +
-                    '<br>' +
-                    textStatus
-            );
-            // alert("error occur when find " + word + " in google");
-        },
-    });
-
-    $('#panel1 first').html('false');
-}
-
 function google_suggest(word) {
-    let curl2 = 'http://dictionary.so8848.com/suggestion/?q=' + word;
-    // alert(curl2);
+    let curl = 'http://dictionary.so8848.com/suggestion/?q=' + word;
     $.ajax({
         type: 'get',
-        url: curl2,
+        url: curl,
         datatype: 'json',
         cache: false,
         //async: false,
@@ -196,7 +83,6 @@ function google_suggest(word) {
             $('#toggle_example')
                 .first()
                 .after(data.replace('Similar', 'Wow, not in the dict. Check out the suggested'));
-            // alert("google_suggest fail: " + data);
         },
         error: function (err) {
             $('#panel1 p').html("can't find the suggestion of " + word + ' in google');
@@ -205,10 +91,7 @@ function google_suggest(word) {
 }
 
 function ajax_search() {
-    // word = $('#queryword').html();
-    // word = word.replace(/\ /g, "_");
     let word = get_word();
-    // alert("ajax_search: " + word);
 
     $.get(
         'http://dictionary.so8848.com/ajax_search',
@@ -292,10 +175,8 @@ function collocation_search() {
         // alert("collocation_first: " + $('#panel2 first').html());
         return;
     }
-    // word = $('#queryword').html();
-    // word = word.replace(/\ /g, "_");
+
     let word = get_word();
-    // alert("collocation: " + word);
 
     $.get(
         'http://dictionary.so8848.com/ajax_collocation_search',
@@ -391,11 +272,7 @@ function wordnet_search() {
 }
 
 function googleenglish_search() {
-    // let word = $('#queryword').html();
-    // word = word.replace(/\ /g, "_");
     let word = get_word();
-    //let curl = getUrl(word);
-    // alert("googleenglish: " + word);
 
     let curl = '../dict/Google2/' + word.substr(0, 1) + '/' + word + '.json';
     let script = document.createElement('script');
@@ -417,7 +294,6 @@ function googleenglish_search() {
 $('#likes').on('click', () => {
     let catid;
     catid = $(this).attr('data-catid');
-    // alert("I am an alert box!");
     $.get(
         '/rango/like_category/',
         {

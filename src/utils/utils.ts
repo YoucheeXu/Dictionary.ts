@@ -204,13 +204,6 @@ export function DecodeBytes(buf: Buffer, code = 'utf-8'): string {
     return decoder.decode(buf);
 }
 
-// export function BufferConcat(a: Buffer, b: Buffer): Buffer {
-//     let c = Buffer.alloc(a.length + b.length);
-//     c.set(a);
-//     c.set(b, a.length);
-//     return c;
-// }
-
 export function BufferConcat(firstBuf: Buffer, ...bufAry: Buffer[]): Buffer {
     let lenOfBuf = firstBuf.length;
     for (let buf of bufAry) {

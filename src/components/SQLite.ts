@@ -48,7 +48,7 @@ export class SQLite {
         return new Promise((resolve, reject) => {
             _this.db.get(query, params, (err: Error | null, row: any) => {
                 if (err) {
-                    reject("Read error: " + err.message);
+                    reject(err);
                 }
                 else {
                     resolve(row);

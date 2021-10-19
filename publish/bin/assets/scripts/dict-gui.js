@@ -5,9 +5,6 @@ const { ipcRenderer } = require('electron');
 
 // $(document).ready(function () {
 $(function () {
-    // console.log("#btn_prev:" + $("#btn_prev:disabled").css('background-position-x'));
-    // console.log("#btn_next:" + $("#btn_next:disabled").css('background-position-x'));
-
     // top_panel
     initButton3('btn_menu', './skin/menu_btn.bmp', 31, 21);
     initButton3('btn_min', './skin/minimize_btn.bmp', 33, 21);
@@ -24,17 +21,12 @@ $(function () {
 
     // double click to query word
     document.addEventListener('dblclick', function (e) {
-        // console.log("Dobule Click!");
-        // console.log(e);
-        // console.log(e.target.id);
         if ('word_input' == e.target.id) return;
 
         let word =
             (document.selection && document.selection.createRange().text) ||
             (window.getSelection && window.getSelection().toString());
-        // log("info", "dblclick: " + word, false);
         word = word.trim();
-        // set_word(word);
         modifyValue('word_input', word);
         query_word(word);
     });
@@ -43,13 +35,6 @@ $(function () {
         data: [],
     });
 
-    // addTab("tab1", "tab1-haah", "");
-    // addTab("tab2", "tab2-haah", "");
-
-    // console.log("#btn_prev:" + $("#btn_prev:disabled").css('background-position-x'));
-    // console.log("#btn_next:" + $("#btn_next:disabled").css('background-position-x'));
-
-    // log('info', 'document_ready', false);
     ipcRenderer.send('dictApp', 'OnDocumentReady');
     ipcRenderer.on('gui', (event, fun, ...paras) => {
         let parasStr = paras.join('`, `');
@@ -82,10 +67,12 @@ function initButton3(id, img, width, height) {
             $(this).css('background-position-x', 0);
         }
     );
+
     // $('#' + id).mousedown(function () {
     $('#' + id).on('mousedown', function () {
         $(this).css('background-position-x', -2 * width);
     });
+
     // $('#' + id).mouseup(function () {
     $('#' + id).on('mouseup', function () {
         $(this).css('background-position-x', -1 * width);
@@ -114,6 +101,7 @@ function initButton4(id, img, width, height) {
     $('#' + id).on('mousedown', function () {
         $(this).css('background-position-x', -2 * width);
     });
+
     // $('#' + id).mouseup(function () {
     $('#' + id).on('mouseup', function () {
         $(this).css('background-position-x', -1 * width);
@@ -146,11 +134,6 @@ function hideButton(id, is) {
     } else $('#' + id).show();
 }
 
-/*
-function set_word(word) {
-    $('#word_input').val(word);
-}*/
-
 function hide_words_list() {
     $('#words_list').hide();
     $('#contents_box').css('width', 701);
@@ -159,12 +142,8 @@ function hide_words_list() {
 function get_word() {
     try {
         let word = $('#word_input').val();
-        // word = word.replace(/\ /g, "_");
         // 去除字符串内两头的空格
         word = word.replace(/^\s*|\s*$/g, '');
-        // word = word.trim();
-        // log("info", "get_word: " + word, false)
-        // set_word(word);
         modifyValue('word_input', word);
         return word;
     } catch (error) {
@@ -184,24 +163,11 @@ function query_word(word) {
         return false;
     }
 
-    // log("info", "query_word: " + word, false)
-
     try {
         if (window.external) {
-            // window.external.query_word(word);
             ipcRenderer.send('dictApp', 'QueryWord', word);
-            // ipcRenderer.sendSync("QueryWord", this.dictParseFun, word, this.dictId, dict, audio);
 
             ipcRenderer.on('QueryWord', (event, fun, ...paras) => {
-                // function buildName(firstName: string, ...restOfName: string[]) {
-                //     return firstName + " " + restOfName.join(" ");
-                //   }
-
-                // let parasStr = paras.join("', '");
-                // if (paras.length >= 1) {
-                //     parasStr = "'" + parasStr + "'";
-                // }
-
                 let parasStr = paras.join('`, `');
                 if (paras.length >= 1) {
                     parasStr = '`' + parasStr + '`';
@@ -228,7 +194,7 @@ function query_word(word) {
 
 function clear_input() {
     $('#word_input').val('');
-    // clear_words_list();
+
     clearOptions('words_list');
     $('#words_list').hide();
     $('#contents_box').css('width', 701);
@@ -239,7 +205,6 @@ function clear_input() {
 $(':button').on('click', function () {
     // disableLink(link);
     let id = $(this).attr('id');
-    // alert(id + " button is clicked!")
     console.log(id + ' is clicked!');
     if (id == 'btn_lookup') {
         hide_words_list();
@@ -248,7 +213,6 @@ $(':button').on('click', function () {
         clear_input();
     } else if (id == 'btn_menu') {
     } else if (window.external) {
-        // window.external.OnButtonClicked(id);
         ipcRenderer.send('dictApp', 'OnButtonClicked', id);
     }
 });
@@ -280,11 +244,9 @@ $(function () {
 
             // get current tabRef
             let tabRef = get_active_tab_href();
-            // log("info", tabRef, false);
 
             if (wordLen >= 1) {
                 $(tabRef + ' p').html('你输入的内容为：' + word);
-                // clear_words_list();
                 clearOptions('words_list');
                 $('#words_list').show();
                 $('#contents_box').css('width', 500);
@@ -313,7 +275,6 @@ function playMP3(mp3) {
 
 function TopMostOrNot() {
     if (window.external) {
-        // window.external.TopMostOrNot();
         ipcRenderer.sendSync('dictApp', 'TopMostOrNot');
     }
 }
@@ -322,18 +283,12 @@ function BindSwitchTab() {
     // $('.nav-tabs li a').click(function () {
     $('.nav-tabs li a').on('click', function () {
         try {
-            // var id = $(this).attr("id");
-            // log("info", "id: " + id, false);
-            // eval(id + "_search()");
-            // log("info", "SwitchTab", false);
-
             let tabId = $(this).attr('href');
             log('info', 'Switch to : ' + tabId, false);
             $(tabId + ' p').html('');
 
             tabId = tabId.slice(1);
             log('info', 'tabId: ' + tabId, false);
-            // var n = parseInt(tabNum);
             if (window.external) {
                 // window.external.switch_tab(tabId);
                 ipcRenderer.sendSync('dictApp', 'SwitchTab', tabId);
@@ -370,7 +325,6 @@ function bindMenus() {
         log('info', 'menuId: ' + menuId, false);
 
         if (window.external) {
-            // window.external.OnMenuClicked(menuId);
             ipcRenderer.sendSync('dictApp', 'OnMenuClicked', menuId);
         }
     });
@@ -383,18 +337,7 @@ function fill_menu(menuId, name) {
 }
 
 function active_menu(menuId) {
-    // var $a = $("#sys_menu a")
-    // console.log($a);
-    // href = $a.attr("href");
-
-    // var ch = $("#ff").find("input");
-    // console.log(ch.length);
-    // for (var i=0; i <ch.length; i++) {
-    // console.log(ch.eq(i));
-    // }
-
     var as = $('#sys_menu a');
-    // console.log(as.length);
     for (var i = 0; i < as.length; i++) {
         var a = as.eq(i);
         // console.log(a);

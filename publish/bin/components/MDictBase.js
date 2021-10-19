@@ -150,9 +150,6 @@ var MDictBase = /** @class */ (function (_super) {
             });
         });
     };
-    MDictBase.prototype.get_parseFun = function () {
-        return "dictHtml";
-    };
     MDictBase.prototype.query_word = function (word) {
         return __awaiter(this, void 0, void 0, function () {
             var value, recordStart, recordEnd, compressBlockStart, compressBlcokSize, decompressSize, recordBlockCompressed, recordBlockType, adler32, recordBlock, recordBlockTypeStr, recordRaw, record;

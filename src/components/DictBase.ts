@@ -22,8 +22,6 @@ export abstract class DictBase {
 
     abstract Open(): void;
 
-    abstract get_parseFun(): string;
-
     abstract query_word(word: string): Promise<[number, string]>
 
     abstract get_wordsLst(word: string, wdMatchLst: string[]): any;

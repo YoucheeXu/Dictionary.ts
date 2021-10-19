@@ -94,10 +94,6 @@ export class MDictBase extends DictBase {
         this._wordList = Array.from(this._wordMap.keys());
     }
 
-    public get_parseFun(): string {
-        return "dictHtml";
-    }
-
     public async query_word(word: string): Promise<[number, string]> {
         if (this._wordList.indexOf(word) != -1) {
             let value = this._wordMap.get(word);

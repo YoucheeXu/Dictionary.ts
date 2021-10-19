@@ -278,12 +278,6 @@ function DecodeBytes(buf, code) {
     return decoder.decode(buf);
 }
 exports.DecodeBytes = DecodeBytes;
-// export function BufferConcat(a: Buffer, b: Buffer): Buffer {
-//     let c = Buffer.alloc(a.length + b.length);
-//     c.set(a);
-//     c.set(b, a.length);
-//     return c;
-// }
 function BufferConcat(firstBuf) {
     var bufAry = [];
     for (var _i = 1; _i < arguments.length; _i++) {

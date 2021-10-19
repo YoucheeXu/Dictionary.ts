@@ -64,7 +64,7 @@ var SQLite = /** @class */ (function () {
         return new Promise(function (resolve, reject) {
             _this.db.get(query, params, function (err, row) {
                 if (err) {
-                    reject("Read error: " + err.message);
+                    reject(err);
                 }
                 else {
                     resolve(row);

@@ -115,7 +115,8 @@ export class ReciteWordsApp extends ElectronApp {
             }
 
             this.Show_Content(this._curWord, true);
-            this.PlayAudio();
+            this.PlayAudio
+                ();
 
             this._win.webContents.send("gui", "modifyValue", "numOfWords", `${this._curLearnPos + 1} of ${len}`);
 
@@ -420,29 +421,30 @@ export class ReciteWordsApp extends ElectronApp {
         let [retDict, dict] = await this._curDictBase.query_word(word);
         if (retDict < 0) {
             this.Record2File(this._miss_dict, "Dict of " + word + ": " + dict + "\n");
+            this._win.webContents.send("gui", "modifyValue", "txtArea", dict);
         } else if (retDict == 0) {
             if (this._curDictBase.download) {
                 this.TriggerDownload(this._curDictBase, word, dict);
             }
-        }
+        } else {
+            let txtLst = dict.split(";;");
+            if (retDict == 1) {
+                let symbol = txtLst[0];
+                this._win.webContents.send("gui", "modifyValue", "symbol", "[" + symbol + "]");
+                let meaning = txtLst[1];
 
-        let txtLst = dict.split(";;");
-        if (retDict == 1) {
-            let symbol = txtLst[0];
-            this._win.webContents.send("gui", "modifyValue", "symbol", "[" + symbol + "]");
-            let meaning = txtLst[1];
+                if (txtLst[2] == null) {
+                    txtLst[2] = "";
+                }
 
-            if (txtLst[2] == null) {
-                txtLst[2] = "";
+                let sentences = txtLst[2].replace(/\"/g, "\\\"");
+                sentences = sentences.replace(/\'/g, "\\\'");
+                sentences = sentences.replace(/\`/g, "\\\`");
+
+                let txtContent = meaning + "\n" + sentences.replace(/\/r\/n/g, "\n");
+                // txtContent = txtContent.replace(/<br>/g, "");
+                this._win.webContents.send("gui", "modifyValue", "txtArea", txtContent);
             }
-
-            let sentences = txtLst[2].replace(/\"/g, "\\\"");
-            sentences = sentences.replace(/\'/g, "\\\'");
-            sentences = sentences.replace(/\`/g, "\\\`");
-
-            let txtContent = meaning + "\n" + sentences.replace(/\/r\/n/g, "\n");
-            // txtContent = txtContent.replace(/<br>/g, "");
-            this._win.webContents.send("gui", "modifyValue", "txtArea", txtContent);
         }
     }
 
@@ -647,7 +649,7 @@ export class ReciteWordsApp extends ElectronApp {
         // Start to get forgotten words
         console.log("Start to get forgotten words");
         wdsLst.length = 0;
-        limit = allLimit - this._wordsMap.size;
+        limit = Math.min(allLimit - this._wordsMap.size, newWdsLimit);
         let numOfAllForgoten = 0, numOfSelForgotten = 0;
 
         if (await this._usrProgress.GetForgottenWordsLst(wdsLst)) {
@@ -677,7 +679,7 @@ export class ReciteWordsApp extends ElectronApp {
                 this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                 this._logger.debug(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
                 numOfSelOvrDue++;
-                if (numOfSelOvrDue >= limit) {
+                if (this._wordsMap.size >= allLimit) {
                     break;
                 }
             }
@@ -697,7 +699,7 @@ export class ReciteWordsApp extends ElectronApp {
                 this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                 this._logger.debug(`Word: ${wd.Word}, Familiar: ${wd.Familiar}, LastDate: ${wd.LastDate}, NextDate: ${wd.NextDate}`);
                 numOfSelDue++;
-                if (numOfSelDue >= limit) {
+                if (this._wordsMap.size >= allLimit) {
                     break;
                 }
             }

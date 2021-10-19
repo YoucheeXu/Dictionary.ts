@@ -103,20 +103,20 @@ var SDictBase = /** @class */ (function (_super) {
             });
         });
     };
-    SDictBase.prototype.get_parseFun = function () {
-        return "dictHtml";
-    };
     // [symbol, meaning, sentences]
     // TODO: to html
     SDictBase.prototype.query_word = function (word) {
         return __awaiter(this, void 0, void 0, function () {
-            var sql, r;
+            var sql, r, e_2, errMsg;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         sql = "select * from Words where word=?";
-                        return [4 /*yield*/, this._dict.get(sql, [word])];
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this._dict.get(sql, [word])];
+                    case 2:
                         r = _a.sent();
                         if (r === undefined) {
                             return [2 /*return*/, [-1, word + " not in dict!"]];
@@ -124,7 +124,12 @@ var SDictBase = /** @class */ (function (_super) {
                         else {
                             return [2 /*return*/, [1, r.Symbol + ";;" + r.Meaning + ";;" + r.Sentences]];
                         }
-                        return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        e_2 = _a.sent();
+                        errMsg = e_2.message;
+                        return [2 /*return*/, [-1, errMsg]];
+                    case 4: return [2 /*return*/];
                 }
             });
         });

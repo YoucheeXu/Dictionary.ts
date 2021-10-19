@@ -38,20 +38,21 @@ export class SDictBase extends DictBase {
         }
     }
 
-    public get_parseFun() {
-        return "dictHtml";
-    }
-
     // [symbol, meaning, sentences]
     // TODO: to html
     public async query_word(word: string): Promise<[number, string]> {
         let sql = "select * from Words where word=?";
-        let r: any = await this._dict.get(sql, [word]);
-        if (r === undefined) {
-            return [-1, `${word} not in dict!`];
-        }
-        else {
-            return [1, `${r.Symbol};;${r.Meaning};;${r.Sentences}`];
+        try {
+            let r: any = await this._dict.get(sql, [word]);
+            if (r === undefined) {
+                return [-1, `${word} not in dict!`];
+            }
+            else {
+                return [1, `${r.Symbol};;${r.Meaning};;${r.Sentences}`];
+            }
+        } catch (e) {
+            let errMsg = (e as Error).message;
+            return [-1, errMsg];
         }
     }
 

@@ -482,26 +482,29 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                         _a = _b.sent(), retDict = _a[0], dict = _a[1];
                         if (retDict < 0) {
                             this.Record2File(this._miss_dict, "Dict of " + word + ": " + dict + "\n");
+                            this._win.webContents.send("gui", "modifyValue", "txtArea", dict);
                         }
                         else if (retDict == 0) {
                             if (this._curDictBase.download) {
                                 this.TriggerDownload(this._curDictBase, word, dict);
                             }
                         }
-                        txtLst = dict.split(";;");
-                        if (retDict == 1) {
-                            symbol = txtLst[0];
-                            this._win.webContents.send("gui", "modifyValue", "symbol", "[" + symbol + "]");
-                            meaning = txtLst[1];
-                            if (txtLst[2] == null) {
-                                txtLst[2] = "";
+                        else {
+                            txtLst = dict.split(";;");
+                            if (retDict == 1) {
+                                symbol = txtLst[0];
+                                this._win.webContents.send("gui", "modifyValue", "symbol", "[" + symbol + "]");
+                                meaning = txtLst[1];
+                                if (txtLst[2] == null) {
+                                    txtLst[2] = "";
+                                }
+                                sentences = txtLst[2].replace(/\"/g, "\\\"");
+                                sentences = sentences.replace(/\'/g, "\\\'");
+                                sentences = sentences.replace(/\`/g, "\\\`");
+                                txtContent = meaning + "\n" + sentences.replace(/\/r\/n/g, "\n");
+                                // txtContent = txtContent.replace(/<br>/g, "");
+                                this._win.webContents.send("gui", "modifyValue", "txtArea", txtContent);
                             }
-                            sentences = txtLst[2].replace(/\"/g, "\\\"");
-                            sentences = sentences.replace(/\'/g, "\\\'");
-                            sentences = sentences.replace(/\`/g, "\\\`");
-                            txtContent = meaning + "\n" + sentences.replace(/\/r\/n/g, "\n");
-                            // txtContent = txtContent.replace(/<br>/g, "");
-                            this._win.webContents.send("gui", "modifyValue", "txtArea", txtContent);
                         }
                         return [2 /*return*/];
                 }
@@ -767,7 +770,7 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                         // Start to get forgotten words
                         console.log("Start to get forgotten words");
                         wdsLst.length = 0;
-                        limit = allLimit - this._wordsMap.size;
+                        limit = Math.min(allLimit - this._wordsMap.size, newWdsLimit);
                         numOfAllForgoten = 0, numOfSelForgotten = 0;
                         return [4 /*yield*/, this._usrProgress.GetForgottenWordsLst(wdsLst)];
                     case 9:
@@ -800,7 +803,7 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                                 this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                                 this._logger.debug("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
                                 numOfSelOvrDue++;
-                                if (numOfSelOvrDue >= limit) {
+                                if (this._wordsMap.size >= allLimit) {
                                     break;
                                 }
                             }
@@ -821,7 +824,7 @@ var ReciteWordsApp = /** @class */ (function (_super) {
                                 this._wordsMap.set(wd.Word, [Number(wd.Familiar), new Date(wd.LastDate), new Date(wd.NextDate)]);
                                 this._logger.debug("Word: " + wd.Word + ", Familiar: " + wd.Familiar + ", LastDate: " + wd.LastDate + ", NextDate: " + wd.NextDate);
                                 numOfSelDue++;
-                                if (numOfSelDue >= limit) {
+                                if (this._wordsMap.size >= allLimit) {
                                     break;
                                 }
                             }

@@ -386,7 +386,7 @@ export abstract class ElectronApp {
                     this._logger.error(`Fail to record ${something} in ${file}!`);
                     resolve(false);
                 } else {
-                    console.log(`Success to record ${something} in ${file}!`);
+                    // console.log(`Success to record ${something} in ${file}!`);
                     resolve(true);
                 }
             })

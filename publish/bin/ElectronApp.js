@@ -471,7 +471,7 @@ var ElectronApp = /** @class */ (function () {
                                 resolve(false);
                             }
                             else {
-                                console.log("Success to record " + something + " in " + file + "!");
+                                // console.log(`Success to record ${something} in ${file}!`);
                                 resolve(true);
                             }
                         });

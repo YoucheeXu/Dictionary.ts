@@ -296,7 +296,6 @@ var dictApp = /** @class */ (function (_super) {
         // switch to default tab
         this._dictId = this._cfg.Dictionary.Tab;
         this._curDictBase = this.get_curDB();
-        this._dictParseFun = this._curDictBase.get_parseFun();
         // self.get_browser().ExecuteFunction("ActiveTab", this._dictId);
         this._win.webContents.send("gui", "ActiveTab", this._dictId);
         this._curDictBase = this.get_curDB();
@@ -332,7 +331,6 @@ var dictApp = /** @class */ (function (_super) {
         this._logger.info("switch to tab: " + tabId);
         this._dictId = tabId;
         this._curDictBase = this.get_curDB();
-        this._dictParseFun = this._curDictBase.get_parseFun();
     };
     dictApp.prototype.get_curDB = function () {
         return this._dictMap.get(this._dictId);
@@ -500,7 +498,7 @@ var dictApp = /** @class */ (function (_super) {
                         this._logger.error("Fail to read " + word + " from " + this._wordsDict.szName + ", because of " + e_1 + ".");
                         return [3 /*break*/, 12];
                     case 12:
-                        this._win.webContents.send("QueryWord", this._dictParseFun, word, this._dictId, dict, audio, bNew, level, nStars);
+                        this._win.webContents.send("QueryWord", "dictHtml", word, this._dictId, dict, audio, bNew, level, nStars);
                         return [2 /*return*/];
                 }
             });
