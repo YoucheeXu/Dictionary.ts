@@ -5,7 +5,7 @@
 import JSZip from "jszip";
 import * as fs from "fs";
 // import * as path from "path";
-import { asyncCheck } from "../utils/utils";
+import { asyncCheck, pathExists } from "../utils/utils";
 
 export class ZipArchive {
     private zip: JSZip = new JSZip();
@@ -20,22 +20,25 @@ export class ZipArchive {
     }
 
     public async Open() {
-        let _this = this;
-        return new JSZip.external.Promise((resolve, reject) => {
-            fs.readFile(_this.zipFile, (err, data) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(data);
-                }
-            });
-        }).then(function (data: any) {
-            JSZip.loadAsync(data).then((zip) => {
-                _this.zip = zip;
-                _this.fileList = Object.keys(_this.zip.files);
-                // console.log(_this.fileList);
-            });
-        })
+		let _this = this;
+		if(pathExists(_this.zipFile)){        
+			return new JSZip.external.Promise((resolve, reject) => {
+				fs.readFile(_this.zipFile, (err, data) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(data);
+					}
+				});
+			}).then(function (data: any) {
+				JSZip.loadAsync(data).then((zip) => {
+					_this.zip = zip;
+					_this.fileList = Object.keys(_this.zip.files);
+				});
+			})
+		} else{
+			return Promise.resolve(`There is no ${_this.zipFile}`);
+		}
     }
 
     public addFile(fileName: string, datum: string | any): boolean {

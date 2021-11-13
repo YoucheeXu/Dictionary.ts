@@ -278,11 +278,10 @@ var dictApp = /** @class */ (function (_super) {
             var tab = _a[_i];
             var dictBase = this._dictMap.get(tab.Dict);
             if (dictBase) {
-                var name_1 = dictBase.szName;
+                var dictName = dictBase.szName;
                 var tabName = tab.Name;
-                this._logger.info("AddTab: " + tabName + " with dict: " + name_1);
-                this._win.webContents.send("gui", "AddTab", tabName, name_1, html);
-                this._dictId = tabName;
+                this._logger.info("AddTab: " + tabName + " with dict: " + dictName);
+                this._win.webContents.send("gui", "AddTab", dictName, tabName, html);
             }
         }
         // this._dictMap.forEach((dict: DictBase, tabId: string) => {
@@ -291,12 +290,10 @@ var dictApp = /** @class */ (function (_super) {
         //     this._win.webContents.send("gui", "AddTab", tabId, name, html);
         //     this._dictId = tabId;
         // });
-        // self.get_browser().ExecuteFunction("BindSwitchTab");
         this._win.webContents.send("gui", "BindSwitchTab");
         // switch to default tab
         this._dictId = this._cfg.Dictionary.Tab;
         this._curDictBase = this.get_curDB();
-        // self.get_browser().ExecuteFunction("ActiveTab", this._dictId);
         this._win.webContents.send("gui", "ActiveTab", this._dictId);
         this._curDictBase = this.get_curDB();
         // this._bHomeRdy = true;
@@ -495,7 +492,7 @@ var dictApp = /** @class */ (function (_super) {
                         return [3 /*break*/, 12];
                     case 11:
                         e_1 = _c.sent();
-                        this._logger.error("Fail to read " + word + " from " + this._wordsDict.szName + ", because of " + e_1 + ".");
+                        this._logger.error("Fail to read " + word + " from " + this._wordsDict.szSrcFile + ", because of " + e_1 + ".");
                         return [3 /*break*/, 12];
                     case 12:
                         this._win.webContents.send("QueryWord", "dictHtml", word, this._dictId, dict, audio, bNew, level, nStars);

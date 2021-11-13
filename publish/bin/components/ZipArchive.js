@@ -64,6 +64,8 @@ exports.ZipArchive = void 0;
 // https://stuk.github.io/jszip/documentation/howto/read_zip.html
 var jszip_1 = __importDefault(require("jszip"));
 var fs = __importStar(require("fs"));
+// import * as path from "path";
+var utils_1 = require("../utils/utils");
 var ZipArchive = /** @class */ (function () {
     function ZipArchive(zipFile, compression, compresslevel) {
         if (compression === void 0) { compression = ""; }
@@ -84,22 +86,27 @@ var ZipArchive = /** @class */ (function () {
             var _this;
             return __generator(this, function (_a) {
                 _this = this;
-                return [2 /*return*/, new jszip_1.default.external.Promise(function (resolve, reject) {
-                        fs.readFile(_this.zipFile, function (err, data) {
-                            if (err) {
-                                reject(err);
-                            }
-                            else {
-                                resolve(data);
-                            }
-                        });
-                    }).then(function (data) {
-                        jszip_1.default.loadAsync(data).then(function (zip) {
-                            _this.zip = zip;
-                            _this.fileList = Object.keys(_this.zip.files);
-                            // console.log(_this.fileList);
-                        });
-                    })];
+                if (utils_1.pathExists(_this.zipFile)) {
+                    return [2 /*return*/, new jszip_1.default.external.Promise(function (resolve, reject) {
+                            fs.readFile(_this.zipFile, function (err, data) {
+                                if (err) {
+                                    reject(err);
+                                }
+                                else {
+                                    resolve(data);
+                                }
+                            });
+                        }).then(function (data) {
+                            jszip_1.default.loadAsync(data).then(function (zip) {
+                                _this.zip = zip;
+                                _this.fileList = Object.keys(_this.zip.files);
+                            });
+                        })];
+                }
+                else {
+                    return [2 /*return*/, Promise.resolve("There is no " + _this.zipFile)];
+                }
+                return [2 /*return*/];
             });
         });
     };

@@ -22,6 +22,15 @@ export function RemoveDir(dir: string) {
     };
 }
 
+export function pathExists(p: string): boolean {
+    try {
+        fs.accessSync(p);
+    } catch (err) {
+        return false;
+    }
+    return true;
+}
+
 /**
 * 异步等待对象的生成，对象生成完成返回生成的对象
 * @param getter 对象的获取函数

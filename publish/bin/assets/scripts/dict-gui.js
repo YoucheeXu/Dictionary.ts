@@ -372,7 +372,7 @@ function modifyValue(id, valueStr) {
         console.log(`innerHTML of ${id}: ${ele.innerHTML}`);
         ele.innerHTML = valueStr;
     } else {
-        console.log(`value of ${id}: ${ele.value} to ${valueStr}.`);
+        console.log(`modify value of ${id}: from ${ele.value} to ${valueStr}.`);
         ele.value = valueStr;
     }
 }

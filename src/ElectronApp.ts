@@ -393,7 +393,7 @@ export abstract class ElectronApp {
         });
     }
 
-    public Log(lvl: string, msg: string) {
+    public log(lvl: string, msg: string) {
         if (lvl == "info") {
             this._logger.info(msg);
         }

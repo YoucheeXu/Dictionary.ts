@@ -14,7 +14,7 @@
   "license": "MIT",
   "build": {
     "appId": "Youchee.Dictionary",
-	"asar":false,
+	"asar": false,
     "productName": "Dictionary",
     "files": [
       "publish/bin/**"

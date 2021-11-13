@@ -58,7 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Adler32FromBuffer = exports.BufferConcat = exports.DecodeBytes = exports.Num2Bytes = exports.Bytes2Num = exports.formatTime = exports.formatDate = exports.randomArray2 = exports.randomArray = exports.asyncCheck = exports.RemoveDir = void 0;
+exports.Adler32FromBuffer = exports.BufferConcat = exports.DecodeBytes = exports.Num2Bytes = exports.Bytes2Num = exports.formatTime = exports.formatDate = exports.randomArray2 = exports.randomArray = exports.asyncCheck = exports.pathExists = exports.RemoveDir = void 0;
 var fs = __importStar(require("fs"));
 var jdataView_1 = __importDefault(require("jdataView"));
 var ADLER32 = __importStar(require("adler-32"));
@@ -84,6 +84,16 @@ function RemoveDir(dir) {
     ;
 }
 exports.RemoveDir = RemoveDir;
+function pathExists(p) {
+    try {
+        fs.accessSync(p);
+    }
+    catch (err) {
+        return false;
+    }
+    return true;
+}
+exports.pathExists = pathExists;
 /**
 * 异步等待对象的生成，对象生成完成返回生成的对象
 * @param getter 对象的获取函数

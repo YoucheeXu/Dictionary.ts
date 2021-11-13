@@ -479,7 +479,7 @@ var ElectronApp = /** @class */ (function () {
             });
         });
     };
-    ElectronApp.prototype.Log = function (lvl, msg) {
+    ElectronApp.prototype.log = function (lvl, msg) {
         if (lvl == "info") {
             this._logger.info(msg);
         }

@@ -160,11 +160,10 @@ export class dictApp extends ElectronApp {
         for (let tab of JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs))) {
             let dictBase = this._dictMap.get(tab.Dict);
             if (dictBase) {
-                let name = dictBase.szName;
+                let dictName = dictBase.szName;
                 let tabName = tab.Name;
-                this._logger.info(`AddTab: ${tabName} with dict: ${name}`);
-                this._win.webContents.send("gui", "AddTab", tabName, name, html);
-                this._dictId = tabName;
+                this._logger.info(`AddTab: ${tabName} with dict: ${dictName}`);
+                this._win.webContents.send("gui", "AddTab", dictName, tabName, html);
             }
         }
 
@@ -175,13 +174,11 @@ export class dictApp extends ElectronApp {
         //     this._dictId = tabId;
         // });
 
-        // self.get_browser().ExecuteFunction("BindSwitchTab");
         this._win.webContents.send("gui", "BindSwitchTab");
 
         // switch to default tab
         this._dictId = this._cfg.Dictionary.Tab;
         this._curDictBase = this.get_curDB();
-        // self.get_browser().ExecuteFunction("ActiveTab", this._dictId);
         this._win.webContents.send("gui", "ActiveTab", this._dictId);
 
         this._curDictBase = this.get_curDB();
@@ -367,7 +364,7 @@ export class dictApp extends ElectronApp {
             nStars = await this._wordsDict.GetStar(word);
         }
         catch (e) {
-            this._logger.error(`Fail to read ${word} from ${this._wordsDict.szName}, because of ${e}.`);
+            this._logger.error(`Fail to read ${word} from ${this._wordsDict.szSrcFile}, because of ${e}.`);
         }
 
         this._win.webContents.send("QueryWord", "dictHtml", word, this._dictId, dict, audio, bNew, level, nStars);
