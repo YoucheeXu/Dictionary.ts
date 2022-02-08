@@ -168,7 +168,7 @@ var dictApp = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 if (this._dQueue.IsFnshd()) {
                     console.info("Finshed to download all files.");
-                    timers_1.clearInterval(timerID);
+                    (0, timers_1.clearInterval)(timerID);
                     this._logger.info("Wait 2s to quit.");
                     setTimeout(function () {
                         cb();
@@ -338,6 +338,7 @@ var dictApp = /** @class */ (function (_super) {
         this._win.webContents.send("gui", "playMP3", audio);
         return true;
     };
+    // only for command line
     dictApp.prototype.QueryWord2 = function (word) {
         return __awaiter(this, void 0, void 0, function () {
             var retDict, dict, retAudio, audio;
@@ -376,6 +377,7 @@ var dictApp = /** @class */ (function (_super) {
             });
         });
     };
+    // only for gui
     dictApp.prototype.QueryWord = function (word, nDirect) {
         if (nDirect === void 0) { nDirect = 0; }
         return __awaiter(this, void 0, void 0, function () {

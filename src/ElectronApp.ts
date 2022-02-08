@@ -223,6 +223,7 @@ export abstract class ElectronApp {
             frame: false,
             webPreferences: {
                 nodeIntegration: true,
+                contextIsolation: false
             },
         });
 

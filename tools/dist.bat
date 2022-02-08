@@ -21,7 +21,8 @@ goto start
 set originFolder=.\dist
 set dictFolder=C:\Green\Dictionary\bin
 rmdir /q /s %dictFolder%
-xcopy /y/e %originFolder%\win-ia32-unpacked\* %dictFolder%\
+REM xcopy /y/e %originFolder%\win-ia32-unpacked\* %dictFolder%\
+xcopy /y/e %originFolder%\win-unpacked\* %dictFolder%\
 rmdir /q /s %originFolder%
 goto exit
 
@@ -29,7 +30,8 @@ goto exit
 set originFolder=.\dist
 set dictFolder=D:\Green\Dictionary\bin
 rmdir /q /s %dictFolder%
-xcopy /y/e %originFolder%\win-ia32-unpacked\* %dictFolder%\
+REM xcopy /y/e %originFolder%\win-ia32-unpacked\* %dictFolder%\
+xcopy /y/e %originFolder%\win-unpacked\* %dictFolder%\
 rmdir /q /s %originFolder%
 goto exit
 

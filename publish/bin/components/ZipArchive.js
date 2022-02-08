@@ -86,7 +86,7 @@ var ZipArchive = /** @class */ (function () {
             var _this;
             return __generator(this, function (_a) {
                 _this = this;
-                if (utils_1.pathExists(_this.zipFile)) {
+                if ((0, utils_1.pathExists)(_this.zipFile)) {
                     return [2 /*return*/, new jszip_1.default.external.Promise(function (resolve, reject) {
                             fs.readFile(_this.zipFile, function (err, data) {
                                 if (err) {

@@ -283,6 +283,7 @@ var ElectronApp = /** @class */ (function () {
                     frame: false,
                     webPreferences: {
                         nodeIntegration: true,
+                        contextIsolation: false
                     },
                 });
                 if (bShow) {

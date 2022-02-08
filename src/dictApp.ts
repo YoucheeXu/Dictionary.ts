@@ -230,6 +230,7 @@ export class dictApp extends ElectronApp {
         return true;
     }
 
+    // only for command line
     public async QueryWord2(word: string): Promise<void> {
         this._logger.info(`word = ${word};`);
 
@@ -258,6 +259,7 @@ export class dictApp extends ElectronApp {
         }
     }
 
+    // only for gui
     public async QueryWord(word: string, nDirect: number = 0): Promise<void> {
         // Not implemented
         /*

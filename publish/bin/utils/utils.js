@@ -60,7 +60,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Adler32FromBuffer = exports.BufferConcat = exports.DecodeBytes = exports.Num2Bytes = exports.Bytes2Num = exports.formatTime = exports.formatDate = exports.randomArray2 = exports.randomArray = exports.asyncCheck = exports.pathExists = exports.RemoveDir = void 0;
 var fs = __importStar(require("fs"));
-var jdataView_1 = __importDefault(require("jdataView"));
+var jdataview_1 = __importDefault(require("jdataview"));
 var ADLER32 = __importStar(require("adler-32"));
 function RemoveDir(dir) {
     if (fs.existsSync(dir) == true) {
@@ -236,7 +236,7 @@ function formatTime(data) {
 exports.formatTime = formatTime;
 function Bytes2Num(format, buf, offset, length) {
     var bLittleEndian = (format[0] == "<");
-    var jdv = new jdataView_1.default(buf, offset, length, bLittleEndian);
+    var jdv = new jdataview_1.default(buf, offset, length, bLittleEndian);
     var typ = format[1];
     if (typ == "B") {
         return jdv.getUint8();

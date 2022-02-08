@@ -67,10 +67,19 @@ export class MasterApp {
                 sel = 0;
             }
         } else {
+            // let ret = await dialog.showMessageBox({
+            //     type: "info",
+            //     message: "Select a application",
+            //     buttons: ["Dictionary", "ReciteWords"]
+            // });
+
+            // sel = ret.response;
+
             let ret = await dialog.showMessageBox({
                 type: "info",
                 message: "Select a application",
-                buttons: ["Dictionary", "ReciteWords"]
+                buttons: ["Dictionary", "ReciteWords"],
+                cancelId: 2         // 点击x号关闭返回值
             });
 
             sel = ret.response;
@@ -99,6 +108,7 @@ export class MasterApp {
         }
         else {
             app.quit();
+            return;
         }
 
         try {

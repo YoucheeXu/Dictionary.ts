@@ -11,3 +11,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - modified the fucntion of AddTabs to make the id of tab equal to the id of dict
 - the name of log function of ElectronApp doesn't equal the dict-gui.js to call
 - trigger error if there is no zip file
+- close "selection a application" dialog could not quit app

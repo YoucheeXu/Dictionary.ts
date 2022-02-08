@@ -112,7 +112,7 @@ var AuidoArchive = /** @class */ (function () {
         });
     };
     AuidoArchive.prototype.Close = function () {
-        utils_1.RemoveDir(this._tempAudioDir);
+        (0, utils_1.RemoveDir)(this._tempAudioDir);
         if (fs.existsSync(this._tempAudioDir) == false) {
             return [true, "OK to remove " + this._tempAudioDir];
         }

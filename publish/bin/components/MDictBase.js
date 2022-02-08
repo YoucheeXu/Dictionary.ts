@@ -171,15 +171,15 @@ var MDictBase = /** @class */ (function (_super) {
                         }
                         recordBlockCompressed = this.ReadBuffer(compressBlcokSize, compressBlockStart);
                         recordBlockType = recordBlockCompressed.slice(0, 4);
-                        adler32 = utils_1.Bytes2Num('>I', recordBlockCompressed.slice(4, 8));
+                        adler32 = (0, utils_1.Bytes2Num)('>I', recordBlockCompressed.slice(4, 8));
                         recordBlock = void 0;
                         recordBlockTypeStr = recordBlockType.join();
                         return [4 /*yield*/, this.Decompress(recordBlockTypeStr, recordBlockCompressed, decompressSize)];
                     case 1:
                         recordBlock = _a.sent();
                         // notice that adler32 return signed value
-                        assert_1.strict(utils_1.Adler32FromBuffer(recordBlock) == adler32);
-                        assert_1.strict(recordBlock.length == decompressSize);
+                        (0, assert_1.strict)((0, utils_1.Adler32FromBuffer)(recordBlock) == adler32);
+                        (0, assert_1.strict)(recordBlock.length == decompressSize);
                         recordRaw = recordBlock.slice(recordStart, recordEnd);
                         record = new TextDecoder(this._encoding).decode(recordRaw);
                         // record = record.trim('\x00');
@@ -234,15 +234,15 @@ var MDictBase = /** @class */ (function (_super) {
         // number of bytes of header text, big-endian, integer
         var bufOfSizeOfHeader = this.ReadBuffer(4);
         globalInterface_1.globalVar.Logger.debug("sizeOfHeaderRaw = " + bufOfSizeOfHeader.join());
-        var sizeOfHeader = utils_1.Bytes2Num(">I", bufOfSizeOfHeader);
+        var sizeOfHeader = (0, utils_1.Bytes2Num)(">I", bufOfSizeOfHeader);
         globalInterface_1.globalVar.Logger.debug("sizeOfHeader = " + sizeOfHeader);
         var bufOfBytesOfHeader = this.ReadBuffer(sizeOfHeader);
         // 4 bytes: adler32 checksum of header, in little endian
         var bufOfAdler32 = this.ReadBuffer(4);
         globalInterface_1.globalVar.Logger.debug("adler32Raw = " + bufOfAdler32.join());
-        var adler32 = utils_1.Bytes2Num("<I", bufOfAdler32);
+        var adler32 = (0, utils_1.Bytes2Num)("<I", bufOfAdler32);
         globalInterface_1.globalVar.Logger.debug("adler32 = " + adler32);
-        assert_1.strict(adler32 == utils_1.Adler32FromBuffer(bufOfBytesOfHeader));
+        (0, assert_1.strict)(adler32 == (0, utils_1.Adler32FromBuffer)(bufOfBytesOfHeader));
         // mark down key block offset
         // this._keyBlockOffset = this._posOfFd;
         globalInterface_1.globalVar.Logger.debug("offsetOfKeyBlk = " + this._posOfFd);
@@ -362,11 +362,11 @@ var MDictBase = /** @class */ (function (_super) {
                             block = this.Salsa_decrypt(block, encrypted_key);
                         }
                         offset = 0;
-                        numOfKeyBlocks = utils_1.Bytes2Num(this._formatOfNumber, block, offset, this._numOfWidth);
+                        numOfKeyBlocks = (0, utils_1.Bytes2Num)(this._formatOfNumber, block, offset, this._numOfWidth);
                         globalInterface_1.globalVar.Logger.debug("Number of Key Blocks = " + numOfKeyBlocks);
                         // number of entries
                         offset += this._numOfWidth;
-                        this._numOfEntries = utils_1.Bytes2Num(this._formatOfNumber, block, offset, this._numOfWidth);
+                        this._numOfEntries = (0, utils_1.Bytes2Num)(this._formatOfNumber, block, offset, this._numOfWidth);
                         ;
                         globalInterface_1.globalVar.Logger.debug("Number of Entries = " + this._numOfEntries);
                         // number of bytes of key block info after decompression
@@ -374,28 +374,28 @@ var MDictBase = /** @class */ (function (_super) {
                         sizeOfkeyBlockInfoDecomp = 0;
                         if (this._version >= 2.0) {
                             // Number of Bytes After Decompression
-                            sizeOfkeyBlockInfoDecomp = utils_1.Bytes2Num(this._formatOfNumber, block, offset, this._numOfWidth);
+                            sizeOfkeyBlockInfoDecomp = (0, utils_1.Bytes2Num)(this._formatOfNumber, block, offset, this._numOfWidth);
                             globalInterface_1.globalVar.Logger.debug("Number of Bytes of key block info After Decompression = " + sizeOfkeyBlockInfoDecomp);
                         }
                         // number of bytes of key block info
                         offset += this._numOfWidth;
-                        sizeOfkeyBlockInfo = utils_1.Bytes2Num(this._formatOfNumber, block, offset, this._numOfWidth);
+                        sizeOfkeyBlockInfo = (0, utils_1.Bytes2Num)(this._formatOfNumber, block, offset, this._numOfWidth);
                         globalInterface_1.globalVar.Logger.debug("Number of bytes of key block info = " + sizeOfkeyBlockInfo);
                         // number of bytes of key block
                         offset += this._numOfWidth;
-                        sizeOfKeyBlock = utils_1.Bytes2Num(this._formatOfNumber, block, offset, this._numOfWidth);
+                        sizeOfKeyBlock = (0, utils_1.Bytes2Num)(this._formatOfNumber, block, offset, this._numOfWidth);
                         globalInterface_1.globalVar.Logger.debug("Number of bytes of key block = " + sizeOfKeyBlock);
                         // 4 bytes: adler checksum of previous 5 numbers
                         if (this._version >= 2.0) {
-                            adler32 = utils_1.Bytes2Num('>I', this.ReadBuffer(4));
+                            adler32 = (0, utils_1.Bytes2Num)('>I', this.ReadBuffer(4));
                             globalInterface_1.globalVar.Logger.debug("adler checksum of previous 5 numbers = " + adler32);
-                            assert_1.strict(adler32 == utils_1.Adler32FromBuffer(block));
+                            (0, assert_1.strict)(adler32 == (0, utils_1.Adler32FromBuffer)(block));
                         }
                         keyBlockInfo = this.ReadBuffer(sizeOfkeyBlockInfo);
                         return [4 /*yield*/, this.DecodeKeyBlockInfo(keyBlockInfo, sizeOfkeyBlockInfoDecomp)];
                     case 1:
                         keyBlockInfoList = _b.sent();
-                        assert_1.strict(numOfKeyBlocks == keyBlockInfoList.length);
+                        (0, assert_1.strict)(numOfKeyBlocks == keyBlockInfoList.length);
                         keyBlockCompressed = this.ReadBuffer(sizeOfKeyBlock);
                         return [4 /*yield*/, this.DecodeKeyBlocks(keyBlockCompressed, keyBlockInfoList)];
                     case 2:
@@ -433,12 +433,12 @@ var MDictBase = /** @class */ (function (_super) {
             this._posOfFd += len;
         }
         var num = fs.readSync(this._fd, buf, 0, len, pos);
-        assert_1.strict(num == len);
+        (0, assert_1.strict)(num == len);
         return buf;
     };
     MDictBase.prototype.ReadNumber = function () {
         var buf = this.ReadBuffer(this._numOfWidth);
-        return utils_1.Bytes2Num(this._formatOfNumber, buf);
+        return (0, utils_1.Bytes2Num)(this._formatOfNumber, buf);
     };
     MDictBase.prototype.DecodeKeyBlockInfo = function (keyBlockInfoCompressed, sizeOfKeyBlockInfoDecomp) {
         return __awaiter(this, void 0, void 0, function () {
@@ -449,7 +449,7 @@ var MDictBase = /** @class */ (function (_super) {
                         if (!(this._version >= 2)) return [3 /*break*/, 2];
                         typOfCompr = keyBlockInfoCompressed.slice(0, 4).join();
                         globalInterface_1.globalVar.Logger.debug("Type of compression of keyBlockInfo = " + typOfCompr);
-                        assert_1.strict(typOfCompr == '2,0,0,0'); // zlib compression, \x02\x00\x00\x00
+                        (0, assert_1.strict)(typOfCompr == '2,0,0,0'); // zlib compression, \x02\x00\x00\x00
                         infoOfKeyBlockDecrypted = void 0;
                         if (this._encrypt & 0x02) {
                             infoOfKeyBlockDecrypted = this.MdxDecrypt(keyBlockInfoCompressed);
@@ -461,9 +461,9 @@ var MDictBase = /** @class */ (function (_super) {
                         return [4 /*yield*/, this.Decompress(typOfCompr, infoOfKeyBlockDecrypted, sizeOfKeyBlockInfoDecomp)];
                     case 1:
                         keyBlockInfo = _a.sent();
-                        adler32 = utils_1.Bytes2Num('>I', keyBlockInfoCompressed.slice(4, 8));
+                        adler32 = (0, utils_1.Bytes2Num)('>I', keyBlockInfoCompressed.slice(4, 8));
                         globalInterface_1.globalVar.Logger.debug("adler32 of keyBlockInfo = " + adler32);
-                        assert_1.strict(adler32 == utils_1.Adler32FromBuffer(keyBlockInfo));
+                        (0, assert_1.strict)(adler32 == (0, utils_1.Adler32FromBuffer)(keyBlockInfo));
                         return [3 /*break*/, 3];
                     case 2:
                         // no compression and encrypt
@@ -488,9 +488,9 @@ var MDictBase = /** @class */ (function (_super) {
                         globalInterface_1.globalVar.Logger.debug("lenOfKeyBlockInfo = " + lenOfKeyBlockInfo);
                         while (i < lenOfKeyBlockInfo) {
                             // number of entries in current key block
-                            numEntries += utils_1.Bytes2Num(this._formatOfNumber, keyBlockInfo.slice(i, i + this._numOfWidth));
+                            numEntries += (0, utils_1.Bytes2Num)(this._formatOfNumber, keyBlockInfo.slice(i, i + this._numOfWidth));
                             i += this._numOfWidth;
-                            sizeOftextHead = utils_1.Bytes2Num(byteFormat, keyBlockInfo.slice(i, i + byteWidth));
+                            sizeOftextHead = (0, utils_1.Bytes2Num)(byteFormat, keyBlockInfo.slice(i, i + byteWidth));
                             i += byteWidth;
                             // text head
                             if (this._encoding != 'UTF-16') {
@@ -499,7 +499,7 @@ var MDictBase = /** @class */ (function (_super) {
                             else {
                                 i += (sizeOftextHead + sizeOfTextTerm) * 2;
                             }
-                            textTailSize = utils_1.Bytes2Num(byteFormat, keyBlockInfo.slice(i, i + byteWidth));
+                            textTailSize = (0, utils_1.Bytes2Num)(byteFormat, keyBlockInfo.slice(i, i + byteWidth));
                             i += byteWidth;
                             // text tail
                             if (this._encoding != 'UTF-16') {
@@ -508,9 +508,9 @@ var MDictBase = /** @class */ (function (_super) {
                             else {
                                 i += (textTailSize + sizeOfTextTerm) * 2;
                             }
-                            sizeOfKeyBlkCompreSize = utils_1.Bytes2Num(this._formatOfNumber, keyBlockInfo.slice(i, i + this._numOfWidth));
+                            sizeOfKeyBlkCompreSize = (0, utils_1.Bytes2Num)(this._formatOfNumber, keyBlockInfo.slice(i, i + this._numOfWidth));
                             i += this._numOfWidth;
-                            sizeOfKeyBlkDecomprSize = utils_1.Bytes2Num(this._formatOfNumber, keyBlockInfo.slice(i, i + this._numOfWidth));
+                            sizeOfKeyBlkDecomprSize = (0, utils_1.Bytes2Num)(this._formatOfNumber, keyBlockInfo.slice(i, i + this._numOfWidth));
                             i += this._numOfWidth;
                             keyBlockInfoList.push([sizeOfKeyBlkCompreSize, sizeOfKeyBlkDecomprSize]);
                             // assert(numEntries == this._numOfEntries)
@@ -533,13 +533,13 @@ var MDictBase = /** @class */ (function (_super) {
         return data;
     };
     MDictBase.prototype.MdxDecrypt = function (compBlock) {
-        var tail = utils_1.Num2Bytes('<L', 0x3695);
+        var tail = (0, utils_1.Num2Bytes)('<L', 0x3695);
         globalInterface_1.globalVar.Logger.debug("Tail of key of compBlock = " + tail.join());
         var msg = compBlock.slice(4, 8);
         globalInterface_1.globalVar.Logger.debug("msg = " + msg.join());
-        var key = ripemd128_1.ripemd128(utils_1.BufferConcat(msg, tail));
+        var key = (0, ripemd128_1.ripemd128)((0, utils_1.BufferConcat)(msg, tail));
         globalInterface_1.globalVar.Logger.debug("Key of compBlock = " + key.join());
-        return utils_1.BufferConcat(compBlock.slice(0, 8), this.FastDecrypt(compBlock.slice(8), key));
+        return (0, utils_1.BufferConcat)(compBlock.slice(0, 8), this.FastDecrypt(compBlock.slice(8), key));
     };
     MDictBase.prototype.DecodeKeyBlocks = function (keyBlockCompressed, keyBlockInfoList) {
         return __awaiter(this, void 0, void 0, function () {
@@ -559,12 +559,12 @@ var MDictBase = /** @class */ (function (_super) {
                         start = i;
                         end = i + sizeOfcompressed;
                         keyBlockType = keyBlockCompressed.slice(start, start + 4);
-                        adler32 = utils_1.Bytes2Num('>I', keyBlockCompressed.slice(start + 4, start + 8));
+                        adler32 = (0, utils_1.Bytes2Num)('>I', keyBlockCompressed.slice(start + 4, start + 8));
                         keyBlockTypeStr = keyBlockType.join();
                         return [4 /*yield*/, this.Decompress(keyBlockTypeStr, keyBlockCompressed.slice(start, end), sizeOfDecompressed)];
                     case 2:
                         keyBlock = _a.sent();
-                        assert_1.strict(adler32 == utils_1.Adler32FromBuffer(keyBlock));
+                        (0, assert_1.strict)(adler32 == (0, utils_1.Adler32FromBuffer)(keyBlock));
                         keyList1 = this.DecodeKeyBlock(keyBlock);
                         keyList = keyList.concat(keyList1);
                         i += sizeOfcompressed;
@@ -585,7 +585,7 @@ var MDictBase = /** @class */ (function (_super) {
         var keyEndIndex = 0;
         while (keyStartIndex < keyBlock.length) {
             // the corresponding record's offset in record block
-            var keyId = utils_1.Bytes2Num(this._formatOfNumber, keyBlock.slice(keyStartIndex, keyStartIndex + this._numOfWidth));
+            var keyId = (0, utils_1.Bytes2Num)(this._formatOfNumber, keyBlock.slice(keyStartIndex, keyStartIndex + this._numOfWidth));
             var delimiter = void 0;
             var width = void 0;
             // key text ends with '\x00'
@@ -623,7 +623,7 @@ var MDictBase = /** @class */ (function (_super) {
                     case 0:
                         numRecordBlocks = this.ReadNumber();
                         numEntries = this.ReadNumber();
-                        assert_1.strict(numEntries == this._numOfEntries);
+                        (0, assert_1.strict)(numEntries == this._numOfEntries);
                         sizeOfRecordBlockInfo = this.ReadNumber();
                         sizeOfRecordBlock = this.ReadNumber();
                         recordBlockInfoList = new Array();
@@ -634,7 +634,7 @@ var MDictBase = /** @class */ (function (_super) {
                             recordBlockInfoList.push([compressedSize, decompressedSize]);
                             sizeCounter += this._numOfWidth * 2;
                         }
-                        assert_1.strict(sizeCounter == sizeOfRecordBlockInfo);
+                        (0, assert_1.strict)(sizeCounter == sizeOfRecordBlockInfo);
                         offset = 0;
                         i = 0;
                         sizeCounter = 0;
@@ -648,14 +648,14 @@ var MDictBase = /** @class */ (function (_super) {
                         compressBlockStart = this._fd.tellSync();
                         recordBlockCompressed = this.ReadBuffer(compressedSize);
                         recordBlockType = recordBlockCompressed.slice(0, 4);
-                        adler32 = utils_1.Bytes2Num('>I', recordBlockCompressed.slice(4, 8));
+                        adler32 = (0, utils_1.Bytes2Num)('>I', recordBlockCompressed.slice(4, 8));
                         recordBlockTypeStr = recordBlockType.join('');
                         return [4 /*yield*/, this.Decompress(recordBlockTypeStr, recordBlockCompressed, decompressedSize)];
                     case 2:
                         recordBlock = _a.sent();
                         // notice that adler32 return signed value
-                        assert_1.strict(adler32 == utils_1.Adler32FromBuffer(recordBlock));
-                        assert_1.strict(recordBlock.length == decompressedSize);
+                        (0, assert_1.strict)(adler32 == (0, utils_1.Adler32FromBuffer)(recordBlock));
+                        (0, assert_1.strict)(recordBlock.length == decompressedSize);
                         // split record block according to the offset info from key block
                         while (i < this._keyList.length) {
                             value_1 = this._keyList[i];
@@ -683,7 +683,7 @@ var MDictBase = /** @class */ (function (_super) {
                         _i++;
                         return [3 /*break*/, 1];
                     case 4:
-                        assert_1.strict(sizeCounter == sizeOfRecordBlock);
+                        (0, assert_1.strict)(sizeCounter == sizeOfRecordBlock);
                         return [2 /*return*/];
                 }
             });
@@ -700,7 +700,7 @@ var MDictBase = /** @class */ (function (_super) {
                         numOfRecordBlocks = this.ReadNumber();
                         globalInterface_1.globalVar.Logger.debug("Number of Record Blocks = " + numOfRecordBlocks);
                         numEntries = this.ReadNumber();
-                        assert_1.strict(numEntries == this._numOfEntries);
+                        (0, assert_1.strict)(numEntries == this._numOfEntries);
                         sizeOfRecordBlockInfo = this.ReadNumber();
                         globalInterface_1.globalVar.Logger.debug("sizeOfRecordBlockInfo = " + sizeOfRecordBlockInfo);
                         sizeOfRecordBlock = this.ReadNumber();
@@ -714,7 +714,7 @@ var MDictBase = /** @class */ (function (_super) {
                             recordBlockInfoList.push([sizeOfcompressed, sizeOfDecompressed]);
                             sizeCounter += this._numOfWidth * 2;
                         }
-                        assert_1.strict(sizeCounter == sizeOfRecordBlockInfo);
+                        (0, assert_1.strict)(sizeCounter == sizeOfRecordBlockInfo);
                         offset = 0;
                         i = 0;
                         sizeCounter = 0;
@@ -728,14 +728,14 @@ var MDictBase = /** @class */ (function (_super) {
                         strtOfComprBlk = this._posOfFd;
                         recordBlockCompressed = this.ReadBuffer(sizeOfCompressed);
                         recordBlockType = recordBlockCompressed.slice(0, 4);
-                        adler32 = utils_1.Bytes2Num('>I', recordBlockCompressed.slice(4, 8));
+                        adler32 = (0, utils_1.Bytes2Num)('>I', recordBlockCompressed.slice(4, 8));
                         recordBlockTypeStr = recordBlockType.join();
                         return [4 /*yield*/, this.Decompress(recordBlockTypeStr, recordBlockCompressed, sizeOfDecompressed)];
                     case 2:
                         recordBlock = _a.sent();
                         // notice that adler32 return signed value
-                        assert_1.strict(adler32 == utils_1.Adler32FromBuffer(recordBlock));
-                        assert_1.strict(recordBlock.length == sizeOfDecompressed);
+                        (0, assert_1.strict)(adler32 == (0, utils_1.Adler32FromBuffer)(recordBlock));
+                        (0, assert_1.strict)(recordBlock.length == sizeOfDecompressed);
                         // split record block according to the offset info from key block
                         // for word, recordStart in this._KeyDict.items(){
                         while (i < this._keyList.length) {
@@ -765,7 +765,7 @@ var MDictBase = /** @class */ (function (_super) {
                         _i++;
                         return [3 /*break*/, 1];
                     case 4:
-                        assert_1.strict(sizeCounter == sizeOfRecordBlock);
+                        (0, assert_1.strict)(sizeCounter == sizeOfRecordBlock);
                         return [2 /*return*/];
                 }
             });
@@ -800,7 +800,7 @@ var MDictBase = /** @class */ (function (_super) {
                 else if (typOfCompr == '1,0,0,0') { // lzo compression, \x01\x00\x00\x00
                     header = Buffer.alloc(5);
                     header[0] = 0xf0;
-                    header.set(utils_1.Num2Bytes('>I', sizeOfDecompr), 1);
+                    header.set((0, utils_1.Num2Bytes)('>I', sizeOfDecompr), 1);
                     // recordBlock = lzo.decompress(header + blkOfCompr.slice(8,));            
                     // return new Promise((resolve, reject) => {
                     // });
@@ -811,7 +811,7 @@ var MDictBase = /** @class */ (function (_super) {
                     return [2 /*return*/, new Promise(function (resolve, reject) {
                             zlib.unzip(blkOfCompr.slice(8), function (error, result) {
                                 if (!error) {
-                                    assert_1.strict(result.length == sizeOfDecompr);
+                                    (0, assert_1.strict)(result.length == sizeOfDecompr);
                                     resolve(result);
                                 }
                                 else {

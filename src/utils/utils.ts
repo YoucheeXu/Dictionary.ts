@@ -1,6 +1,6 @@
 import exp from "constants";
 import * as fs from "fs";
-import jDataView from "jdataView";
+import jDataView from "jdataview";
 import * as ADLER32 from 'adler-32';
 
 export function RemoveDir(dir: string) {

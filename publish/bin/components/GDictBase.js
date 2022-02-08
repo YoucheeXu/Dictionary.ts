@@ -102,7 +102,7 @@ var GDictBase = /** @class */ (function (_super) {
     GDictBase.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                utils_1.RemoveDir(this._tempDictDir);
+                (0, utils_1.RemoveDir)(this._tempDictDir);
                 if (fs.existsSync(this._tempDictDir) == false) {
                     return [2 /*return*/, [true, "OK to remove " + this._tempDictDir]];
                 }

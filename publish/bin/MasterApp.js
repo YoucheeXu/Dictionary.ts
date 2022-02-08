@@ -138,7 +138,8 @@ var MasterApp = /** @class */ (function () {
                     case 2: return [4 /*yield*/, electron_1.dialog.showMessageBox({
                             type: "info",
                             message: "Select a application",
-                            buttons: ["Dictionary", "ReciteWords"]
+                            buttons: ["Dictionary", "ReciteWords"],
+                            cancelId: 2 // 点击x号关闭返回值
                         })];
                     case 3:
                         ret = _a.sent();
@@ -166,6 +167,7 @@ var MasterApp = /** @class */ (function () {
                         }
                         else {
                             electron_1.app.quit();
+                            return [2 /*return*/];
                         }
                         try {
                             this._myApp.Run(argvs);

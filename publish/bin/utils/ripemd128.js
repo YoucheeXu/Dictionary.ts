@@ -20,7 +20,7 @@ var globalInterface_1 = require("./globalInterface");
 var utils_1 = require("./utils");
 // follows this description: http://homes.esat.kuleuven.be/~bosselae/ripemd/rmd128.txt
 function f(j, x, y, z) {
-    assert_1.strict(0 <= j && j < 64);
+    (0, assert_1.strict)(0 <= j && j < 64);
     if (j < 16) {
         return x ^ y ^ z;
     }
@@ -35,7 +35,7 @@ function f(j, x, y, z) {
     }
 }
 function K(j) {
-    assert_1.strict(0 <= j && j < 64);
+    (0, assert_1.strict)(0 <= j && j < 64);
     if (j < 16) {
         return 0x00000000;
     }
@@ -50,7 +50,7 @@ function K(j) {
     }
 }
 function Kp(j) {
-    assert_1.strict(0 <= j && j < 64);
+    (0, assert_1.strict)(0 <= j && j < 64);
     if (j < 16) {
         return 0x50a28be6;
     }
@@ -80,18 +80,18 @@ function padandsplit(message) {
     globalInterface_1.globalVar.Logger.debug("Len of padding = " + LenOfPad);
     var bufOfPad = Buffer.alloc(LenOfPad);
     bufOfPad[0] = 0x80;
-    var msgPad = utils_1.BufferConcat(message, bufOfPad);
+    var msgPad = (0, utils_1.BufferConcat)(message, bufOfPad);
     // ending with check bits (= little endian 64-bit int, 8 * data.length)
     // let end = Num2Bytes("<Q", len * 8);
     len = len << 3;
     var end32 = new Uint32Array([len, len >> 31 >> 1]);
     var end = Buffer.from(end32.buffer);
     globalInterface_1.globalVar.Logger.debug("End of Msg = " + end.join());
-    var newMsg = utils_1.BufferConcat(msgPad, end);
+    var newMsg = (0, utils_1.BufferConcat)(msgPad, end);
     var lenOfMsg = newMsg.length;
     globalInterface_1.globalVar.Logger.debug("Len of Msg after padding = " + lenOfMsg);
     globalInterface_1.globalVar.Logger.debug("msg after padding = " + newMsg.join());
-    assert_1.strict(newMsg.length % 64 == 0);
+    (0, assert_1.strict)(newMsg.length % 64 == 0);
     // return [
     //     [
     //         struct.unpack("<L", message[i + j: i + j + 4])[0]
@@ -106,7 +106,7 @@ function padandsplit(message) {
     }
     for (var i = 0; i < newMsg.length; i += 64) {
         for (var j = 0; j < 64; j += 4) {
-            var value = utils_1.Bytes2Num("<L", newMsg.slice(i + j, i + j + 4));
+            var value = (0, utils_1.Bytes2Num)("<L", newMsg.slice(i + j, i + j + 4));
             X[i / 64][j / 4] = value;
         }
     }
@@ -126,7 +126,7 @@ function add(firstNum) {
 }
 // swap high and low bits of a 32-bit int.
 function rol(s, x) {
-    assert_1.strict(s < 32);
+    (0, assert_1.strict)(s < 32);
     // globalVar.Logger.debug(`s = ${s} x = ${x}`);
     // >>> 无符号右移
     return (x << s | x >>> (32 - s)) & 0xffffffff;
@@ -193,15 +193,15 @@ function ripemd128(message) {
     globalInterface_1.globalVar.Logger.debug("h2 = " + hash[2]);
     globalInterface_1.globalVar.Logger.debug("h3 = " + hash[3]);
     // return Num2Bytes("<LLLL", hash[0], hash[1], hash[2], hash[3]);
-    var h0Bytes = utils_1.Num2Bytes('<L', hash[0]);
+    var h0Bytes = (0, utils_1.Num2Bytes)('<L', hash[0]);
     globalInterface_1.globalVar.Logger.debug("h0Bytes = " + h0Bytes.join());
-    var h1Bytes = utils_1.Num2Bytes('<L', hash[1]);
+    var h1Bytes = (0, utils_1.Num2Bytes)('<L', hash[1]);
     globalInterface_1.globalVar.Logger.debug("h1Bytes = " + h1Bytes.join());
-    var h2Bytes = utils_1.Num2Bytes('<L', hash[2]);
+    var h2Bytes = (0, utils_1.Num2Bytes)('<L', hash[2]);
     globalInterface_1.globalVar.Logger.debug("h2Bytes = " + h2Bytes.join());
-    var h3Bytes = utils_1.Num2Bytes('<L', hash[3]);
+    var h3Bytes = (0, utils_1.Num2Bytes)('<L', hash[3]);
     globalInterface_1.globalVar.Logger.debug("h3Bytes = " + h3Bytes.join());
-    return utils_1.BufferConcat(h0Bytes, h1Bytes, h2Bytes, h3Bytes);
+    return (0, utils_1.BufferConcat)(h0Bytes, h1Bytes, h2Bytes, h3Bytes);
 }
 exports.ripemd128 = ripemd128;
 // function hexstr(bstr) {

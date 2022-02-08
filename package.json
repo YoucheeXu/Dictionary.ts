@@ -7,14 +7,14 @@
     "build": "tsc",
     "watch": "tsc -w",
     "start": "cnpm run build && electron --d ./publish/bin/main.js",
-    "dist-win": "electron-builder --win --ia32"
+    "dist-win": "electron-builder --win --x64"
   },
   "keywords": [],
   "author": "Youchee Xu",
   "license": "MIT",
   "build": {
     "appId": "Youchee.Dictionary",
-	"asar": false,
+    "asar": true,
     "productName": "Dictionary",
     "files": [
       "publish/bin/**"
@@ -30,7 +30,6 @@
     "adler-32": "^1.3.0",
     "fast-xml-parser": "^3.20.3",
     "jdataview": "^2.5.0",
-    "jquery": "^3.5.1",
     "jszip": "^3.5.0",
     "log4js": "^6.3.0",
     "lzo-decompress": "^1.0.1",
@@ -42,7 +41,7 @@
     "@types/sqlite3": "^3.1.7",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
-    "electron": "11.1.0",
+    "electron": "^16.0.8",
     "electron-builder": "^22.10.5",
     "eslint": "^7.15.0",
     "eslint-plugin-html": "^6.1.1"
