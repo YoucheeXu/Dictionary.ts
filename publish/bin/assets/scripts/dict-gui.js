@@ -57,9 +57,8 @@ function initButton3(id, img, width, height) {
     $('#' + id).css('height', height);
     $('#' + id).css('outline', 'none');
     $('#' + id).css('background-position', '0px 0px');
-    // $('#' + id).hover(
-    $('#' + id).on(
-        'hover',
+
+    $('#' + id).hover(
         function () {
             $(this).css('background-position-x', -1 * width);
         },
@@ -86,9 +85,7 @@ function initButton4(id, img, width, height) {
     $('#' + id).css('outline', 'none');
     $('#' + id).css('background-position', '0px 0px');
 
-    // $('#' + id).hover(
-    $('#' + id).on(
-        'hover',
+    $('#' + id).hover(
         function () {
             $(this).css('background-position-x', -1 * width);
         },
