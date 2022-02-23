@@ -313,6 +313,8 @@ export abstract class ElectronApp {
         let download = owner.download;
         let mode = download.Mode;
         console.log(`mode: ${mode}`);
+        let ext = path.extname(localFile);
+        let typ = (ext == ".mp3") ? 2 : 1;
         if (mode == 'Dict') {
             let iterator = this._dictMap.entries();
             let r: IteratorResult<[string, DictBase]>;
@@ -330,14 +332,15 @@ export abstract class ElectronApp {
                                 owner.CheckAndAddFile(dFile);
                             });
                         } else {
-                            this._logger.error(`no audio in ${word} of ${download.Dict}.`);
+                            this.Info(-1, typ, word, `no expected resource in ${word} of ${download.Dict}.`);
                         }
                     } else {
                         this.Info(-1, 1, word, `no ${word} in the dict of ${download.Dict}`);
                     }
-                    break;
+                    return;
                 }
             }
+            this._logger.error(`can't download ${word}${ext} due to no ${download.Dict} in ${mode} mode.`);
         } else if (mode == "Direct") {
             let url = download.URL.replace(" ", "%20");
             url = url.replace("${word}", word);
@@ -362,10 +365,10 @@ export abstract class ElectronApp {
         if (ret < 0) {
             this._logger.error(msg);
             if (typ == 1) {
-                this.Record2File(this._miss_dict, `dict of ${word} : ${msg}\n`);
+                this.Record2File(this._miss_dict, `dict of ${word}: ${msg}\n`);
             }
             else if (typ == 2) {
-                this.Record2File(this._miss_audio, `audio of ${word} : ${msg}\n`);
+                this.Record2File(this._miss_audio, `audio of ${word}: ${msg}\n\n`);
             }
         }
         else if (ret = 1) {

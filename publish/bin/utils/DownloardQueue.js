@@ -21,6 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DownloardQueue = void 0;
 var fs = __importStar(require("fs"));
+var path = __importStar(require("path"));
 var globalInterface_1 = require("./globalInterface");
 var DownloardQueue = /** @class */ (function () {
     function DownloardQueue(_win) {
@@ -39,11 +40,18 @@ var DownloardQueue = /** @class */ (function () {
     DownloardQueue.prototype.Dealer = function (cb, word, dfile, progress, state, why) {
         console.log((progress * 100).toFixed(2) + "% of " + dfile + " was " + state + " to download!");
         var gApp = globalInterface_1.globalVar.app;
+        var ext = path.extname(dfile);
+        console.log(ext);
         switch (state) {
             case 'ongoing':
                 break;
             case 'fail':
-                gApp.Info(-1, 1, word, "Fail to download dict of " + word + ", because of " + why);
+                if (ext == ".json") {
+                    gApp.Info(-1, 1, word, "Fail to download dict of " + word + ", because of " + why);
+                }
+                else {
+                    gApp.Info(-1, 2, word, "Fail to download audio of " + word + ", because of " + why);
+                }
                 break;
             case 'done':
                 cb(dfile);

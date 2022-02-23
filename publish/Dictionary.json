@@ -96,12 +96,12 @@
 				"Dict": "Google"
 			},
 			{
-				"Name": "牛津英语搭配词典",
-				"Dict": "牛津英语搭配词典"
-			},
-			{
 				"Name": "T15000",
 				"Dict": "D15000"
+			},
+			{
+				"Name": "牛津英语搭配词典",
+				"Dict": "牛津英语搭配词典"
 			}
 		],
 		"Tab": "牛津英语搭配词典",
@@ -175,7 +175,7 @@
 			"bEnable": true,
 			"file": "log/ReciteWords.log"
 		},
-		"DictBase": "15000",
+		"DictBase": "D15000",
 		"WordsDict": "Words",
 		"AudioBase": "Google",
 		"User": "anonymous"

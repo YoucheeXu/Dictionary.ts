@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - the name of log function of ElectronApp doesn't equal the dict-gui.js to call
 - trigger error if there is no zip file
 - close "selection a application" dialog could not quit app
+- wrong to record error message
 
 ### Added
 

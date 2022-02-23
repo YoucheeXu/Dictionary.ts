@@ -21,11 +21,17 @@ export class DownloardQueue {
     private Dealer(cb: (file: string) => void, word: string, dfile: string, progress: number, state: string, why?: string) {
         console.log(`${(progress * 100).toFixed(2)}% of ${dfile} was ${state} to download!`);
         let gApp = globalVar.app;
+		let ext = path.extname(dfile);
+		console.log(ext);
         switch (state) {
             case 'ongoing':
                 break;
             case 'fail':
-                gApp.Info(-1, 1, word, `Fail to download dict of ${word}, because of ${why}`);
+				if (ext == ".json"){
+					gApp.Info(-1, 1, word, `Fail to download dict of ${word}, because of ${why}`);
+				} else{
+					gApp.Info(-1, 2, word, `Fail to download audio of ${word}, because of ${why}`);
+				}
                 break;
             case 'done':
                 cb(dfile);

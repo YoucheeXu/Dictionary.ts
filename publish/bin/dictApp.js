@@ -433,6 +433,9 @@ var dictApp = /** @class */ (function (_super) {
                             if (this._curDictBase.download) {
                                 this.TriggerDownload(this._curDictBase, word, dict);
                             }
+                            else {
+                                this.Record2File(this._miss_dict, "Dict of " + word + ": " + "No support to download.\n");
+                            }
                         }
                         if (!(retDict <= 0)) return [3 /*break*/, 3];
                         dict =
@@ -468,6 +471,10 @@ var dictApp = /** @class */ (function (_super) {
                         else if (retAudio == 0) {
                             if (this._audioBase.download) {
                                 this.TriggerDownload(this._audioBase, word, audio);
+                            }
+                            else {
+                                this.Record2File(this._miss_audio, "Audio of " + word + ": " + "No support to download.\n");
+                                this.Record2File(this._miss_audio, "\n");
                             }
                         }
                         if (retAudio <= 0) {

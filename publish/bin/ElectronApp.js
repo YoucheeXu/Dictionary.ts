@@ -377,13 +377,15 @@ var ElectronApp = /** @class */ (function () {
     };
     ElectronApp.prototype.TriggerDownload = function (owner, word, localFile) {
         return __awaiter(this, void 0, void 0, function () {
-            var download, mode, iterator, r, _a, id, dict, _b, ret, html, regEx, match, url, url;
+            var download, mode, ext, typ, iterator, r, _a, id, dict, _b, ret, html, regEx, match, url, url;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
                         download = owner.download;
                         mode = download.Mode;
                         console.log("mode: " + mode);
+                        ext = path.extname(localFile);
+                        typ = (ext == ".mp3") ? 2 : 1;
                         if (!(mode == 'Dict')) return [3 /*break*/, 5];
                         iterator = this._dictMap.entries();
                         r = void 0;
@@ -406,15 +408,17 @@ var ElectronApp = /** @class */ (function () {
                                 });
                             }
                             else {
-                                this._logger.error("no audio in " + word + " of " + download.Dict + ".");
+                                this.Info(-1, typ, word, "no expected resource in " + word + " of " + download.Dict + ".");
                             }
                         }
                         else {
                             this.Info(-1, 1, word, "no " + word + " in the dict of " + download.Dict);
                         }
-                        return [3 /*break*/, 4];
+                        return [2 /*return*/];
                     case 3: return [3 /*break*/, 1];
-                    case 4: return [3 /*break*/, 6];
+                    case 4:
+                        this._logger.error("can't download " + word + ext + " due to no " + download.Dict + " in " + mode + " mode.");
+                        return [3 /*break*/, 6];
                     case 5:
                         if (mode == "Direct") {
                             url = download.URL.replace(" ", "%20");
@@ -445,10 +449,10 @@ var ElectronApp = /** @class */ (function () {
         if (ret < 0) {
             this._logger.error(msg);
             if (typ == 1) {
-                this.Record2File(this._miss_dict, "dict of " + word + " : " + msg + "\n");
+                this.Record2File(this._miss_dict, "dict of " + word + ": " + msg + "\n");
             }
             else if (typ == 2) {
-                this.Record2File(this._miss_audio, "audio of " + word + " : " + msg + "\n");
+                this.Record2File(this._miss_audio, "audio of " + word + ": " + msg + "\n\n");
             }
         }
         else if (ret = 1) {
