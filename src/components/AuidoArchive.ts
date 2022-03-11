@@ -12,7 +12,7 @@ export class AuidoArchive {
     private _audioZip: ZipArchive;
     private _tempAudioDir: string;
 
-    constructor(readonly _name: string, readonly _srcFile: string, readonly _compression: string, readonly _compresslevel: string) {
+    constructor(readonly _szName: string, readonly _srcFile: string, readonly _compression: string, readonly _compresslevel: string) {
         this._szAudioArchive = path.basename(_srcFile);
         // console.log(this._szAudioArchive);
         let filePath = path.dirname(_srcFile);
@@ -35,8 +35,8 @@ export class AuidoArchive {
         this._audioZip = new ZipArchive(_srcFile, _compression, _compresslevel);
     }
 
-    public get name() {
-        return this._name;
+    public get szName() {
+        return this._szName;
     }
 
     public get srcFile() {

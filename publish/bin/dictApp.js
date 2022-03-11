@@ -381,7 +381,7 @@ var dictApp = /** @class */ (function (_super) {
     dictApp.prototype.QueryWord = function (word, nDirect) {
         if (nDirect === void 0) { nDirect = 0; }
         return __awaiter(this, void 0, void 0, function () {
-            var retDict, dict, retAudio, audio, bNew, familiar, level, nStars, e_1;
+            var retDict, dict, retAudio, audio, bNew, dictName, familiar, audioName, level, nStars, e_1;
             var _a, _b;
             var _this = this;
             return __generator(this, function (_c) {
@@ -434,7 +434,8 @@ var dictApp = /** @class */ (function (_super) {
                                 this.TriggerDownload(this._curDictBase, word, dict);
                             }
                             else {
-                                this.Record2File(this._miss_dict, "Dict of " + word + ": " + "No support to download.\n");
+                                dictName = this._curDictBase.szName;
+                                this.Record2File(this._miss_dict, "Dict of " + word + ": " + dictName + " doesn't support to download.\n");
                             }
                         }
                         if (!(retDict <= 0)) return [3 /*break*/, 3];
@@ -473,7 +474,8 @@ var dictApp = /** @class */ (function (_super) {
                                 this.TriggerDownload(this._audioBase, word, audio);
                             }
                             else {
-                                this.Record2File(this._miss_audio, "Audio of " + word + ": " + "No support to download.\n");
+                                audioName = this._audioBase.szName;
+                                this.Record2File(this._miss_audio, "Audio of " + word + ": " + audioName + " doesn't support to download.\n");
                                 this.Record2File(this._miss_audio, "\n");
                             }
                         }
@@ -486,6 +488,7 @@ var dictApp = /** @class */ (function (_super) {
                         if (retAudio == 1) {
                             this.Info(0, 2, "", "");
                         }
+                        dict = dict.replace(/\\/g, "/");
                         audio = audio.replace(/\\/g, "/");
                         level = "";
                         nStars = 0;

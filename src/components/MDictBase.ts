@@ -22,11 +22,11 @@ import * as fs from 'fs';
 import { rejects, strict as assert } from 'assert';
 
 import { globalVar } from "../utils/globalInterface";
-import { Bytes2Num, Num2Bytes, BufferConcat, Adler32FromBuffer } from "../utils/utils";
+import { Bytes2Num, Num2Bytes, BufferConcat, Adler32FromBuffer, RemoveDir } from "../utils/utils";
 
 // read from mdd, mdx
 export class MDictBase extends DictBase {
-    private _tempDir = "";
+    private _tempDictDir = "";
 
     private _fd: any;
     private _posOfFd = 0;
@@ -68,7 +68,18 @@ export class MDictBase extends DictBase {
         }
 
         // console.log(fileName);
-        this._tempDir = path.join(filePath, fileName);
+        this._tempDictDir = path.join(filePath, fileName);
+
+        let _this = this;
+        if (fs.existsSync(_this._tempDictDir) == false) {
+            fs.mkdir(_this._tempDictDir, function (error) {
+                if (error) {
+                    console.log(error);
+                    return false;
+                }
+                console.log('Success to create folder: ' + _this._tempDictDir);
+            })
+        }
 
         this._bSubstyle = false;
     }
@@ -95,7 +106,11 @@ export class MDictBase extends DictBase {
     }
 
     public async query_word(word: string): Promise<[number, string]> {
-        if (this._wordList.indexOf(word) != -1) {
+        let dictFile = path.join(this._tempDictDir, word + ".html");
+        if (fs.existsSync(dictFile) == true) {
+            return Promise.resolve([1, dictFile]);
+        }
+        else if (this._wordList.indexOf(word) != -1) {
             let value = this._wordMap.get(word);
             let recordStart = 0, recordEnd = 0, compressBlockStart = 0, compressBlcokSize = 0, decompressSize = 0;
             if (value) {
@@ -132,7 +147,11 @@ export class MDictBase extends DictBase {
             if (this._bSubstyle && this._stylesheet) {
                 record = this.SubstituteStylesheet(record);
             }
-            return [1, record];
+
+            let html = "<!DOCTYPE html><html><body>" + record + "</body></html>";
+            fs.writeFileSync(dictFile, html);
+
+            return [1, dictFile];
         } else {
             return [-1, "Word isn't in DictBase."];
         }
@@ -164,12 +183,30 @@ export class MDictBase extends DictBase {
     }
 
     public async Close(): Promise<[boolean, string]> {
+        let ret = false;
+        let msg = "";
+        let msg2 = "";
         try {
             fs.closeSync(this._fd);
-            return [true, ""];
+            ret = true;
         } catch (e) {
-            return [false, (e as Error).message];
+            msg = (e as Error).message;
         }
+
+        RemoveDir(this._tempDictDir);
+        if (fs.existsSync(this._tempDictDir) == false) {
+            msg2 = `OK to remove ${this._tempDictDir}`
+        } else {
+            msg2 = `Fail to remove ${this._tempDictDir}`;
+            ret = false;
+        }
+
+        if (msg.length != 0) {
+            msg = msg + ";" + msg2;
+        } else {
+            msg = msg2;
+        }
+        return [ret, msg];
     }
 
     private ReadHeader() {

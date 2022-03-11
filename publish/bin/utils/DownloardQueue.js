@@ -38,7 +38,7 @@ var DownloardQueue = /** @class */ (function () {
         }
     };
     DownloardQueue.prototype.Dealer = function (cb, word, dfile, progress, state, why) {
-        console.log((progress * 100).toFixed(2) + "% of " + dfile + " was " + state + " to download!");
+        console.log((progress * 100).toFixed(2) + "% of " + dfile + " was " + state + " to download");
         var gApp = globalInterface_1.globalVar.app;
         var ext = path.extname(dfile);
         console.log(ext);

@@ -93,31 +93,41 @@ var MDictBase = /** @class */ (function (_super) {
     __extends(MDictBase, _super);
     function MDictBase(name, srcFile, _bMdd, _passcode) {
         if (_bMdd === void 0) { _bMdd = false; }
-        var _this = _super.call(this, name, srcFile) || this;
-        _this._bMdd = _bMdd;
-        _this._passcode = _passcode;
-        _this._tempDir = "";
-        _this._posOfFd = 0;
-        _this._encoding = "";
-        _this._encrypt = 0;
-        _this._stylesheet = new Map();
-        _this._keyList = new Array();
+        var _this_1 = _super.call(this, name, srcFile) || this;
+        _this_1._bMdd = _bMdd;
+        _this_1._passcode = _passcode;
+        _this_1._tempDictDir = "";
+        _this_1._posOfFd = 0;
+        _this_1._encoding = "";
+        _this_1._encrypt = 0;
+        _this_1._stylesheet = new Map();
+        _this_1._keyList = new Array();
         // <word, [recordStart, recordEnd, compressBlockStart, compressedSize, decompressedSize]>;
-        _this._wordMap = new Map();
+        _this_1._wordMap = new Map();
         var filePath = path.dirname(srcFile);
         var fileName = "";
-        if (_this._bMdd) {
-            _this._encoding = 'UTF-16';
+        if (_this_1._bMdd) {
+            _this_1._encoding = 'UTF-16';
             fileName = path.basename(srcFile, ".mdd");
         }
         else {
-            _this._encoding = "";
+            _this_1._encoding = "";
             fileName = path.basename(srcFile, ".mdx");
         }
         // console.log(fileName);
-        _this._tempDir = path.join(filePath, fileName);
-        _this._bSubstyle = false;
-        return _this;
+        _this_1._tempDictDir = path.join(filePath, fileName);
+        var _this = _this_1;
+        if (fs.existsSync(_this._tempDictDir) == false) {
+            fs.mkdir(_this._tempDictDir, function (error) {
+                if (error) {
+                    console.log(error);
+                    return false;
+                }
+                console.log('Success to create folder: ' + _this._tempDictDir);
+            });
+        }
+        _this_1._bSubstyle = false;
+        return _this_1;
     }
     MDictBase.prototype.Open = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -152,11 +162,15 @@ var MDictBase = /** @class */ (function (_super) {
     };
     MDictBase.prototype.query_word = function (word) {
         return __awaiter(this, void 0, void 0, function () {
-            var value, recordStart, recordEnd, compressBlockStart, compressBlcokSize, decompressSize, recordBlockCompressed, recordBlockType, adler32, recordBlock, recordBlockTypeStr, recordRaw, record;
+            var dictFile, value, recordStart, recordEnd, compressBlockStart, compressBlcokSize, decompressSize, recordBlockCompressed, recordBlockType, adler32, recordBlock, recordBlockTypeStr, recordRaw, record, html;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this._wordList.indexOf(word) != -1)) return [3 /*break*/, 2];
+                        dictFile = path.join(this._tempDictDir, word + ".html");
+                        if (!(fs.existsSync(dictFile) == true)) return [3 /*break*/, 1];
+                        return [2 /*return*/, Promise.resolve([1, dictFile])];
+                    case 1:
+                        if (!(this._wordList.indexOf(word) != -1)) return [3 /*break*/, 3];
                         value = this._wordMap.get(word);
                         recordStart = 0, recordEnd = 0, compressBlockStart = 0, compressBlcokSize = 0, decompressSize = 0;
                         if (value) {
@@ -175,7 +189,7 @@ var MDictBase = /** @class */ (function (_super) {
                         recordBlock = void 0;
                         recordBlockTypeStr = recordBlockType.join();
                         return [4 /*yield*/, this.Decompress(recordBlockTypeStr, recordBlockCompressed, decompressSize)];
-                    case 1:
+                    case 2:
                         recordBlock = _a.sent();
                         // notice that adler32 return signed value
                         (0, assert_1.strict)((0, utils_1.Adler32FromBuffer)(recordBlock) == adler32);
@@ -187,8 +201,10 @@ var MDictBase = /** @class */ (function (_super) {
                         if (this._bSubstyle && this._stylesheet) {
                             record = this.SubstituteStylesheet(record);
                         }
-                        return [2 /*return*/, [1, record]];
-                    case 2: return [2 /*return*/, [-1, "Word isn't in DictBase."]];
+                        html = "<!DOCTYPE html><html><body>" + record + "</body></html>";
+                        fs.writeFileSync(dictFile, html);
+                        return [2 /*return*/, [1, dictFile]];
+                    case 3: return [2 /*return*/, [-1, "Word isn't in DictBase."]];
                 }
             });
         });
@@ -217,15 +233,33 @@ var MDictBase = /** @class */ (function (_super) {
     };
     MDictBase.prototype.Close = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var ret, msg, msg2;
             return __generator(this, function (_a) {
+                ret = false;
+                msg = "";
+                msg2 = "";
                 try {
                     fs.closeSync(this._fd);
-                    return [2 /*return*/, [true, ""]];
+                    ret = true;
                 }
                 catch (e) {
-                    return [2 /*return*/, [false, e.message]];
+                    msg = e.message;
                 }
-                return [2 /*return*/];
+                (0, utils_1.RemoveDir)(this._tempDictDir);
+                if (fs.existsSync(this._tempDictDir) == false) {
+                    msg2 = "OK to remove " + this._tempDictDir;
+                }
+                else {
+                    msg2 = "Fail to remove " + this._tempDictDir;
+                    ret = false;
+                }
+                if (msg.length != 0) {
+                    msg = msg + ";" + msg2;
+                }
+                else {
+                    msg = msg2;
+                }
+                return [2 /*return*/, [ret, msg]];
             });
         });
     };

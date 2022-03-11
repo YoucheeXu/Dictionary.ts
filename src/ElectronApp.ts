@@ -332,15 +332,16 @@ export abstract class ElectronApp {
                                 owner.CheckAndAddFile(dFile);
                             });
                         } else {
-                            this.Info(-1, typ, word, `no expected resource in ${word} of ${download.Dict}.`);
+                            this.Info(-1, typ, word, `no expected resource in ${word} of ${download.Dict}`);
                         }
                     } else {
-                        this.Info(-1, 1, word, `no ${word} in the dict of ${download.Dict}`);
+                        // this.Info(-1, 1, word, `no ${word} in the dict of ${download.Dict}`);
+						console.log(`no ${word} in the dict of ${download.Dict}`);
                     }
                     return;
                 }
             }
-            this._logger.error(`can't download ${word}${ext} due to no ${download.Dict} in ${mode} mode.`);
+            this._logger.error(`can't download ${word}${ext} due to no ${download.Dict} in ${mode} mode`);
         } else if (mode == "Direct") {
             let url = download.URL.replace(" ", "%20");
             url = url.replace("${word}", word);
@@ -348,7 +349,7 @@ export abstract class ElectronApp {
                 owner.CheckAndAddFile(dFile);
             });
         } else {
-            this._logger.error(`Not support to download ${localFile}, in ${mode} mode.`);
+            this._logger.error(`Not support to download ${localFile}, in ${mode} mode`);
         }
     }
 

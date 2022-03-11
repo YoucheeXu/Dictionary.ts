@@ -18,6 +18,17 @@ export class GDictBase extends DictBase {
         let fileName = path.basename(dictSrc, ".zip");
         // console.log(fileName);
         this._tempDictDir = path.join(filePath, fileName);
+
+        let _this = this;
+        if (fs.existsSync(_this._tempDictDir) == false) {
+            fs.mkdir(_this._tempDictDir, function (error) {
+                if (error) {
+                    console.log(error);
+                    return false;
+                }
+                console.log('Success to create folder: ' + _this._tempDictDir);
+            })
+        }
     }
 
     public async Open() {
@@ -36,12 +47,15 @@ export class GDictBase extends DictBase {
     public async query_word(word: string): Promise<[number, string]> {
         // fileName = os.path.join(word[0], word + ".json")
         let fileName = word[0] + "/" + word + ".json";
+		let dictFile = path.join(this._tempDictDir, word + ".html");
         let datum: string | any;
         let ret: boolean = false;
-        // let gApp = globalVar.app;
         let wordFile = "";
         try {
-            if (this._dictZip.bFileIn(fileName)) {
+			if (fs.existsSync(dictFile) == true) {
+                return Promise.resolve([1, dictFile]);
+            }
+            else if (this._dictZip.bFileIn(fileName)) {
                 [ret, datum] = await this._dictZip.readFileAsync(fileName);
                 if (!ret) {
                     return Promise.resolve([-1, `Fail to read ${word} in ${this.szName}`]);
@@ -59,10 +73,15 @@ export class GDictBase extends DictBase {
                 info = String(info).replace(/\\x/g, "\\u00");
                 let obj = JSON.parse(info);
                 let tabAlign = '\t\t\t\t\t\t\t';
-                let html = '\r\n' + this.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
+                let html = this.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
 
                 html = html.replace(/[\r\n]/g, "");
-                return Promise.resolve([1, html]);
+
+				fs.writeFileSync(dictFile, "<!DOCTYPE html><html><body>");
+				fs.writeFileSync(dictFile, html);
+				fs.writeFileSync(dictFile, "</body></html>");
+
+                return Promise.resolve([1, dictFile]);
             }
             else {
                 return Promise.resolve([-1, "Fail to read: " + word]);
@@ -72,7 +91,6 @@ export class GDictBase extends DictBase {
             if (fs.existsSync(wordFile)) {
                 fs.unlinkSync(wordFile);
             }
-            // console.error(e);
             let errMsg = (e as Error).message.replace("<", "").replace(">", "");
             return Promise.resolve([-1, errMsg]);
         }
@@ -98,16 +116,16 @@ export class GDictBase extends DictBase {
                 }
                 else {
                     // gApp.log("error", "%s isn't what we want!" %word)
-                    return gApp.Info(-1, 1, inWord, `Wrong word: We except '${word}', but we get '${inWord}'`);
+                    return gApp.Info(-1, 1, inWord, `Wrong word: We except '${word}', but we get '${inWord}' at ${this._szName}`);
                 }
             }
             else {
-                return gApp.Info(-1, 1, word, `No dict of ${word} in ${this.szName}.`);
+                return gApp.Info(-1, 1, word, `No dict of ${word} in ${this.szName}`);
             }
         }
         else {
             console.log(localFile + " doesn't exist");
-            return gApp.Info(-1, 1, word, "Doesn't exist dict of " + word);
+            return gApp.Info(-1, 1, word, `Doesn't exist dict of ${word} at ${this.szName}`);
         }
     }
 

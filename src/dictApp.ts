@@ -308,7 +308,8 @@ export class dictApp extends ElectronApp {
             if (this._curDictBase.download) {
                 this.TriggerDownload(this._curDictBase, word, dict);
             } else {
-                this.Record2File(this._miss_dict, "Dict of " + word + ": " + "No support to download.\n");
+				let dictName = this._curDictBase.szName;
+                this.Record2File(this._miss_dict, `Dict of ${word}: ${dictName} doesn't support to download.\n`);
             }
         }
 
@@ -345,7 +346,8 @@ export class dictApp extends ElectronApp {
             if (this._audioBase.download) {
                 this.TriggerDownload(this._audioBase, word, audio);
             } else {
-                this.Record2File(this._miss_audio, "Audio of " + word + ": " + "No support to download.\n");
+				let audioName = this._audioBase.szName;
+                this.Record2File(this._miss_audio, `Audio of ${word}: ${audioName} doesn't support to download.\n`);
                 this.Record2File(this._miss_audio, "\n");
             }
         }
@@ -362,6 +364,7 @@ export class dictApp extends ElectronApp {
             this.Info(0, 2, "", "");
         }
 
+        dict = dict.replace(/\\/g, "/");
         audio = audio.replace(/\\/g, "/");
 
         let level = "";

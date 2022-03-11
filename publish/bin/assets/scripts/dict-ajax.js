@@ -56,7 +56,7 @@ function dictHtml(word, tabId, dict, audio, bNew, level, nStars) {
         return;
     }
     try {
-        let display = dict;
+        let display = `\t\t\t\t\t\t\t<iframe src="${dict}" style="position: relative; width:701px; height:314px" frameborder="no" noresize="noresize"></iframe>`
         $('#' + tabId + ' p').html(display);
         $('.Word').html(load_word(word, audio, level));
         load_new(bNew, function (bSetNew) {

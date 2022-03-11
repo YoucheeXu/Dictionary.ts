@@ -408,16 +408,17 @@ var ElectronApp = /** @class */ (function () {
                                 });
                             }
                             else {
-                                this.Info(-1, typ, word, "no expected resource in " + word + " of " + download.Dict + ".");
+                                this.Info(-1, typ, word, "no expected resource in " + word + " of " + download.Dict);
                             }
                         }
                         else {
-                            this.Info(-1, 1, word, "no " + word + " in the dict of " + download.Dict);
+                            // this.Info(-1, 1, word, `no ${word} in the dict of ${download.Dict}`);
+                            console.log("no " + word + " in the dict of " + download.Dict);
                         }
                         return [2 /*return*/];
                     case 3: return [3 /*break*/, 1];
                     case 4:
-                        this._logger.error("can't download " + word + ext + " due to no " + download.Dict + " in " + mode + " mode.");
+                        this._logger.error("can't download " + word + ext + " due to no " + download.Dict + " in " + mode + " mode");
                         return [3 /*break*/, 6];
                     case 5:
                         if (mode == "Direct") {
@@ -428,7 +429,7 @@ var ElectronApp = /** @class */ (function () {
                             });
                         }
                         else {
-                            this._logger.error("Not support to download " + localFile + ", in " + mode + " mode.");
+                            this._logger.error("Not support to download " + localFile + ", in " + mode + " mode");
                         }
                         _c.label = 6;
                     case 6: return [2 /*return*/];

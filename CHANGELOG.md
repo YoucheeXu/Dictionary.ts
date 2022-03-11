@@ -14,6 +14,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - close "selection a application" dialog could not quit app
 - wrong to record error message
 
+### Removed
+
+### Changed
+- display dict through html file in Dictionary
+
 ### Added
 
 - auto focus input of Dictionary

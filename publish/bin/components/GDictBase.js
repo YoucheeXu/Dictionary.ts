@@ -90,6 +90,16 @@ var GDictBase = /** @class */ (function (_super) {
         var fileName = path.basename(dictSrc, ".zip");
         // console.log(fileName);
         _this_1._tempDictDir = path.join(filePath, fileName);
+        var _this = _this_1;
+        if (fs.existsSync(_this._tempDictDir) == false) {
+            fs.mkdir(_this._tempDictDir, function (error) {
+                if (error) {
+                    console.log(error);
+                    return false;
+                }
+                console.log('Success to create folder: ' + _this._tempDictDir);
+            });
+        }
         return _this_1;
     }
     GDictBase.prototype.Open = function () {
@@ -115,29 +125,33 @@ var GDictBase = /** @class */ (function (_super) {
     };
     GDictBase.prototype.query_word = function (word) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileName, datum, ret, wordFile, strDatum, dictDatum, info, obj, tabAlign, html, e_1, errMsg;
+            var fileName, dictFile, datum, ret, wordFile, strDatum, dictDatum, info, obj, tabAlign, html, e_1, errMsg;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         fileName = word[0] + "/" + word + ".json";
+                        dictFile = path.join(this._tempDictDir, word + ".html");
                         ret = false;
                         wordFile = "";
                         _b.label = 1;
                     case 1:
-                        _b.trys.push([1, 5, , 6]);
-                        if (!this._dictZip.bFileIn(fileName)) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this._dictZip.readFileAsync(fileName)];
+                        _b.trys.push([1, 6, , 7]);
+                        if (!(fs.existsSync(dictFile) == true)) return [3 /*break*/, 2];
+                        return [2 /*return*/, Promise.resolve([1, dictFile])];
                     case 2:
+                        if (!this._dictZip.bFileIn(fileName)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this._dictZip.readFileAsync(fileName)];
+                    case 3:
                         _a = _b.sent(), ret = _a[0], datum = _a[1];
                         if (!ret) {
                             return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.szName])];
                         }
-                        return [3 /*break*/, 4];
-                    case 3:
+                        return [3 /*break*/, 5];
+                    case 4:
                         wordFile = path.join(this._tempDictDir, word + ".json");
                         return [2 /*return*/, Promise.resolve([0, wordFile])];
-                    case 4:
+                    case 5:
                         strDatum = String(datum);
                         dictDatum = JSON.parse(strDatum);
                         if (dictDatum["ok"]) {
@@ -145,22 +159,25 @@ var GDictBase = /** @class */ (function (_super) {
                             info = String(info).replace(/\\x/g, "\\u00");
                             obj = JSON.parse(info);
                             tabAlign = '\t\t\t\t\t\t\t';
-                            html = '\r\n' + this.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
+                            html = this.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
                             html = html.replace(/[\r\n]/g, "");
-                            return [2 /*return*/, Promise.resolve([1, html])];
+                            fs.writeFileSync(dictFile, "<!DOCTYPE html><html><body>");
+                            fs.writeFileSync(dictFile, html);
+                            fs.writeFileSync(dictFile, "</body></html>");
+                            return [2 /*return*/, Promise.resolve([1, dictFile])];
                         }
                         else {
                             return [2 /*return*/, Promise.resolve([-1, "Fail to read: " + word])];
                         }
-                        return [3 /*break*/, 6];
-                    case 5:
+                        return [3 /*break*/, 7];
+                    case 6:
                         e_1 = _b.sent();
                         if (fs.existsSync(wordFile)) {
                             fs.unlinkSync(wordFile);
                         }
                         errMsg = e_1.message.replace("<", "").replace(">", "");
                         return [2 /*return*/, Promise.resolve([-1, errMsg])];
-                    case 6: return [2 /*return*/];
+                    case 7: return [2 /*return*/];
                 }
             });
         });
@@ -183,16 +200,16 @@ var GDictBase = /** @class */ (function (_super) {
                 }
                 else {
                     // gApp.log("error", "%s isn't what we want!" %word)
-                    return gApp.Info(-1, 1, inWord, "Wrong word: We except '" + word + "', but we get '" + inWord + "'");
+                    return gApp.Info(-1, 1, inWord, "Wrong word: We except '" + word + "', but we get '" + inWord + "' at " + this._szName);
                 }
             }
             else {
-                return gApp.Info(-1, 1, word, "No dict of " + word + " in " + this.szName + ".");
+                return gApp.Info(-1, 1, word, "No dict of " + word + " in " + this.szName);
             }
         }
         else {
             console.log(localFile + " doesn't exist");
-            return gApp.Info(-1, 1, word, "Doesn't exist dict of " + word);
+            return gApp.Info(-1, 1, word, "Doesn't exist dict of " + word + " at " + this.szName);
         }
     };
     GDictBase.prototype.GetInWord = function (dict) {
