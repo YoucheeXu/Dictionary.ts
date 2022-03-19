@@ -1,8 +1,8 @@
 set dictFolder=C:\Green\Dictionary
-mklink /J ..\publish\dict 				%dictFolder%\dict
-mklink /J ..\publish\audio 				%dictFolder%\audio
-mklink /J ..\publish\log 				%dictFolder%\log
-mklink /J ..\publish\tools 				%dictFolder%\tools
-REM mklink /D ..\publish\Dictionary.json 	%dictFolder%\Dictionary.json
-REM mklink /D ..\publish\ReciteWords.json	%dictFolder%\ReciteWords.json
+mklink /J ..\dict 				%dictFolder%\dict
+mklink /J ..\audio 				%dictFolder%\audio
+mklink /J ..\log 				%dictFolder%\log
+mklink /J ..\tools 				%dictFolder%\tools
+REM mklink /D ..\Dictionary.json 	%dictFolder%\Dictionary.json
+REM mklink /D ..\ReciteWords.json	%dictFolder%\ReciteWords.json
 pause

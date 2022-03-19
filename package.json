@@ -2,11 +2,11 @@
   "name": "Dictionary.ts",
   "version": "v0.0.1",
   "description": "Just for Fun",
-  "main": "publish/bin/main.js",
+  "main": "bin/main.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "start": "cnpm run build && electron --d ./publish/bin/main.js",
+    "start": "cnpm run build && electron --d ./bin/main.js",
     "dist-win": "electron-builder --win --x64"
   },
   "keywords": [],
@@ -17,10 +17,10 @@
     "asar": true,
     "productName": "Dictionary",
     "files": [
-      "publish/bin/**"
+      "bin/**"
     ],
     "win": {
-      "icon": "publish/duck.jpg",
+      "icon": "assets/duck.jpg",
       "target": [
         "dir"
       ]

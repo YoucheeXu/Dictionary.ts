@@ -18,22 +18,23 @@ start cmd /k "npm run dist-win"
 goto start
 
 :copyFolder2C
-set originFolder=.\dist
-set dictFolder=C:\Green\Dictionary\bin
-rmdir /q /s %dictFolder%
-REM xcopy /y/e %originFolder%\win-ia32-unpacked\* %dictFolder%\
-xcopy /y/e %originFolder%\win-unpacked\* %dictFolder%\
-rmdir /q /s %originFolder%
-goto exit
+set destFolder=C:\Green\Dictionary
+goto copyFolder
 
 :copyFolder2D
-set originFolder=.\dist
-set dictFolder=D:\Green\Dictionary\bin
-rmdir /q /s %dictFolder%
-REM xcopy /y/e %originFolder%\win-ia32-unpacked\* %dictFolder%\
-xcopy /y/e %originFolder%\win-unpacked\* %dictFolder%\
-rmdir /q /s %originFolder%
-goto exit
+set destFolder=D:\Green\Dictionary
+goto copyFolder
+
+:copyFolder
+set distFolder=.\dist
+set assertFolder=.\assets
+
+rmdir /q /s %destFolder%\bin
+rmdir /q /s %destFolder%\assets
+
+xcopy /y/e %distFolder%\win-unpacked\* %destFolder%\bin
+xcopy /y/e %distFolder%\win-unpacked\* %destFolder%\assets
+rmdir /q /s %distFolder%
 
 :exit
 pause

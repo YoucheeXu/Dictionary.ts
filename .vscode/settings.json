@@ -13,7 +13,7 @@
     },
     "search.exclude": {
         "**/node_modules": true,
-        "/publish": true,
+        "/bin": true,
 		"/dist": true
     },
     "editor.codeActionsOnSave": {

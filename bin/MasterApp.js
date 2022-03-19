@@ -149,12 +149,11 @@ var MasterApp = /** @class */ (function () {
                         startPath = "";
                         // if (process.env.NODE_ENV === 'development') {
                         if (argvs.bDev) {
-                            startPath = path.join(process.cwd(), "/publish/");
+                            startPath = path.join(process.cwd(), "./");
                         }
                         else {
                             startPath = path.join(process.env.PORTABLE_EXECUTABLE_DIR || process.cwd(), "../");
                         }
-                        console.log(startPath);
                         if (sel == 1) {
                             this._myApp = new ReciteWordsApp_1.ReciteWordsApp(startPath);
                             this._myApp.name = "ReciteWords";

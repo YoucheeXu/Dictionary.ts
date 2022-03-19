@@ -160,10 +160,8 @@ var GDictBase = /** @class */ (function (_super) {
                             obj = JSON.parse(info);
                             tabAlign = '\t\t\t\t\t\t\t';
                             html = this.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
-                            html = html.replace(/[\r\n]/g, "");
-                            fs.writeFileSync(dictFile, "<!DOCTYPE html><html><body>");
-                            fs.writeFileSync(dictFile, html);
-                            fs.writeFileSync(dictFile, "</body></html>");
+                            // html = html.replace(/[\r\n]/g, "");
+                            fs.writeFileSync(dictFile, "<!DOCTYPE html><html><body>\r\n" + html + "\r\n</body></html>");
                             return [2 /*return*/, Promise.resolve([1, dictFile])];
                         }
                         else {

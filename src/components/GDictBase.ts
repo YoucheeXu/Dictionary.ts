@@ -47,12 +47,12 @@ export class GDictBase extends DictBase {
     public async query_word(word: string): Promise<[number, string]> {
         // fileName = os.path.join(word[0], word + ".json")
         let fileName = word[0] + "/" + word + ".json";
-		let dictFile = path.join(this._tempDictDir, word + ".html");
+        let dictFile = path.join(this._tempDictDir, word + ".html");
         let datum: string | any;
         let ret: boolean = false;
         let wordFile = "";
         try {
-			if (fs.existsSync(dictFile) == true) {
+            if (fs.existsSync(dictFile) == true) {
                 return Promise.resolve([1, dictFile]);
             }
             else if (this._dictZip.bFileIn(fileName)) {
@@ -75,11 +75,9 @@ export class GDictBase extends DictBase {
                 let tabAlign = '\t\t\t\t\t\t\t';
                 let html = this.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
 
-                html = html.replace(/[\r\n]/g, "");
+                // html = html.replace(/[\r\n]/g, "");
 
-				fs.writeFileSync(dictFile, "<!DOCTYPE html><html><body>");
-				fs.writeFileSync(dictFile, html);
-				fs.writeFileSync(dictFile, "</body></html>");
+                fs.writeFileSync(dictFile, `<!DOCTYPE html><html><body>\r\n${html}\r\n</body></html>`);
 
                 return Promise.resolve([1, dictFile]);
             }

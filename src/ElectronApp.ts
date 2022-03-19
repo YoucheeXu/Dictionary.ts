@@ -215,7 +215,7 @@ export abstract class ElectronApp {
 
         // Create the browser window.
         this._win = new BrowserWindow({
-            icon: path.join(__dirname, 'assets/img/dictApp.ico'),
+            icon: path.join(this._startPath, 'assets/dictApp.ico'),
             width: guiCfg.Width,
             height: guiCfg.Height,
             fullscreen: guiCfg.bFullScreen,
@@ -227,8 +227,9 @@ export abstract class ElectronApp {
             },
         });
 
+        // __dirname
         if (bShow) {
-            this._win.loadURL(`file://${__dirname}/assets/${this._name}.html`);
+            this._win.loadURL(`file://${this._startPath}/assets/${this._name}.html`);
 
             if (bDev) {
                 // Open the DevTools.

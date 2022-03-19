@@ -275,7 +275,7 @@ var ElectronApp = /** @class */ (function () {
                 guiCfg = JSON.parse(JSON.stringify(this._cfg[this._name]['GUI']));
                 // Create the browser window.
                 this._win = new electron_1.BrowserWindow({
-                    icon: path.join(__dirname, 'assets/img/dictApp.ico'),
+                    icon: path.join(this._startPath, 'assets/dictApp.ico'),
                     width: guiCfg.Width,
                     height: guiCfg.Height,
                     fullscreen: guiCfg.bFullScreen,
@@ -286,8 +286,9 @@ var ElectronApp = /** @class */ (function () {
                         contextIsolation: false
                     },
                 });
+                // __dirname
                 if (bShow) {
-                    this._win.loadURL("file://" + __dirname + "/assets/" + this._name + ".html");
+                    this._win.loadURL("file://" + this._startPath + "/assets/" + this._name + ".html");
                     if (bDev) {
                         // Open the DevTools.
                         this._win.webContents.openDevTools({ mode: 'detach' });
