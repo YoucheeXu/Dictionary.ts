@@ -1,5 +1,4 @@
-'use strict';
-
+"use strict";
 // import { ipcRenderer, remote } from 'electron';
 const { ipcRenderer } = require('electron');
 

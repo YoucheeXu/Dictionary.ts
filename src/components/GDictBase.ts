@@ -8,16 +8,21 @@ import { globalVar } from "../utils/globalInterface";
 
 export class GDictBase extends DictBase {
     private _dictZip: ZipArchive;
+    private _styleZip: ZipArchive;
     private _tempDictDir: string;
 
     constructor(name: string, dictSrc: string, readonly _compression: string, readonly _compresslevel: string) {
         super(name, dictSrc);
+
         this._dictZip = new ZipArchive(dictSrc, _compression, _compresslevel);
-        // this.tempDictDir = tempfile.gettempdir();
+
         let filePath = path.dirname(dictSrc);
         let fileName = path.basename(dictSrc, ".zip");
-        // console.log(fileName);
+
         this._tempDictDir = path.join(filePath, fileName);
+
+        let styleSrc = path.join(filePath, fileName + "-style.zip");
+        this._styleZip = new ZipArchive(styleSrc, _compression, _compresslevel);
 
         let _this = this;
         if (fs.existsSync(_this._tempDictDir) == false) {
@@ -32,6 +37,7 @@ export class GDictBase extends DictBase {
     }
 
     public async Open() {
+        this._styleZip.Open();
         return this._dictZip.Open();
     }
 
@@ -45,11 +51,10 @@ export class GDictBase extends DictBase {
     }
 
     public async query_word(word: string): Promise<[number, string]> {
-        // fileName = os.path.join(word[0], word + ".json")
         let fileName = word[0] + "/" + word + ".json";
         let dictFile = path.join(this._tempDictDir, word + ".html");
         let datum: string | any;
-        let ret: boolean = false;
+        let ret = false;
         let wordFile = "";
         try {
             if (fs.existsSync(dictFile) == true) {
@@ -72,12 +77,43 @@ export class GDictBase extends DictBase {
                 let info = dictDatum["info"];
                 info = String(info).replace(/\\x/g, "\\u00");
                 let obj = JSON.parse(info);
-                let tabAlign = '\t\t\t\t\t\t\t';
-                let html = this.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
+                let tabAlign = '\t\t';
+                let dict = this.process_primary(tabAlign, obj.primaries);
 
-                // html = html.replace(/[\r\n]/g, "");
+                let jsName = "google-toggle.js"
+                let cssName = "google.css"
 
-                fs.writeFileSync(dictFile, `<!DOCTYPE html><html><body>\r\n${html}\r\n</body></html>`);
+                let css = tabAlign + '<link rel="stylesheet" href="../../assets/scripts/player.css">' + '\r\n';
+                css += tabAlign + `<link rel="stylesheet" type="text/css" href="${cssName}">`;
+
+                let js = tabAlign + '<script src="../../assets/third_party/jquery-3.4.1.min.js"></script>' + '\r\n';
+                js += tabAlign + '<script src="../../assets/scripts/player.js"></script>' + '\r\n';
+                js += tabAlign + `<script src="${jsName}"></script>`;
+                let togeg = tabAlign + '<div id="toggle_example" align="right">- Hide Examples</div>';
+                let html = `<!DOCTYPE html><html>\r\n\t<body>\r\n${css}\r\n${js}\r\n${togeg}\r\n${dict}\r\n\t</body>\r\n</html>`;
+                fs.writeFileSync(dictFile, html);
+
+                let jsFile = path.join(this._tempDictDir, jsName);
+                if (fs.existsSync(jsFile) == false) {
+                    if (this._styleZip.bFileIn(jsName)) {
+                        [ret, datum] = await this._styleZip.readFileAsync(jsName);
+                        if (!ret) {
+                            return Promise.resolve([-1, `Fail to read ${jsName} in ${this._styleZip}`]);
+                        }
+                        fs.writeFileSync(jsFile, String(datum));
+                    }
+                }
+
+                let cssFile = path.join(this._tempDictDir, cssName);
+                if (fs.existsSync(cssFile) == false) {
+                    if (this._styleZip.bFileIn(cssName)) {
+                        [ret, datum] = await this._styleZip.readFileAsync(cssName);
+                        if (!ret) {
+                            return Promise.resolve([-1, `Fail to read ${cssName} in ${this._styleZip}`]);
+                        }
+                        fs.writeFileSync(cssFile, String(datum));
+                    }
+                }
 
                 return Promise.resolve([1, dictFile]);
             }

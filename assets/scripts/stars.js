@@ -1,3 +1,4 @@
+"use strict";
 function load_starts(n) {
     // 为星星设置hover效果
     let isClicked = false;

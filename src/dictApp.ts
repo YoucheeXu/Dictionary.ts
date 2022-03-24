@@ -154,8 +154,7 @@ export class dictApp extends ElectronApp {
     }
 
     private AddTabs(): void {
-        const html = `\n							<div id = "toggle_example" align = "right">- Hide Examples</div>
-							<p></p>`;
+        const html = `\r\n							<p></p>`;
 
         for (let tab of JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs))) {
             let dictBase = this._dictMap.get(tab.Dict);
@@ -308,7 +307,7 @@ export class dictApp extends ElectronApp {
             if (this._curDictBase.download) {
                 this.TriggerDownload(this._curDictBase, word, dict);
             } else {
-				let dictName = this._curDictBase.szName;
+                let dictName = this._curDictBase.szName;
                 this.Record2File(this._miss_dict, `Dict of ${word}: ${dictName} doesn't support to download.\n`);
             }
         }
@@ -346,7 +345,7 @@ export class dictApp extends ElectronApp {
             if (this._audioBase.download) {
                 this.TriggerDownload(this._audioBase, word, audio);
             } else {
-				let audioName = this._audioBase.szName;
+                let audioName = this._audioBase.szName;
                 this.Record2File(this._miss_audio, `Audio of ${word}: ${audioName} doesn't support to download.\n`);
                 this.Record2File(this._miss_audio, "\n");
             }

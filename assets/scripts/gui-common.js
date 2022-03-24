@@ -1,6 +1,4 @@
 "use strict";
-// import { ipcRenderer } from "electron";
-// const { ipcRenderer } = require('electron');
 /*function getValue(id: string) {
     let ele = document.getElementById(id);
     if (ele != null) {
@@ -127,4 +125,3 @@ function clearOptions(id) {
         selEle.options.length = 0;
     }
 }
-//# sourceMappingURL=gui-common.js.map

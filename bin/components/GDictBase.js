@@ -85,11 +85,11 @@ var GDictBase = /** @class */ (function (_super) {
         _this_1._compression = _compression;
         _this_1._compresslevel = _compresslevel;
         _this_1._dictZip = new ZipArchive_1.ZipArchive(dictSrc, _compression, _compresslevel);
-        // this.tempDictDir = tempfile.gettempdir();
         var filePath = path.dirname(dictSrc);
         var fileName = path.basename(dictSrc, ".zip");
-        // console.log(fileName);
         _this_1._tempDictDir = path.join(filePath, fileName);
+        var styleSrc = path.join(filePath, fileName + "-style.zip");
+        _this_1._styleZip = new ZipArchive_1.ZipArchive(styleSrc, _compression, _compresslevel);
         var _this = _this_1;
         if (fs.existsSync(_this._tempDictDir) == false) {
             fs.mkdir(_this._tempDictDir, function (error) {
@@ -105,6 +105,7 @@ var GDictBase = /** @class */ (function (_super) {
     GDictBase.prototype.Open = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                this._styleZip.Open();
                 return [2 /*return*/, this._dictZip.Open()];
             });
         });
@@ -125,25 +126,25 @@ var GDictBase = /** @class */ (function (_super) {
     };
     GDictBase.prototype.query_word = function (word) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileName, dictFile, datum, ret, wordFile, strDatum, dictDatum, info, obj, tabAlign, html, e_1, errMsg;
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var fileName, dictFile, datum, ret, wordFile, strDatum, dictDatum, info, obj, tabAlign, dict, jsName, cssName, css, js, togeg, html, jsFile, cssFile, e_1, errMsg;
+            var _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
                         fileName = word[0] + "/" + word + ".json";
                         dictFile = path.join(this._tempDictDir, word + ".html");
                         ret = false;
                         wordFile = "";
-                        _b.label = 1;
+                        _d.label = 1;
                     case 1:
-                        _b.trys.push([1, 6, , 7]);
+                        _d.trys.push([1, 12, , 13]);
                         if (!(fs.existsSync(dictFile) == true)) return [3 /*break*/, 2];
                         return [2 /*return*/, Promise.resolve([1, dictFile])];
                     case 2:
                         if (!this._dictZip.bFileIn(fileName)) return [3 /*break*/, 4];
                         return [4 /*yield*/, this._dictZip.readFileAsync(fileName)];
                     case 3:
-                        _a = _b.sent(), ret = _a[0], datum = _a[1];
+                        _a = _d.sent(), ret = _a[0], datum = _a[1];
                         if (!ret) {
                             return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.szName])];
                         }
@@ -154,28 +155,56 @@ var GDictBase = /** @class */ (function (_super) {
                     case 5:
                         strDatum = String(datum);
                         dictDatum = JSON.parse(strDatum);
-                        if (dictDatum["ok"]) {
-                            info = dictDatum["info"];
-                            info = String(info).replace(/\\x/g, "\\u00");
-                            obj = JSON.parse(info);
-                            tabAlign = '\t\t\t\t\t\t\t';
-                            html = this.process_primary(tabAlign + '\t', obj.primaries) + tabAlign;
-                            // html = html.replace(/[\r\n]/g, "");
-                            fs.writeFileSync(dictFile, "<!DOCTYPE html><html><body>\r\n" + html + "\r\n</body></html>");
-                            return [2 /*return*/, Promise.resolve([1, dictFile])];
-                        }
-                        else {
-                            return [2 /*return*/, Promise.resolve([-1, "Fail to read: " + word])];
-                        }
-                        return [3 /*break*/, 7];
+                        if (!dictDatum["ok"]) return [3 /*break*/, 10];
+                        info = dictDatum["info"];
+                        info = String(info).replace(/\\x/g, "\\u00");
+                        obj = JSON.parse(info);
+                        tabAlign = '\t\t';
+                        dict = this.process_primary(tabAlign, obj.primaries);
+                        jsName = "google-toggle.js";
+                        cssName = "google.css";
+                        css = tabAlign + '<link rel="stylesheet" href="../../assets/scripts/player.css">' + '\r\n';
+                        css += tabAlign + ("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + cssName + "\">");
+                        js = tabAlign + '<script src="../../assets/third_party/jquery-3.4.1.min.js"></script>' + '\r\n';
+                        js += tabAlign + '<script src="../../assets/scripts/player.js"></script>' + '\r\n';
+                        js += tabAlign + ("<script src=\"" + jsName + "\"></script>");
+                        togeg = tabAlign + '<div id="toggle_example" align="right">- Hide Examples</div>';
+                        html = "<!DOCTYPE html><html>\r\n\t<body>\r\n" + css + "\r\n" + js + "\r\n" + togeg + "\r\n" + dict + "\r\n\t</body>\r\n</html>";
+                        fs.writeFileSync(dictFile, html);
+                        jsFile = path.join(this._tempDictDir, jsName);
+                        if (!(fs.existsSync(jsFile) == false)) return [3 /*break*/, 7];
+                        if (!this._styleZip.bFileIn(jsName)) return [3 /*break*/, 7];
+                        return [4 /*yield*/, this._styleZip.readFileAsync(jsName)];
                     case 6:
-                        e_1 = _b.sent();
+                        _b = _d.sent(), ret = _b[0], datum = _b[1];
+                        if (!ret) {
+                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + jsName + " in " + this._styleZip])];
+                        }
+                        fs.writeFileSync(jsFile, String(datum));
+                        _d.label = 7;
+                    case 7:
+                        cssFile = path.join(this._tempDictDir, cssName);
+                        if (!(fs.existsSync(cssFile) == false)) return [3 /*break*/, 9];
+                        if (!this._styleZip.bFileIn(cssName)) return [3 /*break*/, 9];
+                        return [4 /*yield*/, this._styleZip.readFileAsync(cssName)];
+                    case 8:
+                        _c = _d.sent(), ret = _c[0], datum = _c[1];
+                        if (!ret) {
+                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + cssName + " in " + this._styleZip])];
+                        }
+                        fs.writeFileSync(cssFile, String(datum));
+                        _d.label = 9;
+                    case 9: return [2 /*return*/, Promise.resolve([1, dictFile])];
+                    case 10: return [2 /*return*/, Promise.resolve([-1, "Fail to read: " + word])];
+                    case 11: return [3 /*break*/, 13];
+                    case 12:
+                        e_1 = _d.sent();
                         if (fs.existsSync(wordFile)) {
                             fs.unlinkSync(wordFile);
                         }
                         errMsg = e_1.message.replace("<", "").replace(">", "");
                         return [2 /*return*/, Promise.resolve([-1, errMsg])];
-                    case 7: return [2 /*return*/];
+                    case 13: return [2 /*return*/];
                 }
             });
         });

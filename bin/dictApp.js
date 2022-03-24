@@ -273,7 +273,7 @@ var dictApp = /** @class */ (function (_super) {
         // this.FillMenus();
     };
     dictApp.prototype.AddTabs = function () {
-        var html = "\n\t\t\t\t\t\t\t<div id = \"toggle_example\" align = \"right\">- Hide Examples</div>\n\t\t\t\t\t\t\t<p></p>";
+        var html = "\r\n\t\t\t\t\t\t\t<p></p>";
         for (var _i = 0, _a = JSON.parse(JSON.stringify(this._cfg.Dictionary.Tabs)); _i < _a.length; _i++) {
             var tab = _a[_i];
             var dictBase = this._dictMap.get(tab.Dict);

@@ -32,8 +32,8 @@ set assertFolder=.\assets
 rmdir /q /s %destFolder%\bin
 rmdir /q /s %destFolder%\assets
 
-xcopy /y/e %distFolder%\win-unpacked\* %destFolder%\bin
-xcopy /y/e %distFolder%\win-unpacked\* %destFolder%\assets
+xcopy /y/e %distFolder%\win-unpacked\* %destFolder%\bin\
+xcopy /y/e %assertFolder%\* %destFolder%\assets\
 rmdir /q /s %distFolder%
 
 :exit
