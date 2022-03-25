@@ -21,15 +21,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SQLite = void 0;
-var sqlite3 = __importStar(require("sqlite3"));
+const sqlite3 = __importStar(require("sqlite3"));
 // const sqlite3 = require('sqlite3').verbose()
-var SQLite = /** @class */ (function () {
-    function SQLite() {
-    }
-    SQLite.prototype.Open = function (path) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            _this.db = new sqlite3.Database(path, function (err) {
+class SQLite {
+    Open(path) {
+        let _this = this;
+        return new Promise((resolve, reject) => {
+            _this.db = new sqlite3.Database(path, (err) => {
                 if (err) {
                     console.error("Open error: " + err.message);
                     reject("Open error: " + err.message);
@@ -40,14 +38,14 @@ var SQLite = /** @class */ (function () {
                 }
             });
         });
-    };
+    }
     // any query: insert/delete/update
     // run(sql: string, params: any, callback?: (this: RunResult, err: Error | null) => void): this;
     // run(sql: string, callback?: (this: RunResult, err: Error | null) => void): this;
-    SQLite.prototype.run = function (query) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            _this.db.run(query, function (err) {
+    run(query) {
+        let _this = this;
+        return new Promise((resolve, reject) => {
+            _this.db.run(query, (err) => {
                 if (err) {
                     console.error(err.message);
                     reject(err.message);
@@ -57,12 +55,12 @@ var SQLite = /** @class */ (function () {
                 }
             });
         });
-    };
+    }
     // first row read
-    SQLite.prototype.get = function (query, params) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            _this.db.get(query, params, function (err, row) {
+    get(query, params) {
+        let _this = this;
+        return new Promise((resolve, reject) => {
+            _this.db.get(query, params, (err, row) => {
                 if (err) {
                     reject(err);
                 }
@@ -71,14 +69,14 @@ var SQLite = /** @class */ (function () {
                 }
             });
         });
-    };
+    }
     // set of rows read
-    SQLite.prototype.all = function (query, params) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
+    all(query, params) {
+        let _this = this;
+        return new Promise((resolve, reject) => {
             if (params === undefined)
                 params = [];
-            _this.db.all(query, params, function (err, rows) {
+            _this.db.all(query, params, (err, rows) => {
                 if (err) {
                     reject("Read error: " + err.message);
                 }
@@ -87,15 +85,15 @@ var SQLite = /** @class */ (function () {
                 }
             });
         });
-    };
+    }
     // each row returned one by one
     // each(sql: string, params: any, callback?: (this: Statement, err: Error | null, row: any) => void, complete?: (err: Error | null, count: number) => void): this;
-    SQLite.prototype.each = function (query, params, action) {
-        var db = this.db;
+    each(query, params, action) {
+        let db = this.db;
         // console.log(query);
-        return new Promise(function (resolve, reject) {
-            db.serialize(function () {
-                db.each(query, params, function (err, row) {
+        return new Promise((resolve, reject) => {
+            db.serialize(() => {
+                db.each(query, params, (err, row) => {
                     if (err) {
                         reject("Read error: " + err.message);
                     }
@@ -105,16 +103,16 @@ var SQLite = /** @class */ (function () {
                         }
                     }
                 });
-                db.get("", function (err, row) {
+                db.get("", (err, row) => {
                     resolve(true);
                 });
             });
         });
-    };
-    SQLite.prototype.Close = function () {
-        var db = this.db;
-        return new Promise(function (resolve, reject) {
-            db.close(function (err) {
+    }
+    Close() {
+        let db = this.db;
+        return new Promise((resolve, reject) => {
+            db.close((err) => {
                 if (err) {
                     reject(err.message);
                 }
@@ -123,9 +121,8 @@ var SQLite = /** @class */ (function () {
                 }
             });
         });
-    };
-    return SQLite;
-}());
+    }
+}
 exports.SQLite = SQLite;
 ;
 //# sourceMappingURL=SQLite.js.map

@@ -1,43 +1,7 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsrProgress = void 0;
-var SQLite_1 = require("./SQLite");
+const SQLite_1 = require("./SQLite");
 // TODO: support create new dict and initialize it; support to reset level
 /*
 CREATE TABLE ${Level}(
@@ -47,483 +11,296 @@ CREATE TABLE ${Level}(
     NextDate DATE
 );
 */
-var UsrProgress = /** @class */ (function () {
-    function UsrProgress() {
+class UsrProgress {
+    get srcFile() {
+        return this._srcFile;
     }
-    Object.defineProperty(UsrProgress.prototype, "srcFile", {
-        get: function () {
-            return this._srcFile;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    UsrProgress.prototype.Open = function (srcFile, lvl) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        this._srcFile = srcFile;
-                        this.dataBase = new SQLite_1.SQLite();
-                        return [4 /*yield*/, this.dataBase.Open(srcFile)];
-                    case 1:
-                        _a.sent();
-                        this.level = lvl;
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
+    async Open(srcFile, lvl) {
+        this._srcFile = srcFile;
+        this.dataBase = new SQLite_1.SQLite();
+        await this.dataBase.Open(srcFile);
+        this.level = lvl;
+        // print("progress of " + srcFile + "is OK to open!");
+    }
     ;
-    UsrProgress.prototype.New = function (srcFile, lvl) {
-        return __awaiter(this, void 0, void 0, function () {
-            var r;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        this.dataBase = new SQLite_1.SQLite();
-                        return [4 /*yield*/, this.dataBase.Open(srcFile)];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, this.dataBase.run("CREATE TABLE " + lvl + "(word text NOT NULL PRIMARY KEY, familiar REAL, lastdate DATE)")];
-                    case 2:
-                        r = _a.sent();
-                        if (r) {
-                            console.log("Table created");
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UsrProgress.prototype.ExistTable = function (lvl) {
-        return __awaiter(this, void 0, void 0, function () {
-            var sql, ret, num;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        sql = "select count(*) from sqlite_master where type='table' and name = '" + lvl + "'";
-                        return [4 /*yield*/, this.dataBase.get(sql)];
-                    case 1:
-                        ret = _a.sent();
-                        if (ret) {
-                            num = ret['count(*)'];
-                            if (num >= 1) {
-                                return [2 /*return*/, Promise.resolve(true)];
-                            }
-                            else {
-                                return [2 /*return*/, Promise.resolve(false)];
-                            }
-                        }
-                        else {
-                            return [2 /*return*/, Promise.reject(false)];
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UsrProgress.prototype.NewTable = function (lvl) {
-        return __awaiter(this, void 0, void 0, function () {
-            var r;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.dataBase.run("CREATE TABLE " + lvl + "(Word text NOT NULL PRIMARY KEY, Familiar REAL, LastDate DATE, NextDate DATE)")];
-                    case 1:
-                        r = _a.sent();
-                        if (r) {
-                            this.level = lvl;
-                            console.log("Table created");
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UsrProgress.prototype.ExistWord = function (wd) {
-        return __awaiter(this, void 0, void 0, function () {
-            var sql, ret, num;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        sql = "select count(*) from " + this.level + " where Word = '" + wd + "'";
-                        return [4 /*yield*/, this.dataBase.get(sql)];
-                    case 1:
-                        ret = _a.sent();
-                        if (ret) {
-                            num = ret['count(*)'];
-                            if (num >= 1) {
-                                return [2 /*return*/, Promise.resolve(true)];
-                            }
-                            else {
-                                return [2 /*return*/, Promise.resolve(false)];
-                            }
-                        }
-                        else {
-                            return [2 /*return*/, Promise.reject(false)];
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UsrProgress.prototype.InsertWord = function (wd) {
-        return __awaiter(this, void 0, void 0, function () {
-            var entry, sql, r;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        entry = "'" + wd + "', 0";
-                        sql = "INSERT INTO " + this.level + " (Word, Familiar) VALUES (" + entry + ")";
-                        console.log(sql);
-                        return [4 /*yield*/, this.dataBase.run(sql)];
-                    case 1:
-                        r = _a.sent();
-                        if (r) {
-                            console.log(wd + " was inserted.");
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UsrProgress.prototype.DelWord = function (wd) {
-        return __awaiter(this, void 0, void 0, function () {
-            var sql, r, e_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        sql = "DELETE FROM " + this.level + " WHERE Word='" + wd + "'";
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, this.dataBase.run(sql)];
-                    case 2:
-                        r = _a.sent();
-                        if (r) {
-                            console.log(wd + " was deleted.");
-                        }
-                        return [3 /*break*/, 4];
-                    case 3:
-                        e_1 = _a.sent();
-                        console.log(e_1);
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UsrProgress.prototype.GetItem = function (word, item) {
-        return __awaiter(this, void 0, void 0, function () {
-            var sql, ret, anything;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        sql = "select " + item + " from " + this.level + " where Word = '" + word + "'";
-                        return [4 /*yield*/, this.dataBase.get(sql, [])];
-                    case 1:
-                        ret = _a.sent();
-                        anything = ret[item];
-                        if (ret) {
-                            return [2 /*return*/, Promise.resolve(anything)];
-                        }
-                        else {
-                            return [2 /*return*/, Promise.reject(false)];
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UsrProgress.prototype.GetLastDate = function (word) {
+    async New(srcFile, lvl) {
+        this.dataBase = new SQLite_1.SQLite();
+        await this.dataBase.Open(srcFile);
+        let r = await this.dataBase.run(`CREATE TABLE ${lvl}(word text NOT NULL PRIMARY KEY, familiar REAL, lastdate DATE)`);
+        if (r) {
+            console.log("Table created");
+        }
+    }
+    async ExistTable(lvl) {
+        let sql = `select count(*) from sqlite_master where type='table' and name = '${lvl}'`;
+        let ret = await this.dataBase.get(sql);
+        if (ret) {
+            let num = ret['count(*)'];
+            if (num >= 1) {
+                return Promise.resolve(true);
+            }
+            else {
+                return Promise.resolve(false);
+            }
+        }
+        else {
+            return Promise.reject(false);
+        }
+    }
+    async NewTable(lvl) {
+        let r = await this.dataBase.run(`CREATE TABLE ${lvl}(Word text NOT NULL PRIMARY KEY, Familiar REAL, LastDate DATE, NextDate DATE)`);
+        if (r) {
+            this.level = lvl;
+            console.log("Table created");
+        }
+    }
+    async ExistWord(wd) {
+        let sql = `select count(*) from ${this.level} where Word = '${wd}'`;
+        let ret = await this.dataBase.get(sql);
+        if (ret) {
+            let num = ret['count(*)'];
+            if (num >= 1) {
+                return Promise.resolve(true);
+            }
+            else {
+                return Promise.resolve(false);
+            }
+        }
+        else {
+            return Promise.reject(false);
+        }
+    }
+    async InsertWord(wd) {
+        let entry = `'${wd}', 0`;
+        let sql = `INSERT INTO ${this.level} (Word, Familiar) VALUES (${entry})`;
+        console.log(sql);
+        let r = await this.dataBase.run(sql);
+        if (r) {
+            console.log(wd + " was inserted.");
+        }
+    }
+    async DelWord(wd) {
+        let sql = `DELETE FROM ${this.level} WHERE Word='${wd}'`;
+        try {
+            let r = await this.dataBase.run(sql);
+            if (r) {
+                console.log(wd + " was deleted.");
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+    async GetItem(word, item) {
+        // let sql = "select " + item + " from Words where word = '" + word + "'";
+        let sql = `select ${item} from ${this.level} where Word = '${word}'`;
+        let ret = await this.dataBase.get(sql, []);
+        let anything = ret[item];
+        if (ret) {
+            return Promise.resolve(anything);
+        }
+        else {
+            return Promise.reject(false);
+        }
+    }
+    GetLastDate(word) {
         return Promise.resolve(this.GetItem(word, "LastDate"));
-    };
-    UsrProgress.prototype.GetFamiliar = function (word) {
+    }
+    GetFamiliar(word) {
         return Promise.resolve(this.GetItem(word, "Familiar"));
-    };
-    UsrProgress.prototype.GetCount = function (table, where) {
-        return __awaiter(this, void 0, void 0, function () {
-            var sql, ret, num;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        sql = "select count(*) from " + table + " where " + where;
-                        return [4 /*yield*/, this.dataBase.get(sql)];
-                    case 1:
-                        ret = _a.sent();
-                        if (ret) {
-                            num = ret['count(*)'];
-                            return [2 /*return*/, Promise.resolve(num)];
-                        }
-                        else {
-                            return [2 /*return*/, Promise.reject(0)];
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UsrProgress.prototype.GetAllCount = function (level) {
+    }
+    async GetCount(table, where) {
+        // let sql = "select count(*) from Words where " + where;
+        let sql = `select count(*) from ${table} where ${where}`;
+        let ret = await this.dataBase.get(sql);
+        if (ret) {
+            let num = ret['count(*)'];
+            return Promise.resolve(num);
+        }
+        else {
+            return Promise.reject(0);
+        }
+    }
+    GetAllCount(level) {
         // let where = "level = '" + level + "'";
-        var where = "Familiar is not null";
+        let where = "Familiar is not null";
         return this.GetCount(level, where);
-    };
-    UsrProgress.prototype.GetInProgressCount = function (level) {
+    }
+    GetInProgressCount(level) {
         // let where = "level = '" + level + "' and familiar > 0";
         // let where = "LastDate is not null and cast (Familiar as real) < 10";
-        var where = "cast (Familiar as real) < 10 and LastDate is not null";
+        let where = "cast (Familiar as real) < 10 and LastDate is not null";
         return this.GetCount(level, where);
-    };
-    UsrProgress.prototype.GetNewCount = function (level) {
+    }
+    GetNewCount(level) {
         // let where = "level = '" + level + "' and LastDate is null ";
-        var where = "LastDate is null and cast (Familiar as real) < 10";
+        let where = "LastDate is null and cast (Familiar as real) < 10";
         return this.GetCount(level, where);
-    };
-    UsrProgress.prototype.GetFnshedCount = function (level) {
+    }
+    GetFnshedCount(level) {
         // let where = "level = '" + level + "' and familiar = 10";
-        var where = "cast (Familiar as real) >= 10";
+        let where = "cast (Familiar as real) >= 10";
         return this.GetCount(level, where);
-    };
-    UsrProgress.prototype.GetWordsLst = function (args) {
-        return __awaiter(this, void 0, void 0, function () {
-            var wdsLst, familiar, limit, sql, sql, lastlastdate, sql, lastdate, lastlastdate, sql;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        wdsLst = args[0];
-                        if (!(args.length == 2)) return [3 /*break*/, 2];
-                        // (wdsLst, familiar);
-                        familiar = args[1];
-                        sql = "select * from " + this.level + " where cast (Familiar as real) = " + String(familiar);
-                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
-                                wdsLst.push(row);
-                            })];
-                    case 1:
-                        _a.sent();
-                        return [3 /*break*/, 8];
-                    case 2:
-                        if (!(args.length == 3)) return [3 /*break*/, 4];
-                        // (wdsLst, familiar, limit);
-                        familiar = args[1];
-                        limit = args[2];
-                        sql = "select * from " + this.level + " where cast (Familiar as real) = " + String(familiar) + " limit " + String(limit);
-                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
-                                wdsLst.push(row);
-                            })];
-                    case 3:
-                        _a.sent();
-                        return [3 /*break*/, 8];
-                    case 4:
-                        if (!(args.length == 4)) return [3 /*break*/, 6];
-                        lastlastdate = args[1];
-                        familiar = args[2];
-                        limit = args[3];
-                        sql = "select * from " + this.level + " where lastdate <= date('" + lastlastdate + "') and cast (Familiar as real) < " + String(familiar);
-                        sql += " limit " + String(limit);
-                        // this.dataBase.GetWordsLst(wdsLst, where);
-                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
-                                wdsLst.push(row);
-                            })];
-                    case 5:
-                        // this.dataBase.GetWordsLst(wdsLst, where);
-                        _a.sent();
-                        return [3 /*break*/, 8];
-                    case 6:
-                        if (!(args.length == 5)) return [3 /*break*/, 8];
-                        lastdate = args[1];
-                        lastlastdate = args[2];
-                        familiar = args[3];
-                        limit = args[4];
-                        sql = "select * from " + this.level + " where lastdate <= date('" + lastdate + "') and lastdate >= date('" + lastlastdate + "') and cast (Familiar as real) < " + String(familiar);
-                        sql += " limit " + String(limit);
-                        // this.dataBase.GetWordsLst(wdsLst, where);
-                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
-                                wdsLst.push(row);
-                            })];
-                    case 7:
-                        // this.dataBase.GetWordsLst(wdsLst, where);
-                        _a.sent();
-                        _a.label = 8;
-                    case 8:
-                        if (wdsLst.length >= 1) {
-                            return [2 /*return*/, true];
-                        }
-                        else {
-                            return [2 /*return*/, false];
-                        }
-                        return [2 /*return*/];
-                }
+    }
+    async GetWordsLst(args) {
+        let wdsLst = args[0];
+        // let familiar: number = args[-2];
+        let familiar;
+        let limit;
+        // get new words
+        if (args.length == 2) {
+            // (wdsLst, familiar);
+            familiar = args[1];
+            // let sql = "select * from Words where level = '" + level + "' and familiar = " + String(familiar);
+            let sql = `select * from ${this.level} where cast (Familiar as real) = ${String(familiar)}`;
+            await this.dataBase.each(sql, [], (row) => {
+                wdsLst.push(row);
             });
-        });
-    };
-    UsrProgress.prototype.UpdateProgress = function (word, familiar, today) {
-        return __awaiter(this, void 0, void 0, function () {
-            var sql;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        sql = "update " + this.level + " set Familiar=" + familiar + ", LastDate=date('" + today + "')";
-                        sql += " where Word='" + word + "'";
-                        return [4 /*yield*/, this.dataBase.run(sql)];
-                    case 1: 
-                    /*let ret = this.dataBase.run(sql);
-            
-                    ret.then((changes: number) => {
-                        console.info(`${changes} has changed!`);
-                    }, (reason) => {
-                        console.error(reason as string);
-                    })*/
-                    return [2 /*return*/, _a.sent()];
-                }
+        }
+        else if (args.length == 3) {
+            // (wdsLst, familiar, limit);
+            familiar = args[1];
+            limit = args[2];
+            // let sql = "select word from Words where level = '" + level + "' and familiar <= 0 and familiar >= " + String(familiar) + " limit " + String(limit);
+            // let sql = "select * from Words where level = '" + level + "' and familiar = " + String(familiar) + " limit " + String(limit);
+            let sql = `select * from ${this.level} where cast (Familiar as real) = ${String(familiar)} limit ${String(limit)}`;
+            await this.dataBase.each(sql, [], (row) => {
+                wdsLst.push(row);
             });
-        });
-    };
-    UsrProgress.prototype.GetForgottenWordsLst = function (wdsLst) {
-        return __awaiter(this, void 0, void 0, function () {
-            var familiar, sql, e_2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        familiar = 0;
-                        sql = "select * from " + this.level + " where cast (Familiar as real) < " + String(familiar);
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
-                                wdsLst.push(row);
-                            })];
-                    case 2:
-                        _a.sent();
-                        if (wdsLst.length >= 1) {
-                            return [2 /*return*/, true];
-                        }
-                        else {
-                            return [2 /*return*/, false];
-                        }
-                        return [3 /*break*/, 4];
-                    case 3:
-                        e_2 = _a.sent();
-                        console.error(e_2);
-                        return [2 /*return*/, false];
-                    case 4: return [2 /*return*/];
-                }
+        }
+        // get ancient words
+        // get forgotten words
+        else if (args.length == 4) {
+            // (wdsLst, lastlastdate, familiar, limit);
+            let lastlastdate = args[1];
+            familiar = args[2];
+            limit = args[3];
+            // let sql = "select * from Words where level = '" + level + "' and lastdate <= date('" + lastlastdate + "') and familiar < " + String(familiar);
+            let sql = `select * from ${this.level} where lastdate <= date('${lastlastdate}') and cast (Familiar as real) < ${String(familiar)}`;
+            sql += " limit " + String(limit);
+            // this.dataBase.GetWordsLst(wdsLst, where);
+            await this.dataBase.each(sql, [], (row) => {
+                wdsLst.push(row);
             });
-        });
-    };
-    UsrProgress.prototype.GetOvrDueWordsLst = function (wdsLst, today) {
-        return __awaiter(this, void 0, void 0, function () {
-            var familiar, sql;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        familiar = 10;
-                        sql = "select * from " + this.level + " where NextDate < date('" + today + "') and cast (Familiar as real) < " + String(familiar);
-                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
-                                wdsLst.push(row);
-                            })];
-                    case 1:
-                        _a.sent();
-                        if (wdsLst.length >= 1) {
-                            return [2 /*return*/, true];
-                        }
-                        else {
-                            return [2 /*return*/, false];
-                        }
-                        return [2 /*return*/];
-                }
+        }
+        // get Ebbinghaus Forgetting Curve words
+        else if (args.length == 5) {
+            // (wdsLst, lastdate, lastlastdate, familiar, limit);
+            let lastdate = args[1];
+            let lastlastdate = args[2];
+            familiar = args[3];
+            limit = args[4];
+            // let sql = "select * from Words where level = '" + level + "' and lastdate <= date('" + lastdate + "') and lastdate >= date('" + lastlastdate + "') and familiar < " + String(familiar);
+            // let sql = "select * from Words where level = '" + level + "' and lastdate <= date('" + lastdate + "') and lastdate >= date('" + lastlastdate + "') and cast (Familiar as real) < " + String(familiar);
+            let sql = `select * from ${this.level} where lastdate <= date('${lastdate}') and lastdate >= date('${lastlastdate}') and cast (Familiar as real) < ${String(familiar)}`;
+            sql += " limit " + String(limit);
+            // this.dataBase.GetWordsLst(wdsLst, where);
+            await this.dataBase.each(sql, [], (row) => {
+                wdsLst.push(row);
             });
-        });
-    };
-    UsrProgress.prototype.GetDueWordsLst = function (wdsLst, today) {
-        return __awaiter(this, void 0, void 0, function () {
-            var familiar, sql;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        familiar = 10;
-                        sql = "select * from " + this.level + " where NextDate = date('" + today + "') and cast (Familiar as real) < " + String(familiar);
-                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
-                                wdsLst.push(row);
-                            })];
-                    case 1:
-                        _a.sent();
-                        if (wdsLst.length >= 1) {
-                            return [2 /*return*/, true];
-                        }
-                        else {
-                            return [2 /*return*/, false];
-                        }
-                        return [2 /*return*/];
-                }
+        }
+        if (wdsLst.length >= 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    async UpdateProgress(word, familiar, today) {
+        // let entry = `'${String(familiar)}','date("${today}")'`;
+        // let sql = "update Words(familiar, lastdate) values (" + entry + ")";
+        // let sql = `update Words set Familiar=${familiar}, LastDate=date('${today}')`;
+        let sql = `update ${this.level} set Familiar=${familiar}, LastDate=date('${today}')`;
+        sql += ` where Word='${word}'`;
+        /*let ret = this.dataBase.run(sql);
+
+        ret.then((changes: number) => {
+            console.info(`${changes} has changed!`);
+        }, (reason) => {
+            console.error(reason as string);
+        })*/
+        return await this.dataBase.run(sql);
+    }
+    async GetForgottenWordsLst(wdsLst) {
+        let familiar = 0;
+        let sql = `select * from ${this.level} where cast (Familiar as real) < ${String(familiar)}`;
+        try {
+            await this.dataBase.each(sql, [], (row) => {
+                wdsLst.push(row);
             });
+            if (wdsLst.length >= 1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (e) {
+            console.error(e);
+            return false;
+        }
+    }
+    async GetOvrDueWordsLst(wdsLst, today) {
+        let familiar = 10;
+        let sql = `select * from ${this.level} where NextDate < date('${today}') and cast (Familiar as real) < ${String(familiar)}`;
+        await this.dataBase.each(sql, [], (row) => {
+            wdsLst.push(row);
         });
-    };
-    UsrProgress.prototype.GetNewWordsLst = function (wdsLst, limit) {
-        return __awaiter(this, void 0, void 0, function () {
-            var familiar, sql;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        familiar = 0;
-                        sql = "select * from " + this.level + " where LastDate is null and cast (Familiar as real) = " + String(familiar);
-                        sql += " limit " + String(limit);
-                        return [4 /*yield*/, this.dataBase.each(sql, [], function (row) {
-                                wdsLst.push(row);
-                            })];
-                    case 1:
-                        _a.sent();
-                        if (wdsLst.length >= 1) {
-                            return [2 /*return*/, true];
-                        }
-                        else {
-                            return [2 /*return*/, false];
-                        }
-                        return [2 /*return*/];
-                }
-            });
+        if (wdsLst.length >= 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    async GetDueWordsLst(wdsLst, today) {
+        let familiar = 10;
+        let sql = `select * from ${this.level} where NextDate = date('${today}') and cast (Familiar as real) < ${String(familiar)}`;
+        await this.dataBase.each(sql, [], (row) => {
+            wdsLst.push(row);
         });
-    };
-    UsrProgress.prototype.UpdateProgress2 = function (word, familiar, lstDate, nxtDate) {
-        return __awaiter(this, void 0, void 0, function () {
-            var sql;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        sql = "update " + this.level + " set Familiar=" + familiar + ", LastDate=date('" + lstDate + "'), NextDate=date('" + nxtDate + "')";
-                        sql += " where Word='" + word + "'";
-                        console.info(sql);
-                        return [4 /*yield*/, this.dataBase.run(sql)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
+        if (wdsLst.length >= 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    async GetNewWordsLst(wdsLst, limit) {
+        let familiar = 0;
+        let sql = `select * from ${this.level} where LastDate is null and cast (Familiar as real) = ${String(familiar)}`;
+        sql += " limit " + String(limit);
+        await this.dataBase.each(sql, [], (row) => {
+            wdsLst.push(row);
         });
-    };
-    UsrProgress.prototype.Close = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var ret, e_3;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.dataBase.Close()];
-                    case 1:
-                        ret = _a.sent();
-                        if (ret) {
-                            return [2 /*return*/, [true, ""]];
-                        }
-                        else {
-                            return [2 /*return*/, [false, "Unkown reason"]];
-                        }
-                        return [3 /*break*/, 3];
-                    case 2:
-                        e_3 = _a.sent();
-                        return [2 /*return*/, [false, e_3.message]];
-                    case 3: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    return UsrProgress;
-}());
+        if (wdsLst.length >= 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    async UpdateProgress2(word, familiar, lstDate, nxtDate) {
+        let sql = `update ${this.level} set Familiar=${familiar}, LastDate=date('${lstDate}'), NextDate=date('${nxtDate}')`;
+        sql += ` where Word='${word}'`;
+        console.info(sql);
+        return await this.dataBase.run(sql);
+    }
+    async Close() {
+        try {
+            let ret = await this.dataBase.Close();
+            if (ret) {
+                return [true, ""];
+            }
+            else {
+                return [false, "Unkown reason"];
+            }
+        }
+        catch (e) {
+            return [false, e.message];
+        }
+    }
+}
 exports.UsrProgress = UsrProgress;
 ;
 //# sourceMappingURL=UsrProgress.js.map

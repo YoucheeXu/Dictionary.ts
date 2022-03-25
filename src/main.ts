@@ -31,7 +31,7 @@ for (let argv of process.argv) {
 }
 
 try {
-    let myApp = new MasterApp();
+    var myApp = new MasterApp();
     myApp.Run(argvs)
 }
 catch (e) {

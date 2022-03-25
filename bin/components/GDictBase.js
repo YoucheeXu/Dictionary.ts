@@ -1,19 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -33,64 +18,27 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GDictBase = void 0;
 // GDictBase.ts
-var path = __importStar(require("path"));
-var fs = __importStar(require("fs"));
-var DictBase_1 = require("./DictBase");
-var ZipArchive_1 = require("./ZipArchive");
-var utils_1 = require("../utils/utils");
-var globalInterface_1 = require("../utils/globalInterface");
-var GDictBase = /** @class */ (function (_super) {
-    __extends(GDictBase, _super);
-    function GDictBase(name, dictSrc, _compression, _compresslevel) {
-        var _this_1 = _super.call(this, name, dictSrc) || this;
-        _this_1._compression = _compression;
-        _this_1._compresslevel = _compresslevel;
-        _this_1._dictZip = new ZipArchive_1.ZipArchive(dictSrc, _compression, _compresslevel);
-        var filePath = path.dirname(dictSrc);
-        var fileName = path.basename(dictSrc, ".zip");
-        _this_1._tempDictDir = path.join(filePath, fileName);
-        var styleSrc = path.join(filePath, fileName + "-style.zip");
-        _this_1._styleZip = new ZipArchive_1.ZipArchive(styleSrc, _compression, _compresslevel);
-        var _this = _this_1;
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
+const DictBase_1 = require("./DictBase");
+const ZipArchive_1 = require("./ZipArchive");
+const utils_1 = require("../utils/utils");
+const globalInterface_1 = require("../utils/globalInterface");
+class GDictBase extends DictBase_1.DictBase {
+    constructor(name, dictSrc, _compression, _compresslevel) {
+        super(name, dictSrc);
+        this._compression = _compression;
+        this._compresslevel = _compresslevel;
+        this._dictZip = new ZipArchive_1.ZipArchive(dictSrc, _compression, _compresslevel);
+        let filePath = path.dirname(dictSrc);
+        let fileName = path.basename(dictSrc, ".zip");
+        this._tempDictDir = path.join(filePath, fileName);
+        let styleSrc = path.join(filePath, fileName + "-style.zip");
+        this._styleZip = new ZipArchive_1.ZipArchive(styleSrc, _compression, _compresslevel);
+        let _this = this;
         if (fs.existsSync(_this._tempDictDir) == false) {
             fs.mkdir(_this._tempDictDir, function (error) {
                 if (error) {
@@ -100,125 +48,102 @@ var GDictBase = /** @class */ (function (_super) {
                 console.log('Success to create folder: ' + _this._tempDictDir);
             });
         }
-        return _this_1;
     }
-    GDictBase.prototype.Open = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                this._styleZip.Open();
-                return [2 /*return*/, this._dictZip.Open()];
-            });
-        });
-    };
-    GDictBase.prototype.Close = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                (0, utils_1.RemoveDir)(this._tempDictDir);
-                if (fs.existsSync(this._tempDictDir) == false) {
-                    return [2 /*return*/, [true, "OK to remove " + this._tempDictDir]];
+    async Open() {
+        this._styleZip.Open();
+        return this._dictZip.Open();
+    }
+    async Close() {
+        (0, utils_1.RemoveDir)(this._tempDictDir);
+        if (fs.existsSync(this._tempDictDir) == false) {
+            return [true, `OK to remove ${this._tempDictDir}`];
+        }
+        else {
+            return [false, `Fail to remove ${this._tempDictDir}`];
+        }
+    }
+    async query_word(word) {
+        let fileName = word[0] + "/" + word + ".json";
+        let dictFile = path.join(this._tempDictDir, word + ".html");
+        let datum;
+        let ret = false;
+        let wordFile = "";
+        try {
+            if (fs.existsSync(dictFile) == true) {
+                return Promise.resolve([1, dictFile]);
+            }
+            else if (this._dictZip.bFileIn(fileName)) {
+                [ret, datum] = await this._dictZip.readFileAsync(fileName);
+                if (!ret) {
+                    return Promise.resolve([-1, `Fail to read ${word} in ${this.szName}`]);
                 }
-                else {
-                    return [2 /*return*/, [false, "Fail to remove " + this._tempDictDir]];
-                }
-                return [2 /*return*/];
-            });
-        });
-    };
-    GDictBase.prototype.query_word = function (word) {
-        return __awaiter(this, void 0, void 0, function () {
-            var fileName, dictFile, datum, ret, wordFile, strDatum, dictDatum, info, obj, tabAlign, dict, jsName, cssName, css, js, togeg, html, jsFile, cssFile, e_1, errMsg;
-            var _a, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        fileName = word[0] + "/" + word + ".json";
-                        dictFile = path.join(this._tempDictDir, word + ".html");
-                        ret = false;
-                        wordFile = "";
-                        _d.label = 1;
-                    case 1:
-                        _d.trys.push([1, 12, , 13]);
-                        if (!(fs.existsSync(dictFile) == true)) return [3 /*break*/, 2];
-                        return [2 /*return*/, Promise.resolve([1, dictFile])];
-                    case 2:
-                        if (!this._dictZip.bFileIn(fileName)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this._dictZip.readFileAsync(fileName)];
-                    case 3:
-                        _a = _d.sent(), ret = _a[0], datum = _a[1];
+            }
+            else {
+                wordFile = path.join(this._tempDictDir, word + ".json");
+                return Promise.resolve([0, wordFile]);
+            }
+            let strDatum = String(datum);
+            let dictDatum = JSON.parse(strDatum);
+            if (dictDatum["ok"]) {
+                let info = dictDatum["info"];
+                info = String(info).replace(/\\x/g, "\\u00");
+                let obj = JSON.parse(info);
+                let tabAlign = '\t\t';
+                let dict = this.process_primary(tabAlign, obj.primaries);
+                let jsName = "google-toggle.js";
+                let cssName = "google.css";
+                let css = tabAlign + '<link rel="stylesheet" href="../../assets/scripts/player.css">' + '\r\n';
+                css += tabAlign + `<link rel="stylesheet" type="text/css" href="${cssName}">`;
+                let js = tabAlign + '<script src="../../assets/third_party/jquery-3.4.1.min.js"></script>' + '\r\n';
+                js += tabAlign + '<script src="../../assets/scripts/player.js"></script>' + '\r\n';
+                js += tabAlign + `<script src="${jsName}"></script>`;
+                let togeg = tabAlign + '<div id="toggle_example" align="right">- Hide Examples</div>';
+                let html = `<!DOCTYPE html><html>\r\n\t<body>\r\n${css}\r\n${js}\r\n${togeg}\r\n${dict}\r\n\t</body>\r\n</html>`;
+                fs.writeFileSync(dictFile, html);
+                let jsFile = path.join(this._tempDictDir, jsName);
+                if (fs.existsSync(jsFile) == false) {
+                    if (this._styleZip.bFileIn(jsName)) {
+                        [ret, datum] = await this._styleZip.readFileAsync(jsName);
                         if (!ret) {
-                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + word + " in " + this.szName])];
-                        }
-                        return [3 /*break*/, 5];
-                    case 4:
-                        wordFile = path.join(this._tempDictDir, word + ".json");
-                        return [2 /*return*/, Promise.resolve([0, wordFile])];
-                    case 5:
-                        strDatum = String(datum);
-                        dictDatum = JSON.parse(strDatum);
-                        if (!dictDatum["ok"]) return [3 /*break*/, 10];
-                        info = dictDatum["info"];
-                        info = String(info).replace(/\\x/g, "\\u00");
-                        obj = JSON.parse(info);
-                        tabAlign = '\t\t';
-                        dict = this.process_primary(tabAlign, obj.primaries);
-                        jsName = "google-toggle.js";
-                        cssName = "google.css";
-                        css = tabAlign + '<link rel="stylesheet" href="../../assets/scripts/player.css">' + '\r\n';
-                        css += tabAlign + ("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + cssName + "\">");
-                        js = tabAlign + '<script src="../../assets/third_party/jquery-3.4.1.min.js"></script>' + '\r\n';
-                        js += tabAlign + '<script src="../../assets/scripts/player.js"></script>' + '\r\n';
-                        js += tabAlign + ("<script src=\"" + jsName + "\"></script>");
-                        togeg = tabAlign + '<div id="toggle_example" align="right">- Hide Examples</div>';
-                        html = "<!DOCTYPE html><html>\r\n\t<body>\r\n" + css + "\r\n" + js + "\r\n" + togeg + "\r\n" + dict + "\r\n\t</body>\r\n</html>";
-                        fs.writeFileSync(dictFile, html);
-                        jsFile = path.join(this._tempDictDir, jsName);
-                        if (!(fs.existsSync(jsFile) == false)) return [3 /*break*/, 7];
-                        if (!this._styleZip.bFileIn(jsName)) return [3 /*break*/, 7];
-                        return [4 /*yield*/, this._styleZip.readFileAsync(jsName)];
-                    case 6:
-                        _b = _d.sent(), ret = _b[0], datum = _b[1];
-                        if (!ret) {
-                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + jsName + " in " + this._styleZip])];
+                            return Promise.resolve([-1, `Fail to read ${jsName} in ${this._styleZip}`]);
                         }
                         fs.writeFileSync(jsFile, String(datum));
-                        _d.label = 7;
-                    case 7:
-                        cssFile = path.join(this._tempDictDir, cssName);
-                        if (!(fs.existsSync(cssFile) == false)) return [3 /*break*/, 9];
-                        if (!this._styleZip.bFileIn(cssName)) return [3 /*break*/, 9];
-                        return [4 /*yield*/, this._styleZip.readFileAsync(cssName)];
-                    case 8:
-                        _c = _d.sent(), ret = _c[0], datum = _c[1];
+                    }
+                }
+                let cssFile = path.join(this._tempDictDir, cssName);
+                if (fs.existsSync(cssFile) == false) {
+                    if (this._styleZip.bFileIn(cssName)) {
+                        [ret, datum] = await this._styleZip.readFileAsync(cssName);
                         if (!ret) {
-                            return [2 /*return*/, Promise.resolve([-1, "Fail to read " + cssName + " in " + this._styleZip])];
+                            return Promise.resolve([-1, `Fail to read ${cssName} in ${this._styleZip}`]);
                         }
                         fs.writeFileSync(cssFile, String(datum));
-                        _d.label = 9;
-                    case 9: return [2 /*return*/, Promise.resolve([1, dictFile])];
-                    case 10: return [2 /*return*/, Promise.resolve([-1, "Fail to read: " + word])];
-                    case 11: return [3 /*break*/, 13];
-                    case 12:
-                        e_1 = _d.sent();
-                        if (fs.existsSync(wordFile)) {
-                            fs.unlinkSync(wordFile);
-                        }
-                        errMsg = e_1.message.replace("<", "").replace(">", "");
-                        return [2 /*return*/, Promise.resolve([-1, errMsg])];
-                    case 13: return [2 /*return*/];
+                    }
                 }
-            });
-        });
-    };
-    GDictBase.prototype.CheckAndAddFile = function (localFile) {
-        var word = path.basename(localFile, ".json");
-        var fileName = word[0] + "/" + word + ".json";
-        var info = "";
-        var _this = this;
-        var gApp = globalInterface_1.globalVar.app;
+                return Promise.resolve([1, dictFile]);
+            }
+            else {
+                return Promise.resolve([-1, "Fail to read: " + word]);
+            }
+        }
+        catch (e) {
+            if (fs.existsSync(wordFile)) {
+                fs.unlinkSync(wordFile);
+            }
+            let errMsg = e.message.replace("<", "").replace(">", "");
+            return Promise.resolve([-1, errMsg]);
+        }
+    }
+    CheckAndAddFile(localFile) {
+        let word = path.basename(localFile, ".json");
+        let fileName = word[0] + "/" + word + ".json";
+        let info = "";
+        let _this = this;
+        let gApp = globalInterface_1.globalVar.app;
         if (fs.existsSync(localFile)) {
-            var dict = fs.readFileSync(localFile).toString();
-            var inWord = this.GetInWord(dict);
-            fs.unlink(localFile, function () { });
+            let dict = fs.readFileSync(localFile).toString();
+            let inWord = this.GetInWord(dict);
+            fs.unlink(localFile, () => { });
             if (inWord != "") {
                 if (inWord == word) {
                     // gApp.log("info", "%s's json is OK!" %word)
@@ -227,22 +152,22 @@ var GDictBase = /** @class */ (function (_super) {
                 }
                 else {
                     // gApp.log("error", "%s isn't what we want!" %word)
-                    return gApp.Info(-1, 1, inWord, "Wrong word: We except '" + word + "', but we get '" + inWord + "' at " + this._szName);
+                    return gApp.Info(-1, 1, inWord, `Wrong word: We except '${word}', but we get '${inWord}' at ${this._szName}`);
                 }
             }
             else {
-                return gApp.Info(-1, 1, word, "No dict of " + word + " in " + this.szName);
+                return gApp.Info(-1, 1, word, `No dict of ${word} in ${this.szName}`);
             }
         }
         else {
             console.log(localFile + " doesn't exist");
-            return gApp.Info(-1, 1, word, "Doesn't exist dict of " + word + " at " + this.szName);
+            return gApp.Info(-1, 1, word, `Doesn't exist dict of ${word} at ${this.szName}`);
         }
-    };
-    GDictBase.prototype.GetInWord = function (dict) {
-        var datum = JSON.parse(dict);
+    }
+    GetInWord(dict) {
+        let datum = JSON.parse(dict);
         if (datum["ok"]) {
-            var info = datum["info"];
+            let info = datum["info"];
             info = String(info).replace(/\\x/g, "\\u00");
             // info = info.replace('\\', '\\\\');
             try {
@@ -252,19 +177,19 @@ var GDictBase = /** @class */ (function (_super) {
                 }
             }
             catch (e) {
-                var errMsg = e.message.replace("<", "").replace(">", "");
+                let errMsg = e.message.replace("<", "").replace(">", "");
                 console.error(errMsg);
                 return "";
             }
         }
         return "";
-    };
-    GDictBase.prototype.get_wordsLst = function (word, wdMatchLst) {
-        var fileName = word[0] + "/" + word + ".*\.json";
+    }
+    get_wordsLst(word, wdMatchLst) {
+        let fileName = word[0] + "/" + word + ".*\.json";
         // print("Going to find: " + fileName)
         this._dictZip.searchFile(fileName, wdMatchLst, 100);
         // for i in range(len(wdMatchLst)){
-        for (var i = 0; i < wdMatchLst.length; i++) {
+        for (let i = 0; i < wdMatchLst.length; i++) {
             wdMatchLst[i] = wdMatchLst[i].slice(2, -5);
         }
         if (wdMatchLst.length >= 1) {
@@ -273,19 +198,19 @@ var GDictBase = /** @class */ (function (_super) {
         else {
             return false;
         }
-    };
-    GDictBase.prototype.del_word = function (word) {
-        var fileName = word[0] + "/" + word + ".json";
+    }
+    del_word(word) {
+        let fileName = word[0] + "/" + word + ".json";
         return this._dictZip.delFile(fileName);
-    };
-    GDictBase.prototype.process_primary = function (tabAlign, dict_primary) {
-        var primary = dict_primary;
-        var xml = "";
-        var html = "";
-        var bMeaning = false;
+    }
+    process_primary(tabAlign, dict_primary) {
+        let primary = dict_primary;
+        let xml = "";
+        let html = "";
+        let bMeaning = false;
         if (primary instanceof Array) {
-            for (var i in primary) {
-                var data = primary[i];
+            for (let i in primary) {
+                let data = primary[i];
                 html = this.process_primary(tabAlign, data);
                 // console.log("html1: " + html + ";");
                 if (html.slice(0, 1) == "<") {
@@ -295,8 +220,8 @@ var GDictBase = /** @class */ (function (_super) {
             }
         }
         else if (typeof (primary) == "object") {
-            var hasChild = false;
-            var hasType = false;
+            let hasChild = false;
+            let hasType = false;
             if (primary.type != undefined) {
                 hasType = true;
                 if (primary.type == "container") {
@@ -370,14 +295,14 @@ var GDictBase = /** @class */ (function (_super) {
             xml += html;
         }
         return xml;
-    };
-    GDictBase.prototype.process_terms = function (tabAlign, dict_terms, type) {
-        var terms = dict_terms;
-        var xml = "";
-        var html = "";
+    }
+    process_terms(tabAlign, dict_terms, type) {
+        let terms = dict_terms;
+        let xml = "";
+        let html = "";
         if (terms instanceof Array) {
-            for (var i in terms) {
-                var data = terms[i];
+            for (let i in terms) {
+                let data = terms[i];
                 html = this.process_terms(tabAlign, data, type);
                 // if(html.slice(0,1) == "<"){
                 // xml += "\r\n" + tabAlign;
@@ -386,7 +311,7 @@ var GDictBase = /** @class */ (function (_super) {
             }
         }
         else if (typeof (terms) == "object") {
-            var hasType = false;
+            let hasType = false;
             if (terms.type != undefined) {
                 hasType = true;
                 if (terms.type != "text" || type == "headword" || type == "related") {
@@ -415,18 +340,18 @@ var GDictBase = /** @class */ (function (_super) {
             }
         }
         return xml;
-    };
-    GDictBase.prototype.process_term = function (dict_terms) {
-        var terms = dict_terms;
-        var xml = "";
-        for (var i in terms) {
-            var data = terms[i];
+    }
+    process_term(dict_terms) {
+        let terms = dict_terms;
+        let xml = "";
+        for (let i in terms) {
+            let data = terms[i];
             xml += (data.text);
         }
         return xml;
-    };
-    GDictBase.prototype.getSound = function (tabAlign, url) {
-        var sound = '\r\n' +
+    }
+    getSound(tabAlign, url) {
+        let sound = '\r\n' +
             tabAlign +
             "<div class = 'sound' id = 'Player'>\r\n" +
             tabAlign +
@@ -451,9 +376,8 @@ var GDictBase = /** @class */ (function (_super) {
             tabAlign +
             '</div>';
         return sound;
-    };
-    return GDictBase;
-}(DictBase_1.DictBase));
+    }
+}
 exports.GDictBase = GDictBase;
 ;
 //# sourceMappingURL=GDictBase.js.map
