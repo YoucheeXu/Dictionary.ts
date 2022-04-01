@@ -4,6 +4,21 @@ All notable changes to the "Dictionary.ts" will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [To-Do]
+
+### Fixed
+
+- when the word is missing, it doesn't show correctly in Dictionary
+
+### Changed
+
+- merged QueryWord2 and QueryWord in Dictionary
+
+### Added
+
+- Go next button and go previous button work in Dictionary
+- Double click to query word in Dictionary
+
 ## [Unreleased]
 
 ### Fixed
@@ -14,9 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - close "selection a application" dialog could not quit app
 - wrong to record error message
 
-### Removed
-
 ### Changed
+
 - display dict through html file in Dictionary
 - files structure
 

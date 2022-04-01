@@ -6,8 +6,6 @@ $(function () {
 
 function loadPlayer() {
     $('[id=playpause]').each(function (n) {
-        // console.log("add click: ", $(this));
-        // $(this).click(function(){
         $(this).on('click', function () {
             // audio = document.getElementById('myaudio');
             // document.getElementsByClassName('d');
@@ -16,11 +14,11 @@ function loadPlayer() {
             // alert($(this).prop("tagName"))
             // alert($('.sound').attr('id'))
             // alert($(this).next().attr('id'))
-            nextTag = $(this).next();
+            let nextTag = $(this).next();
             // nextTagName = nextTag.prop("tagName");
             // alert(nextTagName);
             // alert(nextTag.attr('id'));
-            audio = nextTag[0];
+            let audio = nextTag[0];
             // console.log(audio);
             // var it = $(this)
             // alert($(this).attr("class"))
