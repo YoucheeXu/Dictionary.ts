@@ -13,6 +13,12 @@ class DictBase {
     get szName() {
         return this._szName;
     }
+    set szTmpDir(tmpDir) {
+        this._szTmpDir = tmpDir;
+    }
+    get szTmpDir() {
+        return this._szTmpDir;
+    }
     set download(download) {
         this._download = download;
     }

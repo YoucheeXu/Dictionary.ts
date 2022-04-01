@@ -9,7 +9,6 @@ import { globalVar } from "../utils/globalInterface";
 export class GDictBase extends DictBase {
     private _dictZip: ZipArchive;
     private _styleZip: ZipArchive;
-    private _tempDictDir: string;
 
     constructor(name: string, dictSrc: string, readonly _compression: string, readonly _compresslevel: string) {
         super(name, dictSrc);
@@ -19,19 +18,21 @@ export class GDictBase extends DictBase {
         let filePath = path.dirname(dictSrc);
         let fileName = path.basename(dictSrc, ".zip");
 
-        this._tempDictDir = path.join(filePath, fileName);
+        let tmpDir = path.join(filePath, fileName);
+
+        this.szTmpDir = tmpDir;
 
         let styleSrc = path.join(filePath, fileName + "-style.zip");
         this._styleZip = new ZipArchive(styleSrc, _compression, _compresslevel);
 
         let _this = this;
-        if (fs.existsSync(_this._tempDictDir) == false) {
-            fs.mkdir(_this._tempDictDir, function (error) {
+        if (fs.existsSync(_this.szTmpDir) == false) {
+            fs.mkdir(_this.szTmpDir, function (error) {
                 if (error) {
                     console.log(error);
                     return false;
                 }
-                console.log('Success to create folder: ' + _this._tempDictDir);
+                console.log('Success to create folder: ' + _this.szTmpDir);
             })
         }
     }
@@ -42,20 +43,22 @@ export class GDictBase extends DictBase {
     }
 
     public async Close(): Promise<[boolean, string]> {
-        RemoveDir(this._tempDictDir);
-        if (fs.existsSync(this._tempDictDir) == false) {
-            return [true, `OK to remove ${this._tempDictDir}`];
+        RemoveDir(this.szTmpDir);
+        if (fs.existsSync(this.szTmpDir) == false) {
+            return [true, `OK to remove ${this.szTmpDir}`];
         } else {
-            return [false, `Fail to remove ${this._tempDictDir}`];
+            return [false, `Fail to remove ${this.szTmpDir}`];
         }
     }
 
     public async query_word(word: string): Promise<[number, string]> {
         let fileName = word[0] + "/" + word + ".json";
-        let dictFile = path.join(this._tempDictDir, word + ".html");
+        let dictFile = path.join(this.szTmpDir, word + ".html");
         let datum: string | any;
         let ret = false;
         let wordFile = "";
+        let retNum = -1;
+        let errMsg = '';
         try {
             if (fs.existsSync(dictFile) == true) {
                 return Promise.resolve([1, dictFile]);
@@ -63,10 +66,11 @@ export class GDictBase extends DictBase {
             else if (this._dictZip.bFileIn(fileName)) {
                 [ret, datum] = await this._dictZip.readFileAsync(fileName);
                 if (!ret) {
-                    return Promise.resolve([-1, `Fail to read ${word} in ${this.szName}`]);
+                    retNum = -1;
+                    errMsg = `Fail to read ${word} in ${this.szName}`;
                 }
             } else {
-                wordFile = path.join(this._tempDictDir, word + ".json");
+                wordFile = path.join(this.szTmpDir, word + ".json");
                 return Promise.resolve([0, wordFile]);
             }
 
@@ -93,7 +97,7 @@ export class GDictBase extends DictBase {
                 let html = `<!DOCTYPE html><html>\r\n\t<body>\r\n${css}\r\n${js}\r\n${togeg}\r\n${dict}\r\n\t</body>\r\n</html>`;
                 fs.writeFileSync(dictFile, html);
 
-                let jsFile = path.join(this._tempDictDir, jsName);
+                let jsFile = path.join(this.szTmpDir, jsName);
                 if (fs.existsSync(jsFile) == false) {
                     if (this._styleZip.bFileIn(jsName)) {
                         [ret, datum] = await this._styleZip.readFileAsync(jsName);
@@ -104,7 +108,7 @@ export class GDictBase extends DictBase {
                     }
                 }
 
-                let cssFile = path.join(this._tempDictDir, cssName);
+                let cssFile = path.join(this.szTmpDir, cssName);
                 if (fs.existsSync(cssFile) == false) {
                     if (this._styleZip.bFileIn(cssName)) {
                         [ret, datum] = await this._styleZip.readFileAsync(cssName);
@@ -118,16 +122,19 @@ export class GDictBase extends DictBase {
                 return Promise.resolve([1, dictFile]);
             }
             else {
-                return Promise.resolve([-1, "Fail to read: " + word]);
+                retNum = -1;
+                errMsg = "Fail to read: " + word;
             }
         }
         catch (e) {
             if (fs.existsSync(wordFile)) {
                 fs.unlinkSync(wordFile);
             }
-            let errMsg = (e as Error).message.replace("<", "").replace(">", "");
-            return Promise.resolve([-1, errMsg]);
+            retNum = -1;
+            errMsg = errMsg = (e as Error).message.replace("<", "").replace(">", "");
         }
+
+        return Promise.resolve([retNum, errMsg]);
     }
 
     public CheckAndAddFile(localFile: string) {

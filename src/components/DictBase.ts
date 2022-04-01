@@ -1,5 +1,6 @@
 export abstract class DictBase {
     private _download: any = null;
+    private _szTmpDir: string;
 
     constructor(readonly _szName: string, readonly _szSrcFile: string) {
     }
@@ -10,6 +11,14 @@ export abstract class DictBase {
 
     public get szName() {
         return this._szName;
+    }
+
+    public set szTmpDir(tmpDir: string){
+        this._szTmpDir = tmpDir;
+    }
+
+    public get szTmpDir() {
+        return this._szTmpDir;
     }
 
     public set download(download: any) {

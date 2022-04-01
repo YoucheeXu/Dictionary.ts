@@ -276,25 +276,27 @@ class dictApp extends ElectronApp_1.ElectronApp {
         let bNew = false;
         [retDict, dict] = await this._curDictBase.query_word(word);
         [retAudio, audio] = await this._audioBase.query_audio(word);
-        if (retDict < 0) {
-            this.Record2File(this._miss_dict, "Dict of " + word + ": " + dict + "\n");
-        }
-        else if (retDict == 0) {
+        if (retDict == 0) {
+            let dictName = this._curDictBase.szName;
             if (this._curDictBase.download) {
                 this.TriggerDownload(this._curDictBase, word, dict);
             }
             else {
-                let dictName = this._curDictBase.szName;
-                this.Record2File(this._miss_dict, `Dict of ${word}: ${dictName} doesn't support to download.\n`);
+                let errMsg = `Dict of ${word}: ${dictName} doesn't support to download.\n`;
+                this.Record2File(this._miss_dict, errMsg);
+                this.Info(-1, 1, word, errMsg);
             }
+            dict = `there is no ${word} in ${dictName}.`;
+        }
+        if (retDict < 0) {
+            this.Record2File(this._miss_dict, dict);
         }
         if (retDict <= 0) {
-            dict =
-                `<div class="headword">
-                    <div class="text">${word}</div>
-                    <div class="phonetic">${dict}</div>
-                </div>`;
-            dict = dict.replace(/[\r\n]/g, "");
+            let dictErrFile = path.join(this._curDictBase.szTmpDir, word + "-error.html");
+            // let html = `<div class="headword">\r\n\t<div class="text">${word}</div>\r\n\t<div class="phonetic">${dict}</div>\r\n</div>`;
+            let html = `<div class="headword">\r\n\t<div class="text">${dict}</div>\r\n</div>`;
+            fs.writeFileSync(dictErrFile, html);
+            dict = dictErrFile;
         }
         else {
             if ((await this._usrProgress.ExistWord(word)) == false) {

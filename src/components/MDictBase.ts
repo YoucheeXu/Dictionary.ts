@@ -11,23 +11,22 @@ import { globalVar } from "../utils/globalInterface";
 export class MDictBase extends DictBase {
     private _mdx: MdPakage;
     private _mdd: MdPakage;
-    private _tempDictDir: string;
 
     constructor(name: string, mdxFile: string, readonly _passcode?: [string, string]) {
         super(name, mdxFile);
 
         let filePath = path.dirname(mdxFile);
         let fileName = path.basename(mdxFile, ".mdx");
-        this._tempDictDir = path.join(filePath, fileName);
-
+        let tmpDir = path.join(filePath, fileName);
+        this.szTmpDir = tmpDir;
         let _this = this;
-        if (fs.existsSync(_this._tempDictDir) == false) {
-            fs.mkdir(_this._tempDictDir, function (error) {
+        if (fs.existsSync(_this.szTmpDir) == false) {
+            fs.mkdir(_this.szTmpDir, function (error) {
                 if (error) {
                     console.log(error);
                     return false;
                 }
-                console.log('Success to create folder: ' + _this._tempDictDir);
+                console.log('Success to create folder: ' + _this.szTmpDir);
             })
         }
 
@@ -50,7 +49,9 @@ export class MDictBase extends DictBase {
     public async query_word(word: string): Promise<[number, string]> {
         let datum: string;
         let ret = false;
-        let dictFile = path.join(this._tempDictDir, word + ".html");
+        let dictFile = path.join(this.szTmpDir, word + ".html");
+        let retNum = -1;
+        let errMsg = '';
         if (fs.existsSync(dictFile) == true) {
             return Promise.resolve([1, dictFile]);
         } else if (this._mdx.bRecordIn(word)) {
@@ -61,7 +62,8 @@ export class MDictBase extends DictBase {
                     let html = "<!DOCTYPE html><html><body>" + datum + "</body></html>";
                     fs.writeFileSync(dictFile, html);
                 } else {
-                    return Promise.resolve([-1, `Fail to read ${word} in ${this._szName}.mdx`]);
+                    retNum = -1;
+                    errMsg = `Fail to read ${word} in ${this._szName}.mdx`;
                 }
 
                 // let regEx = /src="google-toggle.js" | href="google.css"/g;
@@ -73,13 +75,15 @@ export class MDictBase extends DictBase {
                     if (this._mdd.bRecordIn(src)) {
                         [ret, datum] = await this._mdd.ReadRecord(src);
                         if (ret) {
-                            srcFile = path.join(this._tempDictDir, src);
+                            srcFile = path.join(this.szTmpDir, src);
                             fs.writeFileSync(srcFile, datum);
                         } else {
-                            return Promise.resolve([-1, `Fail to read ${src} in ${this._szName}.mdd`]);
+                            retNum = -1;
+                            errMsg = `Fail to read ${src} in ${this._szName}.mdd`;
                         }
                     } else {
-                        return Promise.resolve([-1, `There is no ${src} in ${this._szName}.mdd`]);
+                        retNum = -1;
+                        errMsg = `There is no ${src} in ${this._szName}.mdd`;
                     }
                 }
                 return Promise.resolve([1, dictFile]);
@@ -87,12 +91,15 @@ export class MDictBase extends DictBase {
                 if (fs.existsSync(dictFile)) {
                     fs.unlinkSync(dictFile);
                 }
-                let errMsg = (e as Error).message.replace("<", "").replace(">", "");
-                return Promise.resolve([-1, errMsg]);
+                retNum = -1;
+                errMsg = (e as Error).message.replace("<", "").replace(">", "");
             }
         } else {
-            return Promise.resolve([-1, `${word} isn't in ${this._szName}`]);
+            retNum = -1;
+            errMsg = `${word} isn't in ${this._szName}`;
         }
+
+        return Promise.resolve([retNum, errMsg]);
     }
 
     public get_wordsLst(word: string, wdMatchLst: string[]): boolean {
@@ -133,11 +140,11 @@ export class MDictBase extends DictBase {
             [ret2, msg2] = await this._mdd.Close();
         }
 
-        RemoveDir(this._tempDictDir);
-        if (fs.existsSync(this._tempDictDir) == false) {
-            msg3 = `OK to remove ${this._tempDictDir}`
+        RemoveDir(this.szTmpDir);
+        if (fs.existsSync(this.szTmpDir) == false) {
+            msg3 = `OK to remove ${this.szTmpDir}`
         } else {
-            msg3 = `Fail to remove ${this._tempDictDir}`;
+            msg3 = `Fail to remove ${this.szTmpDir}`;
             ret3 = false;
         }
 

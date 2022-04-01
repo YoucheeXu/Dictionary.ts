@@ -33,15 +33,16 @@ class MDictBase extends DictBase_1.DictBase {
         this._passcode = _passcode;
         let filePath = path.dirname(mdxFile);
         let fileName = path.basename(mdxFile, ".mdx");
-        this._tempDictDir = path.join(filePath, fileName);
+        let tmpDir = path.join(filePath, fileName);
+        this.szTmpDir = tmpDir;
         let _this = this;
-        if (fs.existsSync(_this._tempDictDir) == false) {
-            fs.mkdir(_this._tempDictDir, function (error) {
+        if (fs.existsSync(_this.szTmpDir) == false) {
+            fs.mkdir(_this.szTmpDir, function (error) {
                 if (error) {
                     console.log(error);
                     return false;
                 }
-                console.log('Success to create folder: ' + _this._tempDictDir);
+                console.log('Success to create folder: ' + _this.szTmpDir);
             });
         }
         this._mdx = new MdPakage_1.MdPakage(mdxFile, false, "", this._passcode);
@@ -60,7 +61,9 @@ class MDictBase extends DictBase_1.DictBase {
     async query_word(word) {
         let datum;
         let ret = false;
-        let dictFile = path.join(this._tempDictDir, word + ".html");
+        let dictFile = path.join(this.szTmpDir, word + ".html");
+        let retNum = -1;
+        let errMsg = '';
         if (fs.existsSync(dictFile) == true) {
             return Promise.resolve([1, dictFile]);
         }
@@ -72,7 +75,8 @@ class MDictBase extends DictBase_1.DictBase {
                     fs.writeFileSync(dictFile, html);
                 }
                 else {
-                    return Promise.resolve([-1, `Fail to read ${word} in ${this._szName}.mdx`]);
+                    retNum = -1;
+                    errMsg = `Fail to read ${word} in ${this._szName}.mdx`;
                 }
                 // let regEx = /src="google-toggle.js" | href="google.css"/g;
                 let regexp = /href="(.+?)"/g;
@@ -83,15 +87,17 @@ class MDictBase extends DictBase_1.DictBase {
                     if (this._mdd.bRecordIn(src)) {
                         [ret, datum] = await this._mdd.ReadRecord(src);
                         if (ret) {
-                            srcFile = path.join(this._tempDictDir, src);
+                            srcFile = path.join(this.szTmpDir, src);
                             fs.writeFileSync(srcFile, datum);
                         }
                         else {
-                            return Promise.resolve([-1, `Fail to read ${src} in ${this._szName}.mdd`]);
+                            retNum = -1;
+                            errMsg = `Fail to read ${src} in ${this._szName}.mdd`;
                         }
                     }
                     else {
-                        return Promise.resolve([-1, `There is no ${src} in ${this._szName}.mdd`]);
+                        retNum = -1;
+                        errMsg = `There is no ${src} in ${this._szName}.mdd`;
                     }
                 }
                 return Promise.resolve([1, dictFile]);
@@ -100,13 +106,15 @@ class MDictBase extends DictBase_1.DictBase {
                 if (fs.existsSync(dictFile)) {
                     fs.unlinkSync(dictFile);
                 }
-                let errMsg = e.message.replace("<", "").replace(">", "");
-                return Promise.resolve([-1, errMsg]);
+                retNum = -1;
+                errMsg = e.message.replace("<", "").replace(">", "");
             }
         }
         else {
-            return Promise.resolve([-1, `${word} isn't in ${this._szName}`]);
+            retNum = -1;
+            errMsg = `${word} isn't in ${this._szName}`;
         }
+        return Promise.resolve([retNum, errMsg]);
     }
     get_wordsLst(word, wdMatchLst) {
         let wordLike = "^" + word + ".*";
@@ -137,12 +145,12 @@ class MDictBase extends DictBase_1.DictBase {
         if (this._mdd) {
             [ret2, msg2] = await this._mdd.Close();
         }
-        (0, utils_1.RemoveDir)(this._tempDictDir);
-        if (fs.existsSync(this._tempDictDir) == false) {
-            msg3 = `OK to remove ${this._tempDictDir}`;
+        (0, utils_1.RemoveDir)(this.szTmpDir);
+        if (fs.existsSync(this.szTmpDir) == false) {
+            msg3 = `OK to remove ${this.szTmpDir}`;
         }
         else {
-            msg3 = `Fail to remove ${this._tempDictDir}`;
+            msg3 = `Fail to remove ${this.szTmpDir}`;
             ret3 = false;
         }
         let ret = ret1 && ret2 && ret3;

@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- when the word is missing, it doesn't show correctly in Dictionary
+- when the word of SDictBase is missing, it doesn't show correctly in Dictionary
 
 ### Changed
 
