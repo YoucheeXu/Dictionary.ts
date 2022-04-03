@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - when the word of SDictBase is missing, it doesn't show correctly in Dictionary
 
-### Changed
+### Improved
 
 - merged QueryWord2 and QueryWord in Dictionary
 
@@ -29,10 +29,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - close "selection a application" dialog could not quit app
 - wrong to record error message
 
-### Changed
+### Improved
 
 - display dict through html file in Dictionary
 - files structure
+- don't query again if the word is as same as the previous word in Dictionary
 
 ### Added
 

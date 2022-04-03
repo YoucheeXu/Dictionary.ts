@@ -148,7 +148,7 @@ function get_word() {
     }
 }
 
-function query_word(word) {
+function query_word(word, tabId) {
     if (word == null || word == undefined || word == '') {
         word = get_word();
     }
@@ -161,7 +161,7 @@ function query_word(word) {
 
     try {
         if (window.external) {
-            ipcRenderer.send('dictApp', 'QueryWord', word);
+            ipcRenderer.send('dictApp', 'QueryWord', word, tabId);
 
             ipcRenderer.on('QueryWord', (event, fun, ...paras) => {
                 let parasStr = paras.join('`, `');
@@ -265,10 +265,6 @@ $(function () {
     });
 });
 
-function playMP3(mp3) {
-    // $("#jquery_jplayer_1").jPlayer("play");
-}
-
 function TopMostOrNot() {
     if (window.external) {
         ipcRenderer.sendSync('dictApp', 'TopMostOrNot');
@@ -289,7 +285,7 @@ function BindSwitchTab() {
                 // window.external.switch_tab(tabId);
                 ipcRenderer.sendSync('dictApp', 'SwitchTab', tabId);
             }
-            query_word();
+            query_word("", tabId);
         } catch (error) {
             log('error', error, true);
         }
@@ -347,6 +343,27 @@ function active_menu(menuId) {
     }
 }
 
+function loadAndPlayAudio(audioFile) {
+    // console.log(audioFile);
+    let webAudio = document.getElementById('webAudio');
+    let source = document.getElementById('audioSource');
+    source.src = 'file:///' + audioFile;
+
+    webAudio.load(); //call this to just preload the audio without playing
+    webAudio.addEventListener(
+        'canplaythrough',
+        function () {
+            webAudio.play(); //call this to play the song right away
+        },
+        false
+    );
+}
+
+function playAudio() {
+    let webAudio = document.getElementById('webAudio');
+    webAudio.play(); //call this to play the song right away
+}
+
 function getValue(id) {
     let ele = document.getElementById(id);
     if (ele.value) {
@@ -356,10 +373,6 @@ function getValue(id) {
         // console.log(`innerHTML of ${id}: ${ele.innerHTML}`);
         return ele.innerHTML;
     }
-}
-
-function loadAndPlayAudio(audioFile) {
-    loadPlayer();
 }
 
 function modifyValue(id, valueStr) {
@@ -372,6 +385,7 @@ function modifyValue(id, valueStr) {
         ele.value = valueStr;
     }
 }
+
 
 function log(lvl, info, isException) {
     try {

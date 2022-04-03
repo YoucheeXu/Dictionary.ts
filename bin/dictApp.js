@@ -50,8 +50,8 @@ class dictApp extends ElectronApp_1.ElectronApp {
     async Run(argvs) {
         await super.Run(argvs);
         if (argvs.typ == "c") {
-            this._dictId = "dict1";
-            this._curDictBase = this.get_curDB();
+            this._curDictId = "dict1";
+            this._curDictBase = this.getDictBase(this._curDictId);
             let wordsLst = argvs.word.split(" ");
             for (let wd of wordsLst) {
                 await this.QueryWord2(wd);
@@ -165,14 +165,13 @@ class dictApp extends ElectronApp_1.ElectronApp {
         //     let name = dict.szName;
         //     this._logger.info(`Add tab: ${tabId}, dict: ${name}`);
         //     this._win.webContents.send("gui", "AddTab", tabId, name, html);
-        //     this._dictId = tabId;
+        //     this._curDictId = tabId;
         // });
         this._win.webContents.send("gui", "BindSwitchTab");
         // switch to default tab
-        this._dictId = this._cfg.Dictionary.Tab;
-        this._curDictBase = this.get_curDB();
-        this._win.webContents.send("gui", "ActiveTab", this._dictId);
-        this._curDictBase = this.get_curDB();
+        this._curDictId = this._cfg.Dictionary.Tab;
+        this._curDictBase = this.getDictBase(this._curDictId);
+        this._win.webContents.send("gui", "ActiveTab", this._curDictId);
         // this._bHomeRdy = true;
     }
     AddMenu(name, action, bActived = false) {
@@ -200,19 +199,12 @@ class dictApp extends ElectronApp_1.ElectronApp {
         this._win.webContents.send("gui", "bindMenus");
         */
     }
+    getDictBase(tabId) {
+        return this._dictMap.get(tabId);
+    }
     SwitchTab(tabId) {
         this._logger.info("switch to tab: " + tabId);
-        this._dictId = tabId;
-        this._curDictBase = this.get_curDB();
-    }
-    get_curDB() {
-        return this._dictMap.get(this._dictId);
-    }
-    PlayAudio(audio) {
-        this._logger.info("going to play " + audio);
-        // self.get_browser().ExecuteFunction("playMP3", audio);
-        this._win.webContents.send("gui", "playMP3", audio);
-        return true;
+        this._curDictBase = this.getDictBase(tabId);
     }
     // only for command line
     async QueryWord2(word) {
@@ -240,7 +232,7 @@ class dictApp extends ElectronApp_1.ElectronApp {
         }
     }
     // only for gui
-    async QueryWord(word, nDirect = 0) {
+    async QueryWord(word, tabId, nDirect = 0) {
         // Not implemented
         /*
         if (this._lastWord){
@@ -267,7 +259,14 @@ class dictApp extends ElectronApp_1.ElectronApp {
             return;
         }
         */
+        if (word == this._curWord && !tabId) {
+            this.speechWord();
+            return;
+        }
         this._curWord = word;
+        if (tabId) {
+            this._curDictId = tabId;
+        }
         this._logger.info(`word = ${word};`);
         let retDict = -1;
         let dict = "";
@@ -293,7 +292,6 @@ class dictApp extends ElectronApp_1.ElectronApp {
         }
         if (retDict <= 0) {
             let dictErrFile = path.join(this._curDictBase.szTmpDir, word + "-error.html");
-            // let html = `<div class="headword">\r\n\t<div class="text">${word}</div>\r\n\t<div class="phonetic">${dict}</div>\r\n</div>`;
             let html = `<div class="headword">\r\n\t<div class="text">${dict}</div>\r\n</div>`;
             fs.writeFileSync(dictErrFile, html);
             dict = dictErrFile;
@@ -352,15 +350,22 @@ class dictApp extends ElectronApp_1.ElectronApp {
         catch (e) {
             this._logger.error(`Fail to read ${word} from ${this._wordsDict.szSrcFile}, because of ${e}.`);
         }
-        this._win.webContents.send("QueryWord", "dictHtml", word, this._dictId, dict, audio, bNew, level, nStars);
+        this._win.webContents.send("QueryWord", "dictHtml", word, this._curDictId, dict, audio, bNew, level, nStars);
         // this._lastWord = word;
     }
-    speechWord(audio) {
-        if (fs.statSync(audio).isFile() == false) {
-            this._logger.error("There is no mp3: " + audio);
-        }
+    speechWord(audio = "") {
         try {
-            this.PlayAudio(audio);
+            if (audio) {
+                if (fs.statSync(audio).isFile() == false) {
+                    this._logger.error("There is no mp3: " + audio);
+                }
+                else {
+                    this._win.webContents.send("gui", "loadAndPlayAudio", audio);
+                }
+            }
+            else {
+                this._win.webContents.send("gui", "playAudio");
+            }
         }
         catch (e) {
             this._logger.error("wrong mp3: " + audio);

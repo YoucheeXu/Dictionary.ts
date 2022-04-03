@@ -9,7 +9,7 @@ import { DictBase } from "./components/DictBase";
 import { UsrProgress } from "./components/UsrProgress";
 
 export class dictApp extends ElectronApp {
-    private _dictId: string;
+    private _curDictId: string;
 
     private _dictSysMenu: string[] | any;
 
@@ -44,8 +44,8 @@ export class dictApp extends ElectronApp {
         await super.Run(argvs);
 
         if (argvs.typ == "c") {
-            this._dictId = "dict1";
-            this._curDictBase = this.get_curDB();
+            this._curDictId = "dict1";
+            this._curDictBase = this.getDictBase(this._curDictId);
             let wordsLst = argvs.word.split(" ");
             for (let wd of wordsLst) {
                 await this.QueryWord2(wd);
@@ -170,17 +170,15 @@ export class dictApp extends ElectronApp {
         //     let name = dict.szName;
         //     this._logger.info(`Add tab: ${tabId}, dict: ${name}`);
         //     this._win.webContents.send("gui", "AddTab", tabId, name, html);
-        //     this._dictId = tabId;
+        //     this._curDictId = tabId;
         // });
 
         this._win.webContents.send("gui", "BindSwitchTab");
 
         // switch to default tab
-        this._dictId = this._cfg.Dictionary.Tab;
-        this._curDictBase = this.get_curDB();
-        this._win.webContents.send("gui", "ActiveTab", this._dictId);
-
-        this._curDictBase = this.get_curDB();
+        this._curDictId = this._cfg.Dictionary.Tab;
+        this._curDictBase = this.getDictBase(this._curDictId);
+        this._win.webContents.send("gui", "ActiveTab", this._curDictId);
 
         // this._bHomeRdy = true;
     }
@@ -212,21 +210,13 @@ export class dictApp extends ElectronApp {
         */
     }
 
+    private getDictBase(tabId: string): DictBase {
+        return this._dictMap.get(tabId);
+    }
+
     public SwitchTab(tabId: string): void {
         this._logger.info("switch to tab: " + tabId);
-        this._dictId = tabId;
-        this._curDictBase = this.get_curDB();
-    }
-
-    public get_curDB(): DictBase {
-        return this._dictMap.get(this._dictId);
-    }
-
-    public PlayAudio(audio: string): boolean {
-        this._logger.info("going to play " + audio);
-        // self.get_browser().ExecuteFunction("playMP3", audio);
-        this._win.webContents.send("gui", "playMP3", audio);
-        return true;
+        this._curDictBase = this.getDictBase(tabId);
     }
 
     // only for command line
@@ -259,7 +249,7 @@ export class dictApp extends ElectronApp {
     }
 
     // only for gui
-    public async QueryWord(word: string, nDirect: number = 0): Promise<void> {
+    public async QueryWord(word: string, tabId: string, nDirect: number = 0): Promise<void> {
         // Not implemented
         /*
         if (this._lastWord){
@@ -287,7 +277,16 @@ export class dictApp extends ElectronApp {
         }
         */
 
+        if (word == this._curWord && !tabId) {
+            this.speechWord();
+            return;
+        }
+
         this._curWord = word;
+
+        if (tabId) {
+            this._curDictId = tabId;
+        }
 
         this._logger.info(`word = ${word};`);
 
@@ -380,17 +379,22 @@ export class dictApp extends ElectronApp {
             this._logger.error(`Fail to read ${word} from ${this._wordsDict.szSrcFile}, because of ${e}.`);
         }
 
-        this._win.webContents.send("QueryWord", "dictHtml", word, this._dictId, dict, audio, bNew, level, nStars);
+        this._win.webContents.send("QueryWord", "dictHtml", word, this._curDictId, dict, audio, bNew, level, nStars);
 
         // this._lastWord = word;
     }
 
-    public speechWord(audio: string): void {
-        if (fs.statSync(audio).isFile() == false) {
-            this._logger.error("There is no mp3: " + audio);
-        }
+    public speechWord(audio: string = ""): void {
         try {
-            this.PlayAudio(audio);
+            if (audio) {
+                if (fs.statSync(audio).isFile() == false) {
+                    this._logger.error("There is no mp3: " + audio);
+                } else {
+                    this._win.webContents.send("gui", "loadAndPlayAudio", audio);
+                }
+            } else {
+                this._win.webContents.send("gui", "playAudio");
+            }
         }
         catch (e) {
             this._logger.error("wrong mp3: " + audio);
