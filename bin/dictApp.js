@@ -203,6 +203,7 @@ class dictApp extends ElectronApp_1.ElectronApp {
         return this._dictMap.get(tabId);
     }
     SwitchTab(tabId) {
+        this._curDictId = tabId;
         this._logger.info("switch to tab: " + tabId);
         this._curDictBase = this.getDictBase(tabId);
     }
@@ -263,7 +264,6 @@ class dictApp extends ElectronApp_1.ElectronApp {
             this.speechWord();
             return;
         }
-        this._curWord = word;
         if (tabId) {
             this._curDictId = tabId;
         }
@@ -291,12 +291,14 @@ class dictApp extends ElectronApp_1.ElectronApp {
             this.Record2File(this._miss_dict, dict);
         }
         if (retDict <= 0) {
+            this._curWord = "";
             let dictErrFile = path.join(this._curDictBase.szTmpDir, word + "-error.html");
             let html = `<div class="headword">\r\n\t<div class="text">${dict}</div>\r\n</div>`;
             fs.writeFileSync(dictErrFile, html);
             dict = dictErrFile;
         }
         else {
+            this._curWord = word;
             if ((await this._usrProgress.ExistWord(word)) == false) {
                 this._usrProgress.InsertWord(word).then(() => {
                     console.log(word + " will be marked as new.");

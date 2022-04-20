@@ -215,6 +215,7 @@ export class dictApp extends ElectronApp {
     }
 
     public SwitchTab(tabId: string): void {
+        this._curDictId = tabId;
         this._logger.info("switch to tab: " + tabId);
         this._curDictBase = this.getDictBase(tabId);
     }
@@ -282,8 +283,6 @@ export class dictApp extends ElectronApp {
             return;
         }
 
-        this._curWord = word;
-
         if (tabId) {
             this._curDictId = tabId;
         }
@@ -317,12 +316,14 @@ export class dictApp extends ElectronApp {
         }
 
         if (retDict <= 0) {
+            this._curWord = "";
             let dictErrFile = path.join(this._curDictBase.szTmpDir, word + "-error.html");
             let html = `<div class="headword">\r\n\t<div class="text">${dict}</div>\r\n</div>`;
             fs.writeFileSync(dictErrFile, html);
             dict = dictErrFile;
         }
         else {
+            this._curWord = word;
             if ((await this._usrProgress.ExistWord(word)) == false) {
                 this._usrProgress.InsertWord(word).then(() => {
                     console.log(word + " will be marked as new.");

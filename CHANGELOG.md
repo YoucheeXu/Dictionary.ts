@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - trigger error if there is no zip file
 - close "selection a application" dialog could not quit app
 - wrong to record error message
+- query again the same but failure word
 
 ### Improved
 
